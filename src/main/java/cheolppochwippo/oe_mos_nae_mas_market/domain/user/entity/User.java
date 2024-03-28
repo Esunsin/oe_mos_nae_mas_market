@@ -1,4 +1,4 @@
-package cheolppochwippo.oe_mos_nae_mas_market.user.entity;
+package cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -19,5 +19,10 @@ public class User {
     public User(String username, String password) {
         this.username = username;
         this.password = password;
+    }
+
+    public User(Long userId,String username){
+        this.id = userId;
+        this.username = username;
     }
 }
