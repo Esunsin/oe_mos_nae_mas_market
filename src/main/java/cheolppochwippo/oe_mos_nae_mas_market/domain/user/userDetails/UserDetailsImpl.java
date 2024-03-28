@@ -1,20 +1,18 @@
-package cheolppochwippo.oe_mos_nae_mas_market.user.userDetails;
+package cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails;
 
-import cheolppochwippo.oe_mos_nae_mas_market.user.entity.User;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
+@Getter
 @RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
     private final User user;
-
-    public User getUser() {
-        return user;
-    }
 
     @Override
     public String getPassword() {

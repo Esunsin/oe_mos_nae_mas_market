@@ -1,8 +1,7 @@
 package cheolppochwippo.oe_mos_nae_mas_market.global.config;
 
 import cheolppochwippo.oe_mos_nae_mas_market.global.security.JwtAuthorizationFilter;
-import cheolppochwippo.oe_mos_nae_mas_market.global.security.JwtUtil;
-import cheolppochwippo.oe_mos_nae_mas_market.user.userDetails.UserDetailsServiceImpl;
+import cheolppochwippo.oe_mos_nae_mas_market.global.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -24,7 +23,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
 
     private final JwtUtil jwtUtil;
-    private final UserDetailsServiceImpl userDetailsService;
     private final ObjectMapper objectMapper;
 
     @Bean
@@ -40,7 +38,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtUtil, userDetailsService,objectMapper);
+        return new JwtAuthorizationFilter(jwtUtil, objectMapper);
     }
 
     @Bean

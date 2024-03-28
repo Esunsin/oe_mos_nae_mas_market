@@ -1,6 +1,6 @@
-package cheolppochwippo.oe_mos_nae_mas_market.user.repository;
+package cheolppochwippo.oe_mos_nae_mas_market.domain.user.repository;
 
-import cheolppochwippo.oe_mos_nae_mas_market.user.entity.User;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
