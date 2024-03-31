@@ -1,8 +1,14 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.dto.CouponRequest;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
+import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import jakarta.persistence.*;
+import java.sql.Time;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,24 +17,41 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 @Table(name = "coupons")
-public class Coupon {
+public class Coupon extends TimeStamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column
     private String couponInfo;
 
-    private double discount;
+    @Column
+    private Double discount;
 
-    private LocalDateTime created_at;
-
-    private LocalDateTime modified_at;
-
+    @Column
     private LocalDateTime effective_date;
 
+    @Column
     private Deleted deleted;
 
-    private long amount;
+    @Column
+    private Long amount;
 
+
+    public Coupon(CouponRequest couponRequest) {
+        this.couponInfo = couponRequest.getCouponInfo();
+        this.discount = couponRequest.getDiscount();
+        this.effective_date = couponRequest.getEffectiveDate();
+        this.amount = couponRequest.getAmount();
+    }
+
+    public void update(CouponRequest couponRequest) {
+        this.couponInfo = couponRequest.getCouponInfo();
+        this.discount = couponRequest.getDiscount();
+        this.effective_date = couponRequest.getEffectiveDate();
+        this.amount = couponRequest.getAmount();
+    }
 }
