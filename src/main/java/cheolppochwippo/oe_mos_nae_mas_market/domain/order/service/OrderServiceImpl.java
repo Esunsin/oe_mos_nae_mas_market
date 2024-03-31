@@ -26,7 +26,9 @@ public class OrderServiceImpl implements OrderService{
     @Transactional
     public OrderResponse createOrderInCart(User user, Long quantity, Long productId) {
         Product findProduct = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
-
+        if (findProduct.getQuantity() < quantity){
+            throw new IllegalArgumentException("상품 수량이 부족합니다.");
+        }
         Order order = new Order(quantity,findProduct,user);
         orderRepository.save(order);
 
@@ -36,7 +38,10 @@ public class OrderServiceImpl implements OrderService{
     @Transactional
     public OrderResponse updateQuantity(Long quantity, Long orderId) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
-
+        Product findProduct = productRepository.findById(order.getProduct().getId()).orElseThrow();
+        if (findProduct.getQuantity() < quantity){
+            throw new IllegalArgumentException("상품 수량이 부족합니다.");
+        }
         order.updateQuantity(quantity);
 
         return new OrderResponse(order);
