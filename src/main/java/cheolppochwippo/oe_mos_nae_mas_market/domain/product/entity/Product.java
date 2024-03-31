@@ -5,11 +5,13 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product extends TimeStamped {
     @Id
@@ -20,7 +22,7 @@ public class Product extends TimeStamped {
 
     private String info;
 
-    private Long cost;
+    private Long real_price;
 
     private Long price;
 
