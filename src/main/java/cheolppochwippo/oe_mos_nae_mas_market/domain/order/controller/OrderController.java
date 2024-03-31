@@ -1,6 +1,7 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.order.controller;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.OrderResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.SingOrderResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.service.OrderService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails.UserDetailsImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
@@ -66,5 +67,17 @@ public class OrderController {
                         .data(deletedOrderInCart)
                         .build());
     }
-
+    //바로 구매
+    @GetMapping("/products/{productId}/orders")
+    public ResponseEntity<CommonResponse<SingOrderResponse>> orderDirect(
+            @RequestParam Long quantity
+            ,@PathVariable("productId") Long productId
+    ){
+        SingOrderResponse singOrderResponse = orderService.showOrderDirect(quantity, productId);
+        return ResponseEntity.status(HttpStatus.OK.value())
+                .body(CommonResponse.<SingOrderResponse>builder()
+                        .msg("show product direct")
+                        .data(singOrderResponse)
+                        .build());
+    }
 }

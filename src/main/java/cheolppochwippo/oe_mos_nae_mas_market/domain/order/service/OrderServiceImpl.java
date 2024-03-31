@@ -1,6 +1,7 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.order.service;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.OrderResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.SingOrderResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.repository.OrderRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
@@ -65,5 +66,10 @@ public class OrderServiceImpl implements OrderService{
     public List<OrderResponse> showOrdersInCart(User user) {
         List<Order> orders = orderRepository.findOrderByUserBeforeBuy(user);
         return orders.stream().map(OrderResponse::new).toList();
+    }
+
+    public SingOrderResponse showOrderDirect(Long quantity,Long productId){
+        Product findProduct = productRepository.findById(productId).orElseThrow();
+        return new SingOrderResponse(findProduct.getProductName(), quantity, findProduct.getPrice() * quantity);
     }
 }
