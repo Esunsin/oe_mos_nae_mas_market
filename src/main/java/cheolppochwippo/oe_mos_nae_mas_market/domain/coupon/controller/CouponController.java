@@ -19,12 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 public class CouponController {
+
     private final CouponService couponService;
 
     @PostMapping("/coupons")
     public ResponseEntity<CommonResponse<CouponResponse>> createCoupon(
         @RequestBody CouponRequest couponRequest
-    ){
+    ) {
         CouponResponse createdCoupon = couponService.createCoupon(couponRequest);
         return ResponseEntity.status(HttpStatus.CREATED.value())
             .body(CommonResponse.<CouponResponse>builder()
@@ -34,7 +35,7 @@ public class CouponController {
     }
 
     @GetMapping("/coupons")
-    public ResponseEntity<CommonResponse<List<CouponResponse>>> getCoupons(){
+    public ResponseEntity<CommonResponse<List<CouponResponse>>> getCoupons() {
         List<CouponResponse> couponResponses = couponService.getCoupons();
         return ResponseEntity.status(HttpStatus.OK.value())
             .body(CommonResponse.<List<CouponResponse>>builder()
@@ -51,7 +52,7 @@ public class CouponController {
         CouponResponse updatedCoupon = couponService.updateCoupon(couponId, couponRequest);
         return ResponseEntity.status(HttpStatus.CREATED.value())
             .body(CommonResponse.<CouponResponse>builder()
-                .msg("coupon created complete!")
+                .msg("coupon updated complete!")
                 .data(updatedCoupon)
                 .build());
     }

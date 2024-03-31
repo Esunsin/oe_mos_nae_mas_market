@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 @Builder
 @Table(name = "coupons")
 public class Coupon extends TimeStamped {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

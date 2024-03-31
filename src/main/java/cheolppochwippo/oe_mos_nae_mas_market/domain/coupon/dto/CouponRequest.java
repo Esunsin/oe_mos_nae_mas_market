@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public class CouponRequest {
+
     private String couponInfo;
     private Double discount;
     private LocalDateTime effectiveDate;

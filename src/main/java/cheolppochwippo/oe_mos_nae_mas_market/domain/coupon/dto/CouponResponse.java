@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 public class CouponResponse {
+
     private String couponInfo;
     private Double discount;
     private Long amount;
@@ -19,7 +20,7 @@ public class CouponResponse {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
-    public CouponResponse(Coupon coupon){
+    public CouponResponse(Coupon coupon) {
         this.couponInfo = coupon.getCouponInfo();
         this.discount = coupon.getDiscount();
         this.amount = coupon.getAmount();
