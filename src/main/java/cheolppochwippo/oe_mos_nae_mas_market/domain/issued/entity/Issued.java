@@ -18,7 +18,6 @@ public class Issued extends TimeStamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Deleted deleted;
-    private LocalDateTime created_at;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_id",nullable = false)
     private Coupon coupon;
