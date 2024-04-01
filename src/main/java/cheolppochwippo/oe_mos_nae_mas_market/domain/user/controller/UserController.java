@@ -2,6 +2,7 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.user.controller;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails.UserDetailsImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.global.util.JwtUtil;
@@ -36,7 +37,7 @@ public class UserController {
     @PostMapping("/auth/login")
     public ResponseEntity<CommonResponse<UserResponse>> login(@RequestBody UserRequest userRequest, HttpServletResponse response) {
         UserResponse loginedUser = userService.login(userRequest);
-        response.setHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(loginedUser.getUserId(), loginedUser.getUsername()));
+        response.setHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(loginedUser.getUserId(), loginedUser.getUsername(),loginedUser.getRole()));
         return ResponseEntity.status(HttpStatus.OK.value())
                 .body(CommonResponse.<UserResponse>builder()
                         .msg("login complete!")
@@ -46,6 +47,7 @@ public class UserController {
 
     @GetMapping("/test")
     public String test(@AuthenticationPrincipal UserDetailsImpl userDetails){
+
         return userDetails.getUser().getUsername();
     }
 
