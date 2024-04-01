@@ -52,8 +52,8 @@ public class CouponServiceImpl implements CouponService {
         couponRepository.delete(coupon);
     }
 
-
-    private Coupon findCoupon(Long couponId) {
+    @Override
+    public Coupon findCoupon(Long couponId) {
         return couponRepository.findById(couponId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.COUPON_NOT_FOUND));
     }

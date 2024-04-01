@@ -2,6 +2,7 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.service;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.dto.CouponRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.dto.CouponResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity.Coupon;
 import java.util.List;
 
 public interface CouponService {
@@ -13,4 +14,6 @@ public interface CouponService {
     CouponResponse updateCoupon(Long couponId, CouponRequest couponRequest);
 
     void deleteCoupon(Long couponId);
+
+    Coupon findCoupon(Long couponId);
 }

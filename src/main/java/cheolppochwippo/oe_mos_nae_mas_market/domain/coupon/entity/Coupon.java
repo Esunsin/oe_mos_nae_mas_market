@@ -55,4 +55,12 @@ public class Coupon extends TimeStamped {
         this.effective_date = couponRequest.getEffectiveDate();
         this.amount = couponRequest.getAmount();
     }
+
+    public void decreaseAmount() {
+        if (this.amount > 0) {
+            this.amount--; // 재고 감소
+        } else {
+            throw new IllegalStateException("Coupon amount cannot be negative");
+        }
+    }
 }
