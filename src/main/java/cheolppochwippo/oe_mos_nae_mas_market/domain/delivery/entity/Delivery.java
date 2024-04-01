@@ -5,10 +5,15 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 @Entity
+@Getter
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Delivery extends TimeStamped {
 
