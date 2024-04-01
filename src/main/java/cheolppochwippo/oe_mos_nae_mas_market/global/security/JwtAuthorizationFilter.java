@@ -1,5 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.global.security;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.global.util.JwtUtil;
@@ -92,8 +93,14 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
 	// 인증 객체 생성
 	private Authentication createAuthentication(Claims info) {
-		User user = new User(info.get("userId", Long.class), info.get("username", String.class));
+		Long userId = info.get("userId", Long.class);
+		String username = info.get("username", String.class);
+		String authority = info.get("role", String.class);
+		User user = new User(userId, username,authority);
 		UserDetails userDetails = new UserDetailsImpl(user);
 		return new CustomAuthentication(userDetails);
 	}
+
+
+
 }
