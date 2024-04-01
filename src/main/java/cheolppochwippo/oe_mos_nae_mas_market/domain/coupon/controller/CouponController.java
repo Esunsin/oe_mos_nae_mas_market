@@ -58,13 +58,14 @@ public class CouponController {
     }
 
     @DeleteMapping("/coupons/{couponId}")
-    public ResponseEntity<CommonResponse<String>> deleteCoupon(
+    public ResponseEntity<CommonResponse<CouponResponse>> deleteCoupon(
         @PathVariable Long couponId
     ) {
-        couponService.deleteCoupon(couponId);
+        CouponResponse deletedCoupon = couponService.deleteCoupon(couponId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT.value())
-            .body(CommonResponse.<String>builder()
+            .body(CommonResponse.<CouponResponse>builder()
                 .msg("coupon deleted complete!")
+                .data(deletedCoupon)
                 .build());
     }
 

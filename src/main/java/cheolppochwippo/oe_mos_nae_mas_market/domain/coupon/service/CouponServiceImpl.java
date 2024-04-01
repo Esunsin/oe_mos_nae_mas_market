@@ -47,9 +47,10 @@ public class CouponServiceImpl implements CouponService {
 
     @Transactional
     @Override
-    public void deleteCoupon(Long couponId) {
+    public CouponResponse deleteCoupon(Long couponId) {
         Coupon coupon = findCoupon(couponId);
         coupon.delete();
+        return new CouponResponse(coupon);
     }
 
     @Override
