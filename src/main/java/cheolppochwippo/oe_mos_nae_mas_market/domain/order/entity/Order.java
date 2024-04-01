@@ -15,6 +15,7 @@ import java.sql.Time;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "orders")
 public class Order extends TimeStamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +25,7 @@ public class Order extends TimeStamped {
 
     private Long price;
 
-    private final String merchantUid = String.valueOf(id) + getCreatedAt();
+    private String merchantUid;
 
     private Deleted deleted;
 
