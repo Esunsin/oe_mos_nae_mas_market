@@ -12,6 +12,7 @@ public class CustomAuthentication implements Authentication {
 
 	public CustomAuthentication(UserDetails userDetails) {
 		this.userDetails = userDetails;
+
 		this.authenticated = true; // 사용자가 인증된 경우
 	}
 
@@ -20,10 +21,9 @@ public class CustomAuthentication implements Authentication {
 		return null;
 	}
 
-
 	@Override
 	public Object getCredentials() {
-		return null; // 사용자의 자격 증명 정보
+	return null;
 	}
 
 	@Override
@@ -46,10 +46,11 @@ public class CustomAuthentication implements Authentication {
 		this.authenticated = isAuthenticated;
 	}
 
-
-
 	@Override
 	public String getName() {
 		return userDetails.getUsername(); // 사용자 이름
 	}
+
+
+
 }
