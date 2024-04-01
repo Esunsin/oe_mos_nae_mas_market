@@ -2,17 +2,22 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.product.service;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
+import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 public interface ProductService {
-    ProductResponse createProduct(ProductRequest productRequest);
+    @Transactional
+    ProductResponse createProduct(ProductRequest productRequest, User user);
 
-    ProductResponse showProduct(ProductRequest productRequest);
+    ProductShowResponse showProduct(long id);
+    @Transactional
+    ProductResponse updateProduct(ProductRequest productRequest,Long productId,User user);
 
-    ProductResponse updateProduct(ProductRequest productRequest);
+    List<ProductShowResponse> showAllProduct();
 
-    ProductResponse showAllProduct(ProductRequest productRequest);
-
-    ProductResponse deleteProduct(ProductRequest productRequest);
+    ProductResponse deleteProduct(Long productId, User user);
 }
