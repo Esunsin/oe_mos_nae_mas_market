@@ -1,7 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import lombok.Getter;
 
 @Getter
@@ -17,7 +16,7 @@ public class ProductShowResponse {
     public ProductShowResponse(Product product) {
         this.productName = product.getProductName();
         this.info = product.getInfo();
-        this.real_price = product.getReal_price();
+        this.real_price = product.getRealPrice();
         this.price = product.getPrice();
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();

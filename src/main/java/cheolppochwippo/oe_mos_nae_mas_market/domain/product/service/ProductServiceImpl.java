@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class ProductServiceImpl implements ProductService {
     private final StoreRepository storeRepository;
 
     @Override
+    @Transactional
     public ProductResponse createProduct(ProductRequest productRequest, User user) {
         if (RoleEnum.SELLER.equals(user.getRole())) {
 
@@ -43,6 +45,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ProductResponse updateProduct(ProductRequest productRequest, Long productId, User user) {
         if (RoleEnum.SELLER.equals(user.getRole())) {
             Product product = productRepository.findById(productId)

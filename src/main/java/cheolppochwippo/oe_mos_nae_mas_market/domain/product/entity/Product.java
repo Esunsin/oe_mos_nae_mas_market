@@ -32,7 +32,7 @@ public class Product extends TimeStamped {
 
     private String info;
 
-    private Long real_price;
+    private Long realPrice;
 
     private Long price;
 
@@ -50,7 +50,7 @@ public class Product extends TimeStamped {
     public Product(ProductRequest product, Store store) {
         this.productName = product.getProductName();
         this.info = product.getInfo();
-        this.real_price = product.getReal_price();
+        this.realPrice = product.getReal_price();
         this.price = product.getPrice();
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();
@@ -60,7 +60,7 @@ public class Product extends TimeStamped {
     public void update(ProductRequest product) {
         this.productName = product.getProductName();
         this.info = product.getInfo();
-        this.real_price = product.getReal_price();
+        this.realPrice = product.getReal_price();
         this.price = product.getPrice();
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();
