@@ -49,7 +49,7 @@ public class CouponServiceImpl implements CouponService {
     @Override
     public void deleteCoupon(Long couponId) {
         Coupon coupon = findCoupon(couponId);
-        couponRepository.delete(coupon);
+        coupon.delete();
     }
 
     @Override

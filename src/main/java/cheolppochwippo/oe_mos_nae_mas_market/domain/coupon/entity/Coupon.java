@@ -35,7 +35,7 @@ public class Coupon extends TimeStamped {
     @Column
     private LocalDateTime effective_date;
 
-    @Column
+    @Enumerated(EnumType.STRING)
     private Deleted deleted;
 
     @Column
@@ -62,5 +62,9 @@ public class Coupon extends TimeStamped {
         } else {
             throw new IllegalStateException("Coupon amount cannot be negative");
         }
+    }
+
+    public void delete() {
+        this.deleted = Deleted.DELETE;
     }
 }
