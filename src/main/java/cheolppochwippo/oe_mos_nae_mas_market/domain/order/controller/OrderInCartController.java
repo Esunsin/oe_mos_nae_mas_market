@@ -18,12 +18,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderInCartController {
 
-    private final CartService orderService;
+    private final CartService cartService;
 
     @GetMapping("/orders")
     public ResponseEntity<CartResponse<List<SingleOrderInCartResponse>, AllOrderInCartResponse>> showOrdersInCart(
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<SingleOrderInCartResponse> ordersInCart = orderService.showOrdersInCart(userDetails.getUser());
+        List<SingleOrderInCartResponse> ordersInCart = cartService.showOrdersInCart(userDetails.getUser());
         AllOrderInCartResponse allOrderResponse = new AllOrderInCartResponse(ordersInCart);
         return ResponseEntity.status(HttpStatus.OK.value())
         .body(CartResponse.<List<SingleOrderInCartResponse>, AllOrderInCartResponse>builder()
@@ -38,7 +38,7 @@ public class OrderInCartController {
             @AuthenticationPrincipal UserDetailsImpl userDetails
             ,@RequestParam Long quantity
             ,@PathVariable("productId") Long productId){
-        SingleOrderInCartResponse orderInCart = orderService.createOrderInCart(userDetails.getUser(), quantity, productId);
+        SingleOrderInCartResponse orderInCart = cartService.createOrderInCart(userDetails.getUser(), quantity, productId);
         return ResponseEntity.status(HttpStatus.OK.value())
                 .body(CommonResponse.<SingleOrderInCartResponse>builder()
                         .msg("create order in cart")
@@ -50,7 +50,7 @@ public class OrderInCartController {
     public ResponseEntity<CommonResponse<SingleOrderInCartResponse>> updateOrderQuantityInCart(
             @RequestParam Long quantity
             ,@PathVariable("orderId") Long orderId){
-        SingleOrderInCartResponse updateQuantityOrder = orderService.updateQuantity(quantity, orderId);
+        SingleOrderInCartResponse updateQuantityOrder = cartService.updateQuantity(quantity, orderId);
         return ResponseEntity.status(HttpStatus.OK.value())
                 .body(CommonResponse.<SingleOrderInCartResponse>builder()
                         .msg("update order quantity in cart")
@@ -62,7 +62,7 @@ public class OrderInCartController {
     public ResponseEntity<CommonResponse<SingleOrderInCartResponse>> deleteOrderInCart(
             @AuthenticationPrincipal UserDetailsImpl userDetails
             ,@PathVariable("orderId") Long orderId){
-        SingleOrderInCartResponse deletedOrderInCart = orderService.deleteOrderInCart(userDetails.getUser(), orderId);
+        SingleOrderInCartResponse deletedOrderInCart = cartService.deleteOrderInCart(userDetails.getUser(), orderId);
         return ResponseEntity.status(HttpStatus.OK.value())
                 .body(CommonResponse.<SingleOrderInCartResponse>builder()
                         .msg("delete order in cart")
