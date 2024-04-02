@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public interface OrderService {
+public interface CartService {
     SingleOrderResponse createOrderInCart(User user, Long quantity, Long productId);
 
     SingleOrderResponse deleteOrderInCart(User user, Long orderId);

@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class OrderServiceImpl implements OrderService{
+public class CartServiceImpl implements CartService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
