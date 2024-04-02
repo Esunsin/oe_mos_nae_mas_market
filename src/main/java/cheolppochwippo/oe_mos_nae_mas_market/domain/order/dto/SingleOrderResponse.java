@@ -7,7 +7,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Getter
-public class OrderResponse {
+public class SingleOrderResponse {
 
     private Long orderId;
 
@@ -23,7 +23,7 @@ public class OrderResponse {
 
     private LocalDateTime modifiedAt;
 
-    public OrderResponse(Order order) {
+    public SingleOrderResponse(Order order) {
         this.orderId = order.getId();
         this.quantity = order.getQuantity();
         this.price = order.getPrice();
@@ -33,3 +33,4 @@ public class OrderResponse {
         this.modifiedAt = order.getModifiedAt();
     }
 }
+
