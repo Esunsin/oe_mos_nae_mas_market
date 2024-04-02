@@ -1,7 +1,10 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.user.service;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.ErrorCode;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NotFoundException;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
@@ -19,14 +22,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final StoreRepository storeRepository;
 
     public UserResponse signup(UserRequest userRequest){
+
         if(userRepository.findByUsername(userRequest.getUsername()).isPresent()){
             throw new IllegalArgumentException("중복된 아이디입니다.");
         }
 
         String encodedPassword = passwordEncoder.encode(userRequest.getPassword());
-        User user = new User(userRequest.getUsername(), encodedPassword);
+        User user = new User(userRequest.getUsername(), encodedPassword, userRequest.getRole());
 
         User savedUser = userRepository.save(user);
         return new UserResponse(savedUser);

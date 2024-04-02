@@ -7,13 +7,15 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.sql.Time;
 
 @Entity
-@Table(name = "orders")
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "orders")
 public class Order extends TimeStamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,5 +41,15 @@ public class Order extends TimeStamped {
     @JoinColumn(name = "user_id")
     private User user;
 
+    public Order(Long quantity, Product product, User user) {
+        this.quantity = quantity;
+        this.price = product.getPrice();
+        this.deleted = Deleted.UNDELETE;
+        this.product = product;
+        this.user = user;
+    }
 
+    public void updateQuantity(Long quantity) {
+        this.quantity = quantity;
+    }
 }
