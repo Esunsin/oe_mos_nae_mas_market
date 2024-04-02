@@ -1,6 +1,5 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.dto;
 
-import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
