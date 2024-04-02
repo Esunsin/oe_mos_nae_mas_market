@@ -43,7 +43,7 @@ public class Order extends TimeStamped {
 
     public Order(Long quantity, Product product, User user) {
         this.quantity = quantity;
-        this.price = product.getPrice() * quantity;
+        this.price = product.getPrice();
         this.deleted = Deleted.UNDELETE;
         this.product = product;
         this.user = user;
@@ -51,6 +51,5 @@ public class Order extends TimeStamped {
 
     public void updateQuantity(Long quantity) {
         this.quantity = quantity;
-        this.price = this.product.getPrice() * quantity;
     }
 }
