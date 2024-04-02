@@ -9,6 +9,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
+import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -59,6 +60,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public ProductShowResponse showProduct(long id) {
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new NoSuchElementException("해당 상품을 찾을 수 없습니다."));
@@ -68,6 +70,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public List<ProductShowResponse> showAllProduct() {
         List<Product> productList = productRepository.findAll();
         List<ProductShowResponse> productShowResponseList = productList.stream()
@@ -77,10 +80,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ProductResponse deleteProduct(Long productId, User user) {
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new NoSuchElementException("해당 상품을 찾을 수 없습니다."));
-        productRepository.delete(product);
+
+        product.setDeleted(Deleted.DELETE);
+        productRepository.save(product);
+
         return new ProductResponse(product.getId());
     }
 }

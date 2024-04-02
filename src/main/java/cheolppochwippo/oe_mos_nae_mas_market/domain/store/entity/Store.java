@@ -24,6 +24,7 @@ public class Store extends TimeStamped {
 
     private String info;
 
+    @Enumerated(EnumType.STRING)
     private Deleted deleted;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -34,5 +35,6 @@ public class Store extends TimeStamped {
         this.storeName = storeRequest.getStoreName();
         this.info = storeRequest.getInfo();
         this.user = user;
+        this.deleted = Deleted.UNDELETE;
     }
 }

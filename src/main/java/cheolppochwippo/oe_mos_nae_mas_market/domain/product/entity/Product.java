@@ -20,9 +20,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Product extends TimeStamped {
@@ -43,7 +45,7 @@ public class Product extends TimeStamped {
 
     private Long quantity;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private Deleted deleted;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -57,6 +59,7 @@ public class Product extends TimeStamped {
         this.price = product.getPrice();
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();
+        this.deleted = Deleted.UNDELETE;
         this.store = store;
     }
 
