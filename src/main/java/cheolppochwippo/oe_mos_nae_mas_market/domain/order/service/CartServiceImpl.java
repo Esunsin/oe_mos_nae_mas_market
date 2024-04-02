@@ -1,6 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.order.service;
 
-import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.SingleOrderResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.SingleOrderInCartResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.repository.OrderRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
@@ -21,7 +21,7 @@ public class CartServiceImpl implements CartService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public SingleOrderResponse createOrderInCart(User user, Long quantity, Long productId) {
+    public SingleOrderInCartResponse createOrderInCart(User user, Long quantity, Long productId) {
         Product findProduct = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
         if (quantity>findProduct.getQuantity()){
             throw new IllegalArgumentException("상품 수량이 부족합니다.");
@@ -39,11 +39,11 @@ public class CartServiceImpl implements CartService {
             }
             order.updateQuantity(order.getQuantity()+quantity);
         }
-        return new SingleOrderResponse(order);
+        return new SingleOrderInCartResponse(order);
     }
 
     @Transactional
-    public SingleOrderResponse updateQuantity(Long quantity, Long orderId) {
+    public SingleOrderInCartResponse updateQuantity(Long quantity, Long orderId) {
         if(quantity < 1){
             throw new IllegalArgumentException("최소 수량은 1개 입니다.");
         }
@@ -54,11 +54,11 @@ public class CartServiceImpl implements CartService {
         }
         order.updateQuantity(quantity);
 
-        return new SingleOrderResponse(order);
+        return new SingleOrderInCartResponse(order);
     }
 
     @Transactional
-    public SingleOrderResponse deleteOrderInCart(User user, Long orderId){
+    public SingleOrderInCartResponse deleteOrderInCart(User user, Long orderId){
         //단건 주문 검색
         Order findOrder = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("없는 주문입니다."));
         //자신의 주문인지 아닌지
@@ -68,13 +68,13 @@ public class CartServiceImpl implements CartService {
 
         orderRepository.delete(findOrder);
 
-        return  new SingleOrderResponse(findOrder);
+        return  new SingleOrderInCartResponse(findOrder);
     }
 
     @Transactional(readOnly = true)
-    public List<SingleOrderResponse> showOrdersInCart(User user) {
+    public List<SingleOrderInCartResponse> showOrdersInCart(User user) {
         List<Order> orders = orderRepository.findOrderByUserBeforeBuy(user);
-        return orders.stream().map(SingleOrderResponse::new).toList();
+        return orders.stream().map(SingleOrderInCartResponse::new).toList();
     }
 
 }
