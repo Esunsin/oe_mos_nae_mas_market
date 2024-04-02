@@ -1,7 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.order.service;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.SingleOrderResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.SingOrderResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import org.springframework.stereotype.Service;
 
@@ -17,5 +16,5 @@ public interface OrderService {
 
     SingleOrderResponse updateQuantity(Long quantity, Long orderId);
 
-    SingOrderResponse showOrderDirect(Long quantity, Long productId);
+
 }
