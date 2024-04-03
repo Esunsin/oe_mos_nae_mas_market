@@ -1,9 +1,12 @@
 package cheolppochwippo.oe_mos_nae_mas_market.global.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Duration;
-import lombok.RequiredArgsConstructor;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +17,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -27,6 +29,16 @@ public class RedisConfig {
 
     @Value("${spring.data.redis.port}")
     private int port;
+
+    private static final String REDISSON_HOST_PREFIX = "redis://";
+
+    @Bean
+    public RedissonClient redissonClient(){
+        Config config = new Config();
+        config.useSingleServer().setAddress(REDISSON_HOST_PREFIX + host + ":" + port);
+
+        return Redisson.create(config);
+    }
 
     // 연결정보
     @Bean
@@ -50,11 +62,20 @@ public class RedisConfig {
     // 캐시 매니저
     @Bean
     public CacheManager cacheManager() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer =
+            new GenericJackson2JsonRedisSerializer(objectMapper);
+
         RedisCacheManager.RedisCacheManagerBuilder builder =
-            RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(redisConnectionFactory());
+            RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(
+                redisConnectionFactory());
 
         RedisCacheConfiguration configuration = RedisCacheConfiguration.defaultCacheConfig()
-            .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer())) // Value Serializer 변경
+            .serializeValuesWith(
+                RedisSerializationContext.SerializationPair.fromSerializer(
+                    genericJackson2JsonRedisSerializer)) // Value Serializer 변경
             .disableCachingNullValues()
             .entryTtl(Duration.ofMinutes(10L));
 
