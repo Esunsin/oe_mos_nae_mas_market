@@ -20,19 +20,23 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Issued extends TimeStamped {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column
+    @Enumerated(EnumType.STRING)
     private Deleted deleted;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coupon_id",nullable = false)
+    @JoinColumn(name = "coupon_id", nullable = false)
     private Coupon coupon;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id",nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     public Issued(Coupon coupon, User user) {
         this.coupon = coupon;
         this.user = user;
+        this.deleted = Deleted.UNDELETE;
     }
 }
