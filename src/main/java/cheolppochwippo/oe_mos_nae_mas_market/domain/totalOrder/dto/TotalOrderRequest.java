@@ -9,4 +9,6 @@ public class TotalOrderRequest {
 
 	private Long issueId;
 
+	private String address;
+
 }

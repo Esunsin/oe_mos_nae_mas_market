@@ -25,6 +25,8 @@ public class TotalOrderResponse {
 
     private String orderName;
 
+    private String address;
+
     private DeliveryStatus deliveryStatus;
 
     private LocalDateTime createdAt;
@@ -39,6 +41,7 @@ public class TotalOrderResponse {
         this.deliveryCost = totalOrder.getDeliveryCost();
         this.username = totalOrder.getUser().getUsername();
         this.orderName = totalOrder.getOrderName();
+        this.address = totalOrder.getAddress();
         this.createdAt = totalOrder.getCreatedAt();
         this.modifiedAt = totalOrder.getModifiedAt();
     }

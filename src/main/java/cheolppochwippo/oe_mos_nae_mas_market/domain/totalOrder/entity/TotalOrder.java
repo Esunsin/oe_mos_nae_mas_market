@@ -38,7 +38,9 @@ public class TotalOrder extends TimeStamped {
 
     private String orderName;
 
-    private Long issueId;
+    private String address;
+
+    private Long issueId=0L;
 
     @Enumerated(EnumType.STRING)
     private Deleted deleted;
@@ -57,6 +59,7 @@ public class TotalOrder extends TimeStamped {
             totalName.get(1, Long.class)+"개 등 "+totalInfo.get(1, Long.class)+"종류의 상품":
             totalName.get(0, String.class)+" "+
                 totalName.get(1, Long.class)+"개";
+        address = request.getAddress();
         issueId = request.getIssueId();
         paymentStatementEnum = PaymentStatementEnum.WAIT;
         deleted = Deleted.UNDELETE;
@@ -69,6 +72,11 @@ public class TotalOrder extends TimeStamped {
     public void cancelInProgressOrder(){
         deleted = Deleted.DELETE;
         paymentStatementEnum = PaymentStatementEnum.CANCEL;
+    }
+
+    public void completeOrder(){
+        deleted = Deleted.DELETE;
+        paymentStatementEnum = PaymentStatementEnum.COMPLETE;
     }
 
 }

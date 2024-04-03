@@ -19,5 +19,6 @@ public interface TotalOrderRepositoryCustom {
 
 	Optional<Tuple> getTotalNameUserId(Long userId);
 
+	void completeOrder(TotalOrder totalOrder);
 
 }

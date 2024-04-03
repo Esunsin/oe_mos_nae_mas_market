@@ -53,6 +53,7 @@ public class Payment extends TimeStamped {
         paymentKey = request.getPaymentKey();
         paySuccessYN = true;
         cancelYN = false;
+        statement = PaymentStatementEnum.COMPLETE;
         this.totalOrder = totalOrder;
     }
 }

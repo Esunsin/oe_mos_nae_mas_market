@@ -3,6 +3,7 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository;
 import static cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.QTotalOrder.totalOrder;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.QOrder;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.QProduct;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.QTotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
@@ -10,6 +11,9 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.config.JpaConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.NumberPath;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Objects;
@@ -62,10 +66,25 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 	}
 
 	@Override
+	@Transactional
+	public void completeOrder(TotalOrder totalOrder) {
+		Long count = jpaConfig.jpaQueryFactory()
+			.update(QOrder.order)
+			.set(QOrder.order.deleted,Deleted.DELETE)
+			.where(
+				QOrder.order.totalOrder.id.eq(totalOrder.getId()),
+				QOrder.order.deleted.eq(Deleted.UNDELETE)
+			)
+			.execute();
+		entityManager.flush();
+		entityManager.clear();
+	}
+
+	@Override
 	public Optional<TotalOrder> findTotalOrderByUndeleted(User user) {
 		TotalOrder result = jpaConfig.jpaQueryFactory()
 			.selectFrom(totalOrder)
-			.where(totalOrder.user.eq(user)
+			.where(totalOrder.user.id.eq(user.getId())
 				.and(totalOrder.deleted.eq(Deleted.UNDELETE)))
 			.fetchOne();
 		return Optional.ofNullable(result);
@@ -91,11 +110,12 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 		TotalOrder query = jpaConfig.jpaQueryFactory()
 			.selectFrom(totalOrder)
 			.where(
-				totalOrder.user.eq(user),
+				totalOrder.user.id.eq(user.getId()),
 				totalOrder.deleted.eq(Deleted.UNDELETE)
 			).fetchOne();
 		return Optional.ofNullable(query);
 	}
+
 
 	private BooleanExpression userIdEq(Long userId) {
 		return Objects.nonNull(userId) ? QOrder.order.user.id.eq(userId) : null;
