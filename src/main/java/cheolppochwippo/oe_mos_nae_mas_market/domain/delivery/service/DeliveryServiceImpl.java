@@ -45,7 +45,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     @Transactional(readOnly = true)
     public List<DeliveryResponse> getDeliveries(User user) {
-        List<Delivery> deliveries = deliveryRepository.findByUser(user);
+        List<Delivery> deliveries = deliveryRepository.findDeliveryByUser(user);
         return deliveries.stream()
             .map(DeliveryResponse::new)
             .collect(Collectors.toList());
