@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class AllOrderResponse {
+public class AllOrderInCartResponse {
 
     private Long totalPriceByOrder = 0L;
 
@@ -13,10 +13,12 @@ public class AllOrderResponse {
 
     private Long totalPriceToPay;
 
+    private Integer productSize;
+
     private String content = "4만원이상 무료 배송";
 
-    public AllOrderResponse(List<SingleOrderResponse> singleOrderResponses) {
-        for (SingleOrderResponse singleOrderResponse : singleOrderResponses) {
+    public AllOrderInCartResponse(List<SingleOrderInCartResponse> singleOrderResponses) {
+        for (SingleOrderInCartResponse singleOrderResponse : singleOrderResponses) {
             this.totalPriceByOrder += singleOrderResponse.getPrice() * singleOrderResponse.getQuantity();
         }
         if(totalPriceByOrder > 40000L){
@@ -26,5 +28,6 @@ public class AllOrderResponse {
             this.deliveryCost = 3000L;
         }
         this.totalPriceToPay = totalPriceByOrder + deliveryCost;
+        this.productSize = singleOrderResponses.size();
     }
 }
