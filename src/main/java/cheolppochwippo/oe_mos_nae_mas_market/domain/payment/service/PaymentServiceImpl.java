@@ -52,6 +52,7 @@ public class PaymentServiceImpl implements PaymentService {
 	private final RedissonClient redissonClient;
 
 	@Transactional
+	@Override
 	public PaymentJsonResponse confirmPayment(User user, PaymentRequest request)
 		throws IOException, ParseException {
 		TotalOrder totalOrder = checkPayment(user,request);
@@ -96,6 +97,7 @@ public class PaymentServiceImpl implements PaymentService {
 		return new PaymentJsonResponse(jsonObject,code);
 	}
 
+	@Override
 	public void successPayment(TotalOrder totalOrder, PaymentRequest paymentRequest) {
 		totalOrder.completeOrder();
 		totalOrderRepository.save(totalOrder);
@@ -109,13 +111,15 @@ public class PaymentServiceImpl implements PaymentService {
 		deliveryRepository.save(delivery);
 	}
 
+	@Override
 	public void failPayment(TotalOrder totalOrder,PaymentRequest paymentRequest){
 		//재고 다시 증가시켜주는 메서드 필요
 		totalOrder.cancelInProgressOrder();
 		totalOrderRepository.save(totalOrder);
 	}
 
-	private TotalOrder checkPayment(User user,PaymentRequest paymentRequest){
+	@Override
+	public TotalOrder checkPayment(User user,PaymentRequest paymentRequest){
 		TotalOrder totalOrder = totalOrderRepository.findTotalOrderByUndeleted(user).orElseThrow(
 			() -> new IllegalArgumentException("진행중인 주문이 없습니다.")
 		);
@@ -127,6 +131,7 @@ public class PaymentServiceImpl implements PaymentService {
 		return totalOrder;
 	}
 
+	@Override
 	public PaymentResponse getPayment(User user,Long paymentId){
 		Payment payment = paymentRepository.findById(paymentId).orElseThrow(
 			()-> new IllegalArgumentException("존재하지 않는 결제정보 입니다.")
@@ -137,6 +142,7 @@ public class PaymentServiceImpl implements PaymentService {
 		return new PaymentResponse(payment);
 	}
 
+	@Override
 	public Page<PaymentResponses> getPayments(User user,int page){
 		Pageable pageable = PageRequest.of(page,10);
 		return paymentRepository.getPaymentPageFindByUserId(user.getId(),pageable);

@@ -41,8 +41,7 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom{
 			throw new IllegalArgumentException("결제 정보가 없습니다.");
 		}
 		List<PaymentResponses> paymentResponses = query.stream().map(PaymentResponses::new).toList();
-		Page<PaymentResponses> paymentResponsesPage = new PageImpl<>(paymentResponses,pageable,paymentResponses.size());
-		return paymentResponsesPage;
+		return new PageImpl<>(paymentResponses,pageable,paymentResponses.size());
 	}
 
 	private BooleanExpression userIdEq(Long userId) {
