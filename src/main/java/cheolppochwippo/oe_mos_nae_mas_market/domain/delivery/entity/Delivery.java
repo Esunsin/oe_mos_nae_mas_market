@@ -1,5 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.entity;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
@@ -22,4 +23,10 @@ public class Delivery extends TimeStamped {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
+
+    public Delivery(TotalOrder totalOrder){
+        address = totalOrder.getAddress();
+        deleted = Deleted.UNDELETE;
+        user = totalOrder.getUser();
+    }
 }
