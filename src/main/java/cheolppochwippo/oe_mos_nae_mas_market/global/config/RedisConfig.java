@@ -4,6 +4,9 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderRes
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import java.time.Duration;
 import java.util.Map;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -31,6 +34,8 @@ public class RedisConfig {
 	@Value("${spring.data.redis.port}")
 	private int port;
 
+	private static final String REDISSON_HOST_PREFIX = "redis://";
+
 	@Bean
 	public RedisConnectionFactory redisConnectionFactory() {
 		return new LettuceConnectionFactory(host, port);
@@ -48,16 +53,6 @@ public class RedisConfig {
 		return redisTemplate;
 	}
 
-	@Bean(name = "redisBlackListTemplate")
-	public RedisTemplate<String, Object> redisBlackListTemplate(RedisConnectionFactory connectionFactory) {
-		RedisTemplate<String, Object> template = new RedisTemplate<>();
-		template.setConnectionFactory(connectionFactory);
-		template.setKeySerializer(new StringRedisSerializer());
-		template.setValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
-		template.afterPropertiesSet();
-		return template;
-	}
-
 	@Bean(name = "cacheManager")
 	public CacheManager cacheManager() {
 		RedisCacheManager.RedisCacheManagerBuilder builder =
@@ -72,5 +67,13 @@ public class RedisConfig {
 		builder.cacheDefaults(configuration);
 
 		return builder.build();
+	}
+
+	@Bean
+	public RedissonClient redissonClient(){
+		Config config = new Config();
+		config.useSingleServer().setAddress(REDISSON_HOST_PREFIX + host + ":" + port);
+
+		return Redisson.create(config);
 	}
 }
