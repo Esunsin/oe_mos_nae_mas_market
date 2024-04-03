@@ -1,7 +1,13 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity;
 
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "users")
 public class User extends TimeStamped {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,13 +29,14 @@ public class User extends TimeStamped {
     @Enumerated(EnumType.STRING)
     private RoleEnum role;
 
-    public User(String username, String password,RoleEnum role) {
+    public User(String username, String password, RoleEnum role) {
         this.username = username;
         this.password = password;
-        this.role = role;;
+        this.role = role;
+        ;
     }
 
-    public User(Long userId,String username, String role){
+    public User(Long userId, String username, String role) {
         this.id = userId;
         this.username = username;
         this.role = RoleEnum.valueOf(role);

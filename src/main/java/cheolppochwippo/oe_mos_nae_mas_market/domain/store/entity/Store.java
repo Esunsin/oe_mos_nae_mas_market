@@ -6,6 +6,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -39,5 +40,11 @@ public class Store extends TimeStamped {
     public void update(StoreRequest storeRequest){
         this.storeName = storeRequest.getStoreName();
         this.info = storeRequest.getInfo();
+    }
+    public Store(User user, String storeName,String info){
+        this.storeName = storeName;
+        this.info = info;
+        this.user = user;
+        this.deleted = Deleted.UNDELETE;
     }
 }

@@ -13,10 +13,10 @@ public class OrderServiceTest {
     @Autowired
     OrderService orderService;
 
-    @Test
-    @DisplayName("주문생성")
-    void createOrder(){
-        User userA = new User("userA","1234");
-    }
+//    @Test
+//    @DisplayName("주문생성")
+//    void createOrder(){
+//        User userA = new User("userA","1234");
+//    }
 
 }

@@ -15,13 +15,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.redis.core.RedisHash;
 
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Product extends TimeStamped {
@@ -52,7 +53,7 @@ public class Product extends TimeStamped {
     public Product(ProductRequest product, Store store) {
         this.productName = product.getProductName();
         this.info = product.getInfo();
-        this.realPrice = product.getReal_price();
+        this.realPrice = product.getRealPrice();
         this.price = product.getPrice();
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();
@@ -63,7 +64,7 @@ public class Product extends TimeStamped {
     public void update(ProductRequest product) {
         this.productName = product.getProductName();
         this.info = product.getInfo();
-        this.realPrice = product.getReal_price();
+        this.realPrice = product.getRealPrice();
         this.price = product.getPrice();
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();
