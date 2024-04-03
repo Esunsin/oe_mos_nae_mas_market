@@ -127,7 +127,7 @@ public class PaymentServiceImpl implements PaymentService {
 		return totalOrder;
 	}
 
-	private PaymentResponse getPayment(User user,Long paymentId){
+	public PaymentResponse getPayment(User user,Long paymentId){
 		Payment payment = paymentRepository.findById(paymentId).orElseThrow(
 			()-> new IllegalArgumentException("존재하지 않는 결제정보 입니다.")
 		);
@@ -137,7 +137,7 @@ public class PaymentServiceImpl implements PaymentService {
 		return new PaymentResponse(payment);
 	}
 
-	private Page<PaymentResponses> getPayments(User user,int page){
+	public Page<PaymentResponses> getPayments(User user,int page){
 		Pageable pageable = PageRequest.of(page,10);
 		return paymentRepository.getPaymentPageFindByUserId(user.getId(),pageable);
 	}
