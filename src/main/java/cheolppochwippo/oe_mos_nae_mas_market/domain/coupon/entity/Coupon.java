@@ -52,6 +52,7 @@ public class Coupon extends TimeStamped {
         this.discount = couponRequest.getDiscount();
         this.effective_date = couponRequest.getEffectiveDate();
         this.amount = couponRequest.getAmount();
+        this.deleted = Deleted.UNDELETE;
     }
 
     public void update(CouponRequest couponRequest) {

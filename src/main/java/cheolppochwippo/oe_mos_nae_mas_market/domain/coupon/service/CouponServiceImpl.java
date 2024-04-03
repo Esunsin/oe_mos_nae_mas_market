@@ -53,8 +53,7 @@ public class CouponServiceImpl implements CouponService {
         return new CouponResponse(coupon);
     }
 
-    @Override
-    public Coupon findCoupon(Long couponId) {
+    private Coupon findCoupon(Long couponId) {
         return couponRepository.findById(couponId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.COUPON_NOT_FOUND));
     }

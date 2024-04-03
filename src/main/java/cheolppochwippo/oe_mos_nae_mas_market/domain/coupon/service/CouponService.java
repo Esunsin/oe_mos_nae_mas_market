@@ -15,5 +15,4 @@ public interface CouponService {
 
     CouponResponse deleteCoupon(Long couponId);
 
-    Coupon findCoupon(Long couponId);
 }
