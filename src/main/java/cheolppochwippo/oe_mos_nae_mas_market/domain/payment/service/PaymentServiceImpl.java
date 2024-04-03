@@ -1,53 +1,100 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.payment.service;
 
-import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity.Coupon;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.entity.Issued;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.repository.IssuedRepository;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.Payment;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderRequest;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentJsonResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.repository.PaymentRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository.TotalOrderRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.TossPaymentConfig;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.cache.CacheManager;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
-public class PaymentServiceImpl implements PaymentService{
+public class PaymentServiceImpl implements PaymentService {
 
 	private final PaymentRepository paymentRepository;
 
+	private final TotalOrderRepository totalOrderRepository;
 
 	private final TossPaymentConfig tossPaymentConfig;
 
+	private final RedissonClient redissonClient;
 
+	public PaymentJsonResponse confirmPayment(User user, PaymentRequest request)
+		throws IOException, ParseException {
+		TotalOrder totalOrder = checkPayment(user,request);
+		JSONObject obj = new JSONObject();
+		obj.put("orderId", request.getOrderId());
+		obj.put("amount", request.getAmount());
+		obj.put("paymentKey", request.getPaymentKey());
 
+		// 토스페이먼츠 API는 시크릿 키를 사용자 ID로 사용하고, 비밀번호는 사용하지 않습니다.
+		// 비밀번호가 없다는 것을 알리기 위해 시크릿 키 뒤에 콜론을 추가합니다.
+		String widgetSecretKey = tossPaymentConfig.getSecretKey();
+		Base64.Encoder encoder = Base64.getEncoder();
+		byte[] encodedBytes = encoder.encode(
+			(widgetSecretKey + ":").getBytes(StandardCharsets.UTF_8));
+		String authorizations = "Basic " + new String(encodedBytes);
 
-	private HttpHeaders getHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		String encodedAuthKey = new String(
-			Base64.getEncoder().encode((tossPaymentConfig.getSecretKey() + ":").getBytes(
-				StandardCharsets.UTF_8)));
-		headers.setBasicAuth(encodedAuthKey);
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-		return headers;
+		// 결제를 승인하면 결제수단에서 금액이 차감됩니다.
+		URL url = new URL("https://api.tosspayments.com/v1/payments/confirm");
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.setRequestProperty("Authorization", authorizations);
+		connection.setRequestProperty("Content-Type", "application/json");
+		connection.setRequestMethod("POST");
+		connection.setDoOutput(true);
+
+		OutputStream outputStream = connection.getOutputStream();
+		outputStream.write(obj.toString().getBytes("UTF-8"));
+
+		int code = connection.getResponseCode();
+		boolean isSuccess = code == 200;
+
+		InputStream responseStream =
+			isSuccess ? connection.getInputStream() : connection.getErrorStream();
+		if (isSuccess) {
+			System.out.println("test1");
+		} else {
+			System.out.println("test2");
+		}
+		Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
+		JSONParser responseParser = new JSONParser();
+		JSONObject jsonObject = (JSONObject) responseParser.parse(reader);
+		responseStream.close();
+		return new PaymentJsonResponse(jsonObject,code);
+	}
+
+	private void successPayment(TotalOrder totalOrder, PaymentRequest paymentRequest) {
+		RLock lock = redissonClient.getFairLock("cash");
+
+	}
+
+	private TotalOrder checkPayment(User user,PaymentRequest paymentRequest){
+		TotalOrder totalOrder = totalOrderRepository.findTotalOrderByUndeleted(user).orElseThrow(
+			() -> new IllegalArgumentException("진행중인 주문이 없습니다.")
+		);
+		if(!Objects.equals(totalOrder.getPriceAmount(), paymentRequest.getAmount())
+			|| !Objects.equals(totalOrder.getMerchantUid(), paymentRequest.getOrderId())){
+			throw new IllegalArgumentException("올바르지 않은 요청 입니다.");
+		}
+		return totalOrder;
 	}
 }
 

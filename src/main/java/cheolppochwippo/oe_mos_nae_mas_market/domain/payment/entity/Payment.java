@@ -1,5 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
@@ -45,11 +46,13 @@ public class Payment extends TimeStamped {
     @JoinColumn(name = "total_order_id", nullable = false)
     private TotalOrder totalOrder;
 
-    public Payment(TotalOrderRequest request,TotalOrder totalOrder){
+    public Payment(PaymentRequest request,TotalOrder totalOrder){
         amount= request.getAmount();
-        orderName = request.getOrderName();
-        orderId = UUID.randomUUID().toString();
-        paySuccessYN = false;
+        orderName = totalOrder.getOrderName();
+        orderId = request.getOrderId();
+        paymentKey = request.getPaymentKey();
+        paySuccessYN = true;
+        cancelYN = false;
         this.totalOrder = totalOrder;
     }
 }

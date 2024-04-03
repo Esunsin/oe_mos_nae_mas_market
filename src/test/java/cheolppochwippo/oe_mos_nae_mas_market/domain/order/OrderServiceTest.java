@@ -16,7 +16,7 @@ public class OrderServiceTest {
     @Test
     @DisplayName("주문생성")
     void createOrder(){
-        User userA = new User("userA","1234");
+        //User userA = new User("userA","1234");
     }
 
 }

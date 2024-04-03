@@ -5,12 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PaymentRequest {
-
-	private String orderId;
-
-	private Long amount;
-
-	private String paymentKey;
+public class PaymentResponse {
 
 }
