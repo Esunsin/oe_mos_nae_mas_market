@@ -141,4 +141,5 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 	private BooleanExpression userIdEq(Long userId) {
 		return Objects.nonNull(userId) ? QOrder.order.user.id.eq(userId) : null;
 	}
+
 }

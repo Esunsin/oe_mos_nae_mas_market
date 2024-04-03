@@ -45,6 +45,6 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom{
 	}
 
 	private BooleanExpression userIdEq(Long userId) {
-		return Objects.nonNull(userId) ? QPayment.payment.totalOrder.id.eq(userId) : null;
+		return Objects.nonNull(userId) ? QPayment.payment.totalOrder.user.id.eq(userId) : null;
 	}
 }

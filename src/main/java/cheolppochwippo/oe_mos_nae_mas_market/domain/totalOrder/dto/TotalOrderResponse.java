@@ -20,6 +20,8 @@ public class TotalOrderResponse {
 
 	private Long deliveryCost;
 
+	private Long issuedId;
+
 	private String username;
 
 	private String orderName;
@@ -38,6 +40,7 @@ public class TotalOrderResponse {
 		this.discount = totalOrder.getDiscount();
 		this.priceAmount = totalOrder.getPriceAmount();
 		this.deliveryCost = totalOrder.getDeliveryCost();
+		this.issuedId = totalOrder.getIssueId();
 		this.username = totalOrder.getUser().getUsername();
 		this.orderName = totalOrder.getOrderName();
 		this.address = totalOrder.getAddress();

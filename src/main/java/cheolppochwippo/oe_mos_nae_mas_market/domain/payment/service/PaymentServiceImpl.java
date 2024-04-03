@@ -147,6 +147,26 @@ public class PaymentServiceImpl implements PaymentService {
 		Pageable pageable = PageRequest.of(page,10);
 		return paymentRepository.getPaymentPageFindByUserId(user.getId(),pageable);
 	}
+
+	@Transactional
+	public void successPaymentTest(User user, PaymentRequest paymentRequest) {
+		TotalOrder totalOrder = totalOrderRepository.findByUserUndeleted(user).orElseThrow(
+			()-> new IllegalArgumentException("테스트 실패")
+		);
+		totalOrder.completeOrder();
+		totalOrderRepository.save(totalOrder);
+		totalOrderRepository.completeOrder(totalOrder);
+		if(totalOrder.getIssueId()!=0){
+			issuedRepository.setDeletedFindById(totalOrder.getIssueId());
+		}
+		System.out.println(paymentRequest.getAmount());
+		Payment payment = new Payment(paymentRequest,totalOrder);
+		paymentRepository.save(payment);
+		Delivery delivery = new Delivery(totalOrder);
+		deliveryRepository.save(delivery);
+	}
+
+
 }
 
 

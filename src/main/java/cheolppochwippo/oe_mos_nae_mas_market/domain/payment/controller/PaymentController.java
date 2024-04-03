@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,6 +54,18 @@ public class PaymentController {
 		return ResponseEntity.ok().body(CommonResponse.<Page<PaymentResponses>>builder()
 			.msg("show paymentPage complete!")
 			.data(paymentResponses)
+			.build());
+	}
+
+	@PostMapping("/paymentTest")
+	public ResponseEntity<CommonResponse<Void>> testd(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@RequestBody PaymentRequest paymentRequest
+	){
+		paymentService.successPaymentTest(userDetails.getUser(),paymentRequest);
+
+		return ResponseEntity.ok().body(CommonResponse.<Void>builder()
+			.msg("테스트 성공!!")
 			.build());
 	}
 
