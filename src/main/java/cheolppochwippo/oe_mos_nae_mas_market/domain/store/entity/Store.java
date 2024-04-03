@@ -12,7 +12,6 @@ import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Store extends TimeStamped {
 
@@ -36,5 +35,9 @@ public class Store extends TimeStamped {
         this.info = storeRequest.getInfo();
         this.user = user;
         this.deleted = Deleted.UNDELETE;
+    }
+    public void update(StoreRequest storeRequest){
+        this.storeName = storeRequest.getStoreName();
+        this.info = storeRequest.getInfo();
     }
 }

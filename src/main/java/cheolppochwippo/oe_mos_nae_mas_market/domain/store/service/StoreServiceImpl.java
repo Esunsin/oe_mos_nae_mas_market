@@ -11,10 +11,12 @@ import jakarta.transaction.Transactional;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StoreServiceImpl implements StoreService {
 
     private final StoreRepository storeRepository;
@@ -22,19 +24,17 @@ public class StoreServiceImpl implements StoreService {
 
     @Transactional
     public StoreResponse createStore(StoreRequest storeRequest, User user) {
-        findSeller(user);
-        if (RoleEnum.SELLER.equals(user.getRole())) {
-            Optional<Store> existingStoreOptional = storeRepository.findByUser_Id(user.getId());
-            if (existingStoreOptional.isPresent()) {
+        User seller = findSeller(user);
+        if (RoleEnum.SELLER.equals(seller.getRole())) {
+            Optional<Store> existingStoreOptional = storeRepository.findByUser_Id(seller.getId());
+            if (!existingStoreOptional.isPresent()) {
 
-                Store store = new Store(storeRequest, user);
+                Store store = new Store(storeRequest, seller);
                 storeRepository.save(store);
 
                 return new StoreResponse(store);
-
             }
             throw new IllegalArgumentException("상점은 한개만 생성 할 수 있습니다.");
-
         }
         throw new IllegalArgumentException("판매자만 상점을 생성할 수 있습니다.");
 
@@ -44,13 +44,12 @@ public class StoreServiceImpl implements StoreService {
     @Transactional
     public StoreResponse updateStore(StoreRequest storeRequest, User user) {
 
-        findSeller(user);
-        if (RoleEnum.SELLER.equals(user.getRole())) {
-            Store store = storeRepository.findByUser_Id(user.getId())
+        User seller = findSeller(user);
+        if (RoleEnum.SELLER.equals(seller.getRole())) {
+            Store store = storeRepository.findByUser_Id(seller.getId())
                 .orElseThrow(() -> new NoSuchElementException("상점을 찾을 수 없습니다."));
 
-            store.setStoreName(storeRequest.getStoreName());
-            store.setInfo(storeRequest.getInfo());
+            store.update(storeRequest);
 
             return new StoreResponse(store);
         }
@@ -59,10 +58,10 @@ public class StoreServiceImpl implements StoreService {
 
     }
 
-    public void findSeller(User user) {
-        userRepository.findById(user.getId())
+    public User findSeller(User user) {
+       User seller =  userRepository.findById(user.getId())
             .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-
+        return seller;
     }
 
 }

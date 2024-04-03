@@ -24,7 +24,6 @@ import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Product extends TimeStamped {
@@ -71,4 +70,8 @@ public class Product extends TimeStamped {
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();
     }
+    public void delete(){
+        this.deleted = Deleted.DELETE;
+    }
+
 }
