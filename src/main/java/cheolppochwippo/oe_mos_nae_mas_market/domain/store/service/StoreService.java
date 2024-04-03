@@ -4,6 +4,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.store.dto.StoreRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.dto.StoreResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
 
 public interface StoreService {
 

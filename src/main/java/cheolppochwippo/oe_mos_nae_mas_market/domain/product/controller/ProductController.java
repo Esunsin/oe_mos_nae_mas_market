@@ -31,7 +31,7 @@ public class ProductController {
         @RequestBody ProductRequest productRequest,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         ProductResponse createProduct = productService.createProduct(productRequest,
-            userDetails.getUser()); //productId
+            userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK.value())
             .body(CommonResponse.<ProductResponse>builder()
                 .msg("create products complete!")

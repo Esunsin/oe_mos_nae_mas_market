@@ -9,7 +9,6 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
-import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -26,44 +25,34 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
 
-    @Override
     @Transactional
     public ProductResponse createProduct(ProductRequest productRequest, User user) {
-        if (RoleEnum.SELLER.equals(user.getRole())) {
+        seller(user);
+        Store store = storeRepository.findByUser_Id(user.getId())
+            .orElseThrow(() -> new NoSuchElementException("상점을 찾을 수 없습니다."));
 
-            User seller = new User(user.getId(), user.getUsername(),
-                String.valueOf(user.getRole()));
+        Product product = new Product(productRequest, store);
+        productRepository.save(product);
 
-            Store store = storeRepository.findByUser_Id(seller.getId());
-            Product product = new Product(productRequest, store);
-
-            productRepository.save(product);
-
-            return new ProductResponse(product.getId());
-        } else {
-            throw new IllegalArgumentException("판매자만 상품을 등록할 수 있습니다.");
-        }
+        return new ProductResponse(product);
     }
 
     @Override
     @Transactional
     public ProductResponse updateProduct(ProductRequest productRequest, Long productId, User user) {
-        if (RoleEnum.SELLER.equals(user.getRole())) {
-            Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NoSuchElementException("해당 상품을 찾을 수 없습니다."));
-            product.update(productRequest);
-            return new ProductResponse(product.getId());
-        } else {
-            throw new IllegalArgumentException("판매자만 상품을 등록할 수 있습니다.");
-        }
+        seller(user);
+
+        Product product = foundProduct(productId);
+        product.update(productRequest);
+
+        return new ProductResponse(product);
     }
 
 
     @Override
     @Transactional(readOnly = true)
-    public ProductShowResponse showProduct(long id) {
-        Product product = productRepository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("해당 상품을 찾을 수 없습니다."));
+    public ProductShowResponse showProduct(long productId) {
+        Product product = foundProduct(productId);
 
         return new ProductShowResponse(product);
     }
@@ -72,7 +61,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public List<ProductShowResponse> showAllProduct() {
-        List<Product> productList = productRepository.findAll();
+        List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne();
         List<ProductShowResponse> productShowResponseList = productList.stream()
             .map(ProductShowResponse::new)
             .collect(Collectors.toList());
@@ -82,12 +71,22 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductResponse deleteProduct(Long productId, User user) {
-        Product product = productRepository.findById(productId)
+        seller(user);
+
+        Product product = foundProduct(productId);
+        product.delete();
+
+        return new ProductResponse(product);
+    }
+
+    private Product foundProduct(Long productId) {
+        return productRepository.findById(productId)
             .orElseThrow(() -> new NoSuchElementException("해당 상품을 찾을 수 없습니다."));
+    }
 
-        product.setDeleted(Deleted.DELETE);
-        productRepository.save(product);
-
-        return new ProductResponse(product.getId());
+    private void seller(User user) {
+        if (!RoleEnum.SELLER.equals(user.getRole())) {
+            throw new IllegalArgumentException("판매자만 상품을 등록할 수 있습니다.");
+        }
     }
 }

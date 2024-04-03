@@ -13,7 +13,7 @@ public interface ProductService {
     @Transactional
     ProductResponse createProduct(ProductRequest productRequest, User user);
 
-    ProductShowResponse showProduct(long id);
+    ProductShowResponse showProduct(long productId);
     @Transactional
     ProductResponse updateProduct(ProductRequest productRequest,Long productId,User user);
 
