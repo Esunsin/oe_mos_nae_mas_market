@@ -14,13 +14,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.redis.core.RedisHash;
 
-import java.time.LocalDateTime;
-import lombok.Setter;
 
 @Entity
 @Getter
@@ -70,7 +68,8 @@ public class Product extends TimeStamped {
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();
     }
-    public void delete(){
+
+    public void delete() {
         this.deleted = Deleted.DELETE;
     }
 

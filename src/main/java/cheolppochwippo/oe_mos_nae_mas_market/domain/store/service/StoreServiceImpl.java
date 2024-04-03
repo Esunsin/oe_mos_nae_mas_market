@@ -8,10 +8,13 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,6 +24,8 @@ public class StoreServiceImpl implements StoreService {
 
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+
+
 
     @Transactional
     public StoreResponse createStore(StoreRequest storeRequest, User user) {

@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
-@Repository
 public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
     private final JpaConfig jpaConfig;
     @Override

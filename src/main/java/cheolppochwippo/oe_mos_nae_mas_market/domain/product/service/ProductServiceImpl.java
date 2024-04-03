@@ -14,6 +14,8 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
     private final StoreRepository storeRepository;
 
     @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public ProductResponse createProduct(ProductRequest productRequest, User user) {
         seller(user);
         Store store = storeRepository.findByUser_Id(user.getId())
@@ -39,6 +42,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public ProductResponse updateProduct(ProductRequest productRequest, Long productId, User user) {
         seller(user);
 
@@ -51,6 +55,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public ProductShowResponse showProduct(long productId) {
         Product product = foundProduct(productId);
 
@@ -60,6 +65,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "products", key = "'all'", unless = "#result.size() == 0")
     public List<ProductShowResponse> showAllProduct() {
         List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne();
         List<ProductShowResponse> productShowResponseList = productList.stream()
@@ -70,6 +76,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public ProductResponse deleteProduct(Long productId, User user) {
         seller(user);
 
