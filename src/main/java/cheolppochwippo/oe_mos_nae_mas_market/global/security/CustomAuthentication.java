@@ -1,13 +1,8 @@
 package cheolppochwippo.oe_mos_nae_mas_market.global.security;
 
-import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public class CustomAuthentication implements Authentication {

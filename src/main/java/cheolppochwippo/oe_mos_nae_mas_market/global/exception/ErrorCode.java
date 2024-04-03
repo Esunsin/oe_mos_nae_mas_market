@@ -6,7 +6,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
     //user
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND,"유저가 없습니다.");
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND,"유저가 없습니다."),
+    //coupon
+    COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠폰이 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
