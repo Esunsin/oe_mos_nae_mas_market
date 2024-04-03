@@ -65,8 +65,9 @@ public class JwtUtil {
         String refreshToken = token.getRefreshToken().substring(7);
         Claims info = Jwts.parserBuilder().setSigningKey(key).build()
             .parseClaimsJws(refreshToken).getBody();
+        RoleEnum roleEnum = RoleEnum.valueOf(info.get("role",String.class));
         return createAccessToken(info.get("userId", Long.class),
-            info.get("username", String.class),info.get("role", RoleEnum.class));
+            info.get("username", String.class),roleEnum);
     }
 
     public void deleteRefreshToken(Long userId) {
