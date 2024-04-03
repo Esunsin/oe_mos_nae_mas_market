@@ -13,6 +13,8 @@ public class AllOrderInCartResponse {
 
     private Long totalPriceToPay;
 
+    private Integer productSize;
+
     private String content = "4만원이상 무료 배송";
 
     public AllOrderInCartResponse(List<SingleOrderInCartResponse> singleOrderResponses) {
@@ -26,5 +28,6 @@ public class AllOrderInCartResponse {
             this.deliveryCost = 3000L;
         }
         this.totalPriceToPay = totalPriceByOrder + deliveryCost;
+        this.productSize = singleOrderResponses.size();
     }
 }
