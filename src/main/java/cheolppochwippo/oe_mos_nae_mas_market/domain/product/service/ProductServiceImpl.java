@@ -28,9 +28,9 @@ public class ProductServiceImpl implements ProductService {
     private final StoreRepository storeRepository;
 
     @Transactional
-    @CacheEvict(cacheNames = "products", allEntries = true)
+    @CacheEvict(cacheNames = "products", key = "#productId")
     public ProductResponse createProduct(ProductRequest productRequest, User user) {
-        seller(user);
+        validateSeller(user);
         Store store = storeRepository.findByUser_Id(user.getId())
             .orElseThrow(() -> new NoSuchElementException("상점을 찾을 수 없습니다."));
 
@@ -44,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @CacheEvict(cacheNames = "products", allEntries = true)
     public ProductResponse updateProduct(ProductRequest productRequest, Long productId, User user) {
-        seller(user);
+        validateSeller(user);
 
         Product product = foundProduct(productId);
         product.update(productRequest);
@@ -68,17 +68,16 @@ public class ProductServiceImpl implements ProductService {
     @Cacheable(cacheNames = "products", key = "'all'", unless = "#result.size() == 0")
     public List<ProductShowResponse> showAllProduct() {
         List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne();
-        List<ProductShowResponse> productShowResponseList = productList.stream()
+        return productList.stream()
             .map(ProductShowResponse::new)
             .collect(Collectors.toList());
-        return productShowResponseList;
     }
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = "products", allEntries = true)
+    @CacheEvict(cacheNames = "products", key = "#productId")
     public ProductResponse deleteProduct(Long productId, User user) {
-        seller(user);
+        validateSeller(user);
 
         Product product = foundProduct(productId);
         product.delete();
@@ -91,7 +90,7 @@ public class ProductServiceImpl implements ProductService {
             .orElseThrow(() -> new NoSuchElementException("해당 상품을 찾을 수 없습니다."));
     }
 
-    private void seller(User user) {
+    private void validateSeller(User user) {
         if (!RoleEnum.SELLER.equals(user.getRole())) {
             throw new IllegalArgumentException("판매자만 상품을 등록할 수 있습니다.");
         }

@@ -8,12 +8,13 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.config.JpaConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
-public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
+public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
+
     private final JpaConfig jpaConfig;
+
+
     @Override
     public List<Product> findProductsWithQuantityGreaterThanOne() {
         return jpaConfig.jpaQueryFactory()
