@@ -51,7 +51,7 @@ public class DeliveryServiceImpl implements DeliveryService {
             .collect(Collectors.toList());
     }
 
-    public Delivery findDelivery(Long deliveryId) {
+    private Delivery findDelivery(Long deliveryId) {
         return deliveryRepository.findById(deliveryId)
             .orElseThrow(() -> new NoSuchElementException("없는 주소지 입니다."));
     }
