@@ -28,7 +28,7 @@ public class ProductServiceImpl implements ProductService {
     private final StoreRepository storeRepository;
 
     @Transactional
-    @CacheEvict(cacheNames = "products", key = "#productId")
+    @CacheEvict(cacheNames = "products",allEntries = true)
     public ProductResponse createProduct(ProductRequest productRequest, User user) {
         validateSeller(user);
         Store store = storeRepository.findByUser_Id(user.getId())
