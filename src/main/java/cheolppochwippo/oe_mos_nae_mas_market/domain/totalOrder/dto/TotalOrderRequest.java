@@ -7,10 +7,6 @@ import lombok.Setter;
 @Setter
 public class TotalOrderRequest {
 
-	private Long amount;
-
-	private String orderName;
-
-	private Long couponId;
+	private Long issueId;
 
 }

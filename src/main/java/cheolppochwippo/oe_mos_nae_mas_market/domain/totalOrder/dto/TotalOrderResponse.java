@@ -5,8 +5,10 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class TotalOrderResponse {
 
     private Long totalOrderId;
@@ -18,6 +20,10 @@ public class TotalOrderResponse {
     private Long priceAmount;
 
     private Long deliveryCost;
+
+    private String username;
+
+    private String orderName;
 
     private DeliveryStatus deliveryStatus;
 
@@ -31,7 +37,8 @@ public class TotalOrderResponse {
         this.discount = totalOrder.getDiscount();
         this.priceAmount = totalOrder.getPriceAmount();
         this.deliveryCost = totalOrder.getDeliveryCost();
-//
+        this.username = totalOrder.getUser().getUsername();
+        this.orderName = totalOrder.getOrderName();
         this.createdAt = totalOrder.getCreatedAt();
         this.modifiedAt = totalOrder.getModifiedAt();
     }

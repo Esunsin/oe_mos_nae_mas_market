@@ -6,9 +6,11 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderRes
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository.TotalOrderRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
-import java.util.Objects;
+import com.querydsl.core.Tuple;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,15 +20,26 @@ public class TotalOrderServiceImpl implements TotalOrderService{
 
 	private final IssuedRepository issuedRepository;
 
+	@Transactional
 	public TotalOrderResponse createTotalOrder(User user, TotalOrderRequest request){
-		Long totalPrice = totalOrderRepository.getTotalPriceByUserId(user.getId());
-		if(!Objects.equals(totalPrice, request.getAmount())){
-			throw new IllegalArgumentException("입력된 가격이 상품의 가격과 맞지 않습니다.");
+		Optional<TotalOrder> total = totalOrderRepository.findByUserUndeleted(user);
+		if(total.isPresent()){
+			total.get().cancelInProgressOrder();
+			totalOrderRepository.save(total.get());
 		}
-		double discount = 0.3;
-		// issuedRepository에서 가져오는 작업 필요
-		TotalOrder totalOrder = new TotalOrder(request,user,discount);
+		Tuple totalInfo = totalOrderRepository.getTotalInfoByUserId(user.getId()).orElseThrow(
+			()-> new IllegalArgumentException("현재 진행중인 주문이 없습니다")
+		);
+		Tuple totalName = totalOrderRepository.getTotalNameUserId(user.getId()).orElseThrow(
+			()-> new IllegalArgumentException("현재 진행중인 주문이 없습니다")
+		);
+
+		double discount = issuedRepository.getDiscountFindById(user.getId(),request.getIssueId()).orElseThrow(
+			()-> new IllegalArgumentException("유효하지 않은 쿠폰 입니다.")
+		);
+		TotalOrder totalOrder = new TotalOrder(request,user,totalInfo,totalName,discount);
 		totalOrderRepository.save(totalOrder);
+		totalOrderRepository.pushOrder(totalOrder,user.getId());
 		TotalOrderResponse response  = new TotalOrderResponse(totalOrder);
 		return response ;
 	}
