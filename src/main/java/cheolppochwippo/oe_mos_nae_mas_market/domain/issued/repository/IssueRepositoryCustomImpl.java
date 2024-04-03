@@ -4,6 +4,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity.QCoupon;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.entity.QIssued;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.QOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.JpaConfig;
+import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,6 +28,15 @@ public class IssueRepositoryCustomImpl implements IssueRepositoryCustom{
 			)
 			.fetchOne();
 		return Optional.ofNullable(discount);
+	}
+
+	@Override
+	public void setDeletedFindById(Long issueId) {
+		Long count = jpaConfig.jpaQueryFactory()
+			.update(QIssued.issued)
+			.set(QIssued.issued.deleted, Deleted.DELETE)
+			.where(issueIdEq(issueId))
+			.execute();
 	}
 
 	private BooleanExpression userIdEq(Long userId) {

@@ -6,4 +6,6 @@ public interface IssueRepositoryCustom {
 
 	Optional<Double> getDiscountFindById(Long userId,Long issueId);
 
+	void setDeletedFindById(Long issueId);
+
 }
