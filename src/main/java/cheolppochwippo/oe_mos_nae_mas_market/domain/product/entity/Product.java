@@ -26,7 +26,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Product extends TimeStamped {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -73,6 +72,9 @@ public class Product extends TimeStamped {
     public void delete() {
         this.deleted = Deleted.DELETE;
     }
-    public void quatityUpdate(Long amount){this.quantity = this.quantity + amount;}
+
+    public void quatityUpdate(Long amount) {
+        this.quantity = this.quantity + amount;
+    }
 
 }

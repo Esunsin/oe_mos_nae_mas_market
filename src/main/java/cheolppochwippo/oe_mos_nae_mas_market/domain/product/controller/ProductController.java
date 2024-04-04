@@ -1,8 +1,8 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product.controller;
 
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails.UserDetailsImpl;
@@ -73,7 +73,7 @@ public class ProductController {
     @GetMapping("/products")
     public ResponseEntity<CommonResponse<ProductShowResponse>> showAllProduct(
         @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page,size);
+        Pageable pageable = PageRequest.of(page, size);
         ProductShowResponse productShowResponses = productService.showAllProduct(pageable);
         return ResponseEntity.status(HttpStatus.OK.value())
             .body(CommonResponse.<ProductShowResponse>builder()

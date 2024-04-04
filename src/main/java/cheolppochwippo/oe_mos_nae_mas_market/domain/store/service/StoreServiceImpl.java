@@ -21,7 +21,6 @@ public class StoreServiceImpl implements StoreService {
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
 
-
     @Transactional
     public StoreResponse createStore(StoreRequest storeRequest, User user) {
         User seller = getUser(user);
@@ -65,6 +64,4 @@ public class StoreServiceImpl implements StoreService {
             throw new IllegalArgumentException("상점은 한개만 생성 할 수 있습니다.");
         }
     }
-
-
 }
