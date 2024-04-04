@@ -14,15 +14,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Product extends TimeStamped {
@@ -43,7 +43,7 @@ public class Product extends TimeStamped {
 
     private Long quantity;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private Deleted deleted;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -53,19 +53,26 @@ public class Product extends TimeStamped {
     public Product(ProductRequest product, Store store) {
         this.productName = product.getProductName();
         this.info = product.getInfo();
-        this.realPrice = product.getReal_price();
+        this.realPrice = product.getRealPrice();
         this.price = product.getPrice();
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();
+        this.deleted = Deleted.UNDELETE;
         this.store = store;
     }
 
     public void update(ProductRequest product) {
         this.productName = product.getProductName();
         this.info = product.getInfo();
-        this.realPrice = product.getReal_price();
+        this.realPrice = product.getRealPrice();
         this.price = product.getPrice();
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();
     }
+
+    public void delete() {
+        this.deleted = Deleted.DELETE;
+    }
+    public void quatityUpdate(Long amount){this.quantity = this.quantity + amount;}
+
 }
