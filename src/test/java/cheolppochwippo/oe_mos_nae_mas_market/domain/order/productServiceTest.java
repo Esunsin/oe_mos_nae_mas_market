@@ -5,29 +5,36 @@ import static cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum.
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository.ProductRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductServiceImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
+import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 public class productServiceTest {
@@ -69,6 +76,7 @@ public class productServiceTest {
     }
 
     @Test
+    @DisplayName("상품 생성_성공")
     void createProduct_SellerRole_Success() {
         //given
         ProductRequest productRequest = new ProductRequest("Test Product", "Test Product Info",
@@ -84,6 +92,7 @@ public class productServiceTest {
     }
 
     @Test
+    @DisplayName("상품 생성_seller 아닐때_실패")
     void createProduct_CustomerRole_ThrowsIllegalArgumentException() {
         ProductRequest productRequest = new ProductRequest("Test Product", "Test Product Info",
             10000L, 8000L, 2000L, 10L);
@@ -94,6 +103,7 @@ public class productServiceTest {
 
 
     @Test
+    @DisplayName("상품 수정_성공")
     void updateProduct_SellerRole_Success() {
         given(productRepository.findById(1L)).willReturn(Optional.of(product));
 
@@ -105,6 +115,7 @@ public class productServiceTest {
     }
 
     @Test
+    @DisplayName("상품 수정_SELLER 아닐때_실패")
     void updateProduct_CustomerRole_ThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> {
             ProductRequest updatedProductRequest = new ProductRequest("Updated Product",
@@ -114,6 +125,7 @@ public class productServiceTest {
     }
 
     @Test
+    @DisplayName("상품 수정_존재하지않는 상품_실패")
     void updateProduct_ProductNotFound_ThrowsNoSuchElementException() {
 
         ProductRequest updatedProductRequest = new ProductRequest("Updated Product",
@@ -125,6 +137,7 @@ public class productServiceTest {
     }
 
     @Test
+    @DisplayName("상품 단건 조회_성공")
     void showProduct_Success() {
         given(productRepository.findById(1L)).willReturn(Optional.of(product));
 
@@ -142,41 +155,30 @@ public class productServiceTest {
     }
 
     @Test
+    @DisplayName("상품 단건조회_실패")
     void showProduct_ProductNotFound_ThrowsNoSuchElementException() {
-        when(productRepository.findById(1L)).thenReturn(Optional.empty());
+        when(productRepository.findById(2L)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> productService.showProduct(1L));
+        assertThrows(NoSuchElementException.class, () -> productService.showProduct(2L));
     }
 
-//    @Test
-//    void showAllProduct_Success() {
-//        // Mocking
-//        Pageable pageable = PageRequest.of(0, 10);
-//        Page<Product> productPage = new PageImpl<>(Collections.singletonList(product));
-//        given(productRepository.findProductsWithQuantityGreaterThanOne(pageable))
-//            .willReturn((List<Product>) productPage);
-//
-//        // Test
-//        ProductShowResponse result = productService.showAllProduct(pageable);
-//
-//        // Verification
-//        assertNotNull(result);
-//        List<ProductDto> productList = result.getProductList();
-//        assertEquals(1, productList.size());
-//        ProductDto productDto = productList.get(0);
-//        assertEquals(product.getId(), productDto.getId());
-//        assertEquals(product.getProductName(), productDto.getProductName());
-//        assertEquals(product.getInfo(), productDto.getInfo());
-//        assertEquals(product.getRealPrice(), productDto.getRealPrice());
-//        assertEquals(product.getPrice(), productDto.getPrice());
-//        assertEquals(product.getDiscount(), productDto.getDiscount());
-//        assertEquals(product.getQuantity(), productDto.getQuantity());
-//        assertNotNull(productDto.getStore());
-//        assertEquals(product.getStore().getStoreName(), productDto.getStore().getStoreName());
-//
-//    }
+    @Test
+    @DisplayName("상품 전체 조회_성공")
+    void showAllProduct_Success() {
+
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Product> productList = Collections.singletonList(product);
+        when(productRepository.findProductsWithQuantityGreaterThanOne(pageable)).thenReturn(
+            productList);
+
+        ProductShowResponse result = productService.showAllProduct(pageable);
+
+        assertEquals(1, result.getProductList().size());
+
+    }
 
     @Test
+    @DisplayName("상품 삭제_성공")
     void deleteProduct_SellerRole_Success() {
         // Given
         given(productRepository.findById(product.getId())).willReturn(Optional.of(product));
@@ -190,48 +192,57 @@ public class productServiceTest {
     }
 
     @Test
+    @DisplayName("상품 삭제_실패")
     void deleteProduct_CustomerRole_ThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> {
             productService.deleteProduct(1L, customer);
         });
     }
 
-//    @Test
-//    void testCaching() {
-//        when(productRepository.findProductsWithQuantityGreaterThanOne(
-//            Pageable.ofSize(15))).thenReturn(
-//            Collections.singletonList(product));
-//
-//        // 캐시에 저장되지 않은 상태에서 showAllProduct() 호출
-//        List<ProductShowResponse> result1 = productService.showAllProduct();
-//        assertNotNull(result1);
-//        assertEquals(1, result1.size());
-//
-//        // 캐시에 저장된 상태에서 showAllProduct() 호출
-//        List<ProductShowResponse> result2 = productService.showAllProduct();
-//        assertNotNull(result2);
-//        assertEquals(1, result2.size());
-//
-//    }
+    @Test
+    @DisplayName("캐싱_성공")
+    void testCaching() {
 
-//    @Test
-//    void testCachingEfficiency() {
-//        int numProducts = 10000;
-//        List<Product> products = Collections.nCopies(numProducts, product);
-//        when(productRepository.findProductsWithQuantityGreaterThanOne(
-//            Pageable.ofSize(15))).thenReturn(products);
-//
-//        // 캐시 없이 showAllProduct() 호출
-//        long startTime = System.nanoTime();
-//        List<ProductShowResponse> result1 = productService.showAllProduct();
-//        long duration1 = System.nanoTime() - startTime;
-//
-//        // 캐시에 저장된 상태에서 showAllProduct() 호출
-//        startTime = System.nanoTime();
-//        List<ProductShowResponse> result2 = productService.showAllProduct();
-//        long duration2 = System.nanoTime() - startTime;
-//
-//        // 캐시 적중으로 인한 성능 향상 확인
-//        assertTrue(duration2 < duration1);
-//    }
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Product> productList = Collections.singletonList(product);
+        when(productRepository.findProductsWithQuantityGreaterThanOne(pageable)).thenReturn(
+            productList);
+
+        // 캐시에 저장되지 않은 상태에서 showAllProduct() 호출
+        ProductShowResponse result1 = productService.showAllProduct(pageable);
+        assertNotNull(result1);
+
+        // 캐시에 저장된 상태에서 showAllProduct() 호출
+        ProductShowResponse result2 = productService.showAllProduct(pageable);
+        assertNotNull(result2);
+
+        for (int i = 0; i < result1.getProductList().size(); i++) {
+            ProductResultResponse product1 = result1.getProductList().get(i);
+            ProductResultResponse product2 = result2.getProductList().get(i);
+            assertEquals(product1.getId(), product2.getId());
+            assertEquals(product1.getProductName(), product2.getProductName());
+        }
+    }
+
+    @Test
+    @DisplayName("캐싱 성능 비교")
+    void testCachingEfficiency() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Product> productList = Collections.singletonList(product);
+        when(productRepository.findProductsWithQuantityGreaterThanOne(pageable)).thenReturn(
+            productList);
+
+        long startTime = System.nanoTime();
+        ProductShowResponse result1 = productService.showAllProduct(pageable);
+        long duration1 = System.nanoTime() - startTime;
+
+        startTime = System.nanoTime();
+        ProductShowResponse result2 = productService.showAllProduct(pageable);
+        long duration2 = System.nanoTime() - startTime;
+
+        // 캐싱으로 인한 성능 향상 확인
+        System.out.println("캐싱 전 " + duration1);
+        System.out.println("캐싱 후 " + duration2);
+        assertTrue(duration2 < duration1);
+    }
 }
