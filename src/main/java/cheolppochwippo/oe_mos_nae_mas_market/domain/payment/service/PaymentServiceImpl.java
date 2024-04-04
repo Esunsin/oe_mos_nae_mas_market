@@ -12,10 +12,13 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponses;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.Payment;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.repository.PaymentRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductService;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductServiceImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository.TotalOrderRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.TossPaymentConfig;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.InsufficientQuantityException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.PriceMismatchException;
@@ -58,6 +61,8 @@ public class PaymentServiceImpl implements PaymentService {
 	private final TossPaymentConfig tossPaymentConfig;
 
 	private final RedissonClient redissonClient;
+
+	private final ProductServiceImpl productService;
 
 	@Transactional
 	@Override
@@ -186,7 +191,12 @@ public class PaymentServiceImpl implements PaymentService {
 			throw new PriceMismatchException("올바르지 않은 요청 입니다.");
 		}
 //		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
-//		orders.parallelStream().forEach(element -> method(element));
+		try{
+			//orders.parallelStream().forEach(element -> method(element));
+		}catch (Exception e){
+			failPayment(totalOrder,paymentRequest);
+			throw new InsufficientQuantityException("재고가 부족합니다.");
+		}
 		//락걸고 재고 뺴는 메서드 필요
 		return totalOrder;
 	}

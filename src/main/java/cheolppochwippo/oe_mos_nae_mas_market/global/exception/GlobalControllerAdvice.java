@@ -1,6 +1,7 @@
 package cheolppochwippo.oe_mos_nae_mas_market.global.exception;
 
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.InsufficientQuantityException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NotFoundException;
@@ -100,6 +101,13 @@ public class GlobalControllerAdvice {
         Exception e) {
         log.error(e.getMessage());
         return createResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler({InsufficientQuantityException.class})
+    public ResponseEntity<ErrorResponse> handleConflictException(
+        Exception e) {
+        log.error(e.getMessage());
+        return createResponse(HttpStatus.CONFLICT, e.getMessage());
     }
 
 
