@@ -1,9 +1,9 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product.service;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository.ProductRepository;
@@ -69,9 +69,11 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = "products", key = "#pageable")
     public ProductShowResponse showAllProduct(Pageable pageable) {
-        List<Product> productList =productRepository.findProductsWithQuantityGreaterThanOne(pageable);
+        List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne(
+            pageable);
 
-        return new ProductShowResponse(productList.stream().map(product -> new ProductResultResponse(product)).toList());
+        return new ProductShowResponse(
+            productList.stream().map(product -> new ProductResultResponse(product)).toList());
     }
 
     @Override
@@ -112,7 +114,7 @@ public class ProductServiceImpl implements ProductService {
             () -> new IllegalArgumentException("상품이 존재하지 않습니다.")
         );
 
-        if(product.getQuantity() < 1){
+        if (product.getQuantity() < 1) {
             throw new IllegalArgumentException("재고가 부족합니다");
         }
 
