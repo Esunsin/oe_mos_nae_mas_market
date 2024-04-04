@@ -97,4 +97,27 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+
+    //재고 다시 증가시켜주는 메서드
+    public void updateQuantity(Order order) {
+        Product product = foundProduct(order.getProduct().getId());
+        product.quatityUpdate(order.getQuantity());
+        productRepository.save(product);
+    }
+
+    //재고 감소시켜주는 메소드
+    @Transactional
+    public void decreaseProductStock(Order order) {
+        Product product = productRepository.findById(order.getProduct().getId()).orElseThrow(
+            () -> new IllegalArgumentException("상품이 존재하지 않습니다.")
+        );
+
+        if(product.getQuantity() < 1){
+            throw new IllegalArgumentException("재고가 부족합니다");
+        }
+
+        Long newStock = product.getQuantity() - order.getQuantity();
+        product.quatityUpdate(newStock);
+        productRepository.save(product);
+    }
 }
