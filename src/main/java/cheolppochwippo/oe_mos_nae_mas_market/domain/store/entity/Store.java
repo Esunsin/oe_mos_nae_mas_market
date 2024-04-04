@@ -6,13 +6,13 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Store extends TimeStamped {
 
@@ -24,6 +24,7 @@ public class Store extends TimeStamped {
 
     private String info;
 
+    @Enumerated(EnumType.STRING)
     private Deleted deleted;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -34,5 +35,16 @@ public class Store extends TimeStamped {
         this.storeName = storeRequest.getStoreName();
         this.info = storeRequest.getInfo();
         this.user = user;
+        this.deleted = Deleted.UNDELETE;
+    }
+    public void update(StoreRequest storeRequest){
+        this.storeName = storeRequest.getStoreName();
+        this.info = storeRequest.getInfo();
+    }
+    public Store(User user, String storeName,String info){
+        this.storeName = storeName;
+        this.info = info;
+        this.user = user;
+        this.deleted = Deleted.UNDELETE;
     }
 }

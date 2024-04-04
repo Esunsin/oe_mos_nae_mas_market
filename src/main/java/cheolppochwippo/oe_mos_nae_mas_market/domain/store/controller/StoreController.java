@@ -1,12 +1,9 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.store.controller;
 
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.dto.StoreRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.dto.StoreResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.service.StoreService;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.store.service.StoreServiceImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails.UserDetailsImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
 import lombok.RequiredArgsConstructor;
