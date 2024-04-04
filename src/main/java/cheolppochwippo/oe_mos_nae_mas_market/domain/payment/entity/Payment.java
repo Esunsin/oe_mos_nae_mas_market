@@ -32,8 +32,6 @@ public class Payment extends TimeStamped {
 
     @Column
     private String paymentKey;
-    @Column
-    private String failReason;
 
     @Column
     private boolean cancelYN;
