@@ -12,11 +12,8 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.No
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +50,12 @@ public class IssuedServiceImpl implements IssuedService {
                 Issued issuedCoupon = new Issued(coupon, user);
                 issuedRepository.save(issuedCoupon);
 
-                cacheManager.getCache("IssuedCoupon").put(couponId, issuedCoupon);
+                Cache issuedCouponCache = cacheManager.getCache("IssuedCoupon");
+                if (issuedCouponCache != null) {
+                    issuedCouponCache.put(couponId, issuedCoupon);
+                } else {
+                    throw new IllegalStateException("IssuedCoupon 캐시를 찾을 수 없습니다.");
+                }
 
                 return new IssuedResponse(couponId, coupon.getCouponInfo(),
                     issuedCoupon.getCreatedAt(), issuedCoupon.getDeleted());
