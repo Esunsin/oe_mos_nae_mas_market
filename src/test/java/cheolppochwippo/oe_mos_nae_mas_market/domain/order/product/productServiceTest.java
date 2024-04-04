@@ -1,4 +1,4 @@
-package cheolppochwippo.oe_mos_nae_mas_market.domain.order;
+package cheolppochwippo.oe_mos_nae_mas_market.domain.order.product;
 
 import static cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum.CONSUMER;
 import static cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum.SELLER;
@@ -41,13 +41,10 @@ public class productServiceTest {
 
     @Mock
     ProductRepository productRepository;
-
     @Mock
     StoreRepository storeRepository;
-
     @Mock
     CacheManager cacheManager;
-
 
     ProductServiceImpl productService;
 
