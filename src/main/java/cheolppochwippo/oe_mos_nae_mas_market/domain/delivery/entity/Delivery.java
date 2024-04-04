@@ -27,6 +27,8 @@ public class Delivery extends TimeStamped {
 
     private Deleted deleted;
 
+    private String orderId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
@@ -44,6 +46,7 @@ public class Delivery extends TimeStamped {
     }
 
     public Delivery(TotalOrder totalOrder){
+        orderId = totalOrder.getMerchantUid();
         address = totalOrder.getAddress();
         deleted = Deleted.UNDELETE;
         user = totalOrder.getUser();
