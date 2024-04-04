@@ -1,5 +1,7 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product.service;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
@@ -11,11 +13,11 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
     private final StoreRepository storeRepository;
 
     @Transactional
-    @CacheEvict(cacheNames = "products",allEntries = true)
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public ProductResponse createProduct(ProductRequest productRequest, User user) {
         validateSeller(user);
         Store store = storeRepository.findByUser_Id(user.getId())
@@ -56,21 +58,20 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     @CacheEvict(cacheNames = "products", allEntries = true)
-    public ProductShowResponse showProduct(long productId) {
+    public ProductResultResponse showProduct(long productId) {
         Product product = foundProduct(productId);
 
-        return new ProductShowResponse(product);
+        return new ProductResultResponse(product);
     }
 
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "products", key = "'all'", unless = "#result.size() == 0")
-    public List<ProductShowResponse> showAllProduct() {
-        List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne();
-        return productList.stream()
-            .map(ProductShowResponse::new)
-            .collect(Collectors.toList());
+    @Cacheable(cacheNames = "products", key = "#pageable")
+    public ProductShowResponse showAllProduct(Pageable pageable) {
+        List<Product> productList =productRepository.findProductsWithQuantityGreaterThanOne(pageable);
+
+        return new ProductShowResponse(productList.stream().map(product -> new ProductResultResponse(product)).toList());
     }
 
     @Override
@@ -95,4 +96,5 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalArgumentException("판매자만 상품을 등록할 수 있습니다.");
         }
     }
+
 }
