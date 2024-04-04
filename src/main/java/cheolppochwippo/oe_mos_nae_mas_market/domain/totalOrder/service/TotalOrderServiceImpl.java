@@ -11,6 +11,8 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrdersGe
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository.TotalOrderRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 import com.querydsl.core.Tuple;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,14 +40,14 @@ public class TotalOrderServiceImpl implements TotalOrderService{
 			totalOrderRepository.save(total.get());
 		}
 		Tuple totalInfo = totalOrderRepository.getTotalInfoByUserId(user.getId()).orElseThrow(
-			()-> new IllegalArgumentException("현재 진행중인 주문이 없습니다")
+			()-> new NoEntityException("현재 진행중인 주문이 없습니다")
 		);
 		Tuple totalName = totalOrderRepository.getTotalNameUserId(user.getId()).orElseThrow(
-			()-> new IllegalArgumentException("현재 진행중인 주문이 없습니다")
+			()-> new NoEntityException("현재 진행중인 주문이 없습니다")
 		);
 
 		double discount = issuedRepository.getDiscountFindById(user.getId(),request.getIssueId()).orElseThrow(
-			()-> new IllegalArgumentException("유효하지 않은 쿠폰 입니다.")
+			()-> new NoPermissionException("유효하지 않은 쿠폰 입니다.")
 		);
 		TotalOrder totalOrder = new TotalOrder(request,user,totalInfo,totalName,discount);
 		totalOrderRepository.save(totalOrder);
@@ -57,10 +59,10 @@ public class TotalOrderServiceImpl implements TotalOrderService{
 	@Override
 	public TotalOrderGetResponse getTotalOrder(User user,Long totalOrderId){
 		TotalOrder totalOrder = totalOrderRepository.findById(totalOrderId).orElseThrow(
-			()-> new IllegalArgumentException("존재하지 않는 주문정보 입니다.")
+			()-> new NoEntityException("존재하지 않는 주문정보 입니다.")
 		);
 		if(!Objects.equals(totalOrder.getUser().getId(), user.getId())){
-			throw new IllegalArgumentException("조회하실 권한이 없습니다.");
+			throw new NoPermissionException("조회하실 권한이 없습니다.");
 		}
 		return new TotalOrderGetResponse(totalOrder);
 	}

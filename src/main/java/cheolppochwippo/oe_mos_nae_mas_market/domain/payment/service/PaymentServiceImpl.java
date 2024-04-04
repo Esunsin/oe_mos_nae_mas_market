@@ -16,6 +16,9 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository.TotalOrderRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.TossPaymentConfig;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.PriceMismatchException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -176,11 +179,11 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	public TotalOrder checkPayment(User user,PaymentRequest paymentRequest){
 		TotalOrder totalOrder = totalOrderRepository.findTotalOrderByUndeleted(user).orElseThrow(
-			() -> new IllegalArgumentException("진행중인 주문이 없습니다.")
+			() -> new NoEntityException("진행중인 주문이 없습니다.")
 		);
 		if(!Objects.equals(totalOrder.getPriceAmount(), paymentRequest.getAmount())
 			|| !Objects.equals(totalOrder.getMerchantUid(), paymentRequest.getOrderId())){
-			throw new IllegalArgumentException("올바르지 않은 요청 입니다.");
+			throw new PriceMismatchException("올바르지 않은 요청 입니다.");
 		}
 //		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
 //		orders.parallelStream().forEach(element -> method(element));
@@ -191,20 +194,20 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	public Payment checkCancelPayment(User user,PaymentCancelRequest paymentCancelRequest){
 		Payment payment = paymentRepository.findPaymentKey(paymentCancelRequest.getPaymentKey()).orElseThrow(
-			() -> new IllegalArgumentException("존재하지 않는 결제번호 입니다.")
+			() -> new NoEntityException("존재하지 않는 결제번호 입니다.")
 		);
 		if(!Objects.equals(payment.getTotalOrder().getUser().getId(), user.getId())){
-			throw new IllegalArgumentException("해당 결제를 취소하실 권한이 없습니다.");
+			throw new NoPermissionException( "해당 결제를 취소하실 권한이 없습니다.");
 		}
 		return payment;
 	}
 	@Override
 	public PaymentResponse getPayment(User user,Long paymentId){
 		Payment payment = paymentRepository.findById(paymentId).orElseThrow(
-			()-> new IllegalArgumentException("존재하지 않는 결제정보 입니다.")
+			()-> new NoEntityException("존재하지 않는 결제정보 입니다.")
 		);
 		if(!Objects.equals(payment.getTotalOrder().getUser().getId(), user.getId())){
-			throw new IllegalArgumentException("조회하실 권한이 없습니다.");
+			throw new NoPermissionException("조회하실 권한이 없습니다.");
 		}
 		return new PaymentResponse(payment);
 	}
