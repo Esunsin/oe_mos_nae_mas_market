@@ -1,5 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.payment.controller;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentCancelRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentJsonResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponse;
@@ -26,12 +27,20 @@ public class PaymentController {
 
 	private final PaymentServiceImpl paymentService;
 
-	@RequestMapping(value = "/confirm")
+	@RequestMapping(value = "/payments/confirm")
 	public ResponseEntity<JSONObject> confirmPayment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentRequest request)
 		throws Exception {
 		PaymentJsonResponse response = paymentService.confirmPayment(userDetails.getUser(),
 			request);
+		return ResponseEntity.status(response.getCode()).body(response.getJsonObject());
+	}
+
+	@RequestMapping(value = "/payments/cancel")
+	public ResponseEntity<JSONObject> cancelPayment(
+		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentCancelRequest request)
+		throws Exception {
+		PaymentJsonResponse response = paymentService.paymentCancel(userDetails.getUser(),request);
 		return ResponseEntity.status(response.getCode()).body(response.getJsonObject());
 	}
 

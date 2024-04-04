@@ -3,6 +3,9 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.payment.service;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.entity.Delivery;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.repository.DeliveryRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.repository.IssuedRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.repository.OrderRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentCancelRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentJsonResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponse;
@@ -22,6 +25,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
@@ -45,6 +49,8 @@ public class PaymentServiceImpl implements PaymentService {
 	private final TotalOrderRepository totalOrderRepository;
 
 	private final IssuedRepository issuedRepository;
+
+	private final OrderRepository orderRepository;
 
 	private final TossPaymentConfig tossPaymentConfig;
 
@@ -96,6 +102,47 @@ public class PaymentServiceImpl implements PaymentService {
 		return new PaymentJsonResponse(jsonObject,code);
 	}
 
+	@Transactional
+	@Override
+	public PaymentJsonResponse paymentCancel(User user,PaymentCancelRequest paymentCancelRequest)
+		throws IOException, ParseException {
+		Payment payment = checkCancelPayment(user,paymentCancelRequest);
+		JSONObject obj = new JSONObject();
+		obj.put("cancelReason", paymentCancelRequest.getCancelReason());
+
+		String widgetSecretKey = tossPaymentConfig.getSecretKey();
+		Base64.Encoder encoder = Base64.getEncoder();
+		byte[] encodedBytes = encoder.encode(
+			(widgetSecretKey + ":").getBytes(StandardCharsets.UTF_8));
+		String authorizations = "Basic " + new String(encodedBytes);
+
+		URL url = new URL("https://api.tosspayments.com/v1/payments/"+paymentCancelRequest.getPaymentKey()+"/cancel");
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.setRequestProperty("Authorization", authorizations);
+		connection.setRequestProperty("Content-Type", "application/json");
+		connection.setRequestMethod("POST");
+		connection.setDoOutput(true);
+
+		OutputStream outputStream = connection.getOutputStream();
+		outputStream.write(obj.toString().getBytes("UTF-8"));
+
+		int code = connection.getResponseCode();
+		boolean isSuccess = code == 200;
+
+		if(isSuccess){
+			successCancelPayment(payment,paymentCancelRequest);
+		}
+
+		InputStream responseStream =
+			isSuccess ? connection.getInputStream() : connection.getErrorStream();
+
+		Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
+		JSONParser responseParser = new JSONParser();
+		JSONObject jsonObject = (JSONObject) responseParser.parse(reader);
+		responseStream.close();
+		return new PaymentJsonResponse(jsonObject,code);
+	}
+
 	@Override
 	public void successPayment(TotalOrder totalOrder, PaymentRequest paymentRequest) {
 		totalOrder.completeOrder();
@@ -110,8 +157,17 @@ public class PaymentServiceImpl implements PaymentService {
 		deliveryRepository.save(delivery);
 	}
 
+
+	@Override
+	public void successCancelPayment(Payment payment,PaymentCancelRequest paymentCancelRequest){
+		Payment cancelPayment = new Payment(payment,paymentCancelRequest);
+		paymentRepository.save(cancelPayment);
+	}
+
 	@Override
 	public void failPayment(TotalOrder totalOrder,PaymentRequest paymentRequest){
+//		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
+//		orders.parallelStream().forEach(element -> method(element));
 		//재고 다시 증가시켜주는 메서드 필요
 		totalOrder.cancelInProgressOrder();
 		totalOrderRepository.save(totalOrder);
@@ -126,10 +182,22 @@ public class PaymentServiceImpl implements PaymentService {
 			|| !Objects.equals(totalOrder.getMerchantUid(), paymentRequest.getOrderId())){
 			throw new IllegalArgumentException("올바르지 않은 요청 입니다.");
 		}
+//		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
+//		orders.parallelStream().forEach(element -> method(element));
 		//락걸고 재고 뺴는 메서드 필요
 		return totalOrder;
 	}
 
+	@Override
+	public Payment checkCancelPayment(User user,PaymentCancelRequest paymentCancelRequest){
+		Payment payment = paymentRepository.findPaymentKey(paymentCancelRequest.getPaymentKey()).orElseThrow(
+			() -> new IllegalArgumentException("존재하지 않는 결제번호 입니다.")
+		);
+		if(!Objects.equals(payment.getTotalOrder().getUser().getId(), user.getId())){
+			throw new IllegalArgumentException("해당 결제를 취소하실 권한이 없습니다.");
+		}
+		return payment;
+	}
 	@Override
 	public PaymentResponse getPayment(User user,Long paymentId){
 		Payment payment = paymentRepository.findById(paymentId).orElseThrow(
