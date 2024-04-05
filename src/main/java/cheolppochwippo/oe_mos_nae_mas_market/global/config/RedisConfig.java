@@ -26,6 +26,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @EnableCaching
 @Configuration
 public class RedisConfig {
+
     @Value("${spring.data.redis.host}")
     private String host;
 
@@ -35,7 +36,7 @@ public class RedisConfig {
     private static final String REDISSON_HOST_PREFIX = "redis://";
 
     @Bean
-    public RedissonClient redissonClient(){
+    public RedissonClient redissonClient() {
         Config config = new Config();
         config.useSingleServer().setAddress(REDISSON_HOST_PREFIX + host + ":" + port);
 

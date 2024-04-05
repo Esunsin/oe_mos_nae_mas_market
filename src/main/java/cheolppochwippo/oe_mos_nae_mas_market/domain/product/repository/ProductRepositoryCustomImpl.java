@@ -11,8 +11,6 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import com.querydsl.core.QueryResults;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor

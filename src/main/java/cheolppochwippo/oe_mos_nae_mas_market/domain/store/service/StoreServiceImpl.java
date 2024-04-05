@@ -8,13 +8,9 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,48 +21,47 @@ public class StoreServiceImpl implements StoreService {
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
 
-
-
     @Transactional
     public StoreResponse createStore(StoreRequest storeRequest, User user) {
-        User seller = findSeller(user);
-        if (RoleEnum.SELLER.equals(seller.getRole())) {
-            Optional<Store> existingStoreOptional = storeRepository.findByUser_Id(seller.getId());
-            if (!existingStoreOptional.isPresent()) {
+        User seller = getUser(user);
+        checkUserRole(user);
+        checkExistingStore(seller);
 
-                Store store = new Store(storeRequest, seller);
-                storeRepository.save(store);
+        Store store = new Store(storeRequest, seller);
+        storeRepository.save(store);
 
-                return new StoreResponse(store);
-            }
-            throw new IllegalArgumentException("상점은 한개만 생성 할 수 있습니다.");
-        }
-        throw new IllegalArgumentException("판매자만 상점을 생성할 수 있습니다.");
+        return new StoreResponse(store);
 
     }
-
 
     @Transactional
     public StoreResponse updateStore(StoreRequest storeRequest, User user) {
 
-        User seller = findSeller(user);
-        if (RoleEnum.SELLER.equals(seller.getRole())) {
-            Store store = storeRepository.findByUser_Id(seller.getId())
-                .orElseThrow(() -> new NoSuchElementException("상점을 찾을 수 없습니다."));
+        User seller = getUser(user);
+        checkUserRole(user);
+        Store store = storeRepository.findByUser_Id(seller.getId())
+            .orElseThrow(() -> new NoSuchElementException("상점을 찾을 수 없습니다."));
 
-            store.update(storeRequest);
+        store.update(storeRequest);
 
-            return new StoreResponse(store);
-        }
-        throw new IllegalArgumentException("판매자만 상점을 수정할 수 있습니다.");
-
+        return new StoreResponse(store);
 
     }
 
-    public User findSeller(User user) {
-       User seller =  userRepository.findById(user.getId())
+    private User getUser(User user) {
+        return userRepository.findById(user.getId())
             .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-        return seller;
     }
 
+    private void checkUserRole(User user) {
+        if (!RoleEnum.SELLER.equals(user.getRole())) {
+            throw new IllegalArgumentException("판매자만 상점을 생성 또는 수정할 수 있습니다.");
+        }
+    }
+
+    private void checkExistingStore(User seller) {
+        if (storeRepository.existsByUserId(seller.getId())) {
+            throw new IllegalArgumentException("상점은 한개만 생성 할 수 있습니다.");
+        }
+    }
 }

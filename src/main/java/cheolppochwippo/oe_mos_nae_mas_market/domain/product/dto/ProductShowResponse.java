@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProductShowResponse {
 
-
     private List<ProductResultResponse> productList;
 
     public ProductShowResponse(List<ProductResultResponse> productList) {
