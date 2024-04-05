@@ -1,11 +1,9 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity;
 
-import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted.Authority;
-
 public enum RoleEnum {
-    CONSUMER("ROLE_CONSUMER"),
-    SELLER("ROLE_SELLER"),
-    ADMIN("ROLE_ADMIN");
+    CONSUMER(Authority.CONSUMER),
+    SELLER(Authority.SELLER),
+    ADMIN(Authority.ADMIN);
 
     private final String authority;
 
