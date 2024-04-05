@@ -1,9 +1,10 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
-import org.springframework.stereotype.Repository;
+import java.util.List;
+import org.springframework.data.domain.Pageable;
 
-@Repository
 public interface ProductRepositoryCustom {
 
+    List<Product> findProductsWithQuantityGreaterThanOne(Pageable pageable);
 }

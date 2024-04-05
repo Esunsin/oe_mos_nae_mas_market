@@ -5,11 +5,8 @@ import lombok.Getter;
 
 @Getter
 public class ProductResponse {
-
     private Long productId;
-
-
-    public ProductResponse(Long productId) {
-        this.productId = productId;
+    public ProductResponse(Product product) {
+        this.productId = product.getId();
     }
 }
