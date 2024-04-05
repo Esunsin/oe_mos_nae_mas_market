@@ -12,6 +12,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.No
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
@@ -30,7 +31,6 @@ public class IssuedServiceImpl implements IssuedService {
     private final CacheManager cacheManager;
 
     @Override
-    @Transactional
     public IssuedResponse issueCoupon(Long couponId, User user) {
         RLock lock = redisConfig.redissonClient().getFairLock("couponLock" + couponId);
         try {
