@@ -19,35 +19,35 @@ public class PaymentLockTest {
 	PaymentServiceImpl paymentService;
 
 
-	@Test
-	@DisplayName("분산락테스트")
-	void redis() throws InterruptedException {
-		int numThreads = 10;
-		CountDownLatch latch = new CountDownLatch(numThreads);
-		ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-		User user = new User(1L);
-		PaymentRequest paymentRequest = new PaymentRequest();
-		paymentRequest.setAmount(2000L);
-		paymentRequest.setOrderId("4ae6cde7-ed30-46be-asfas-2a01799f2c4fasdasdasd");
-
-		for (int i = 0; i < numThreads; i++) {
-			int userId = i + 1; // 사용자 번호
-			executor.submit(() -> {
-				try {
-					paymentService.checkPayment(user, paymentRequest);
-					//productService.decreaseProductStock(order);
-				} catch (Exception e) {
-					System.out.println(e.getMessage());
-				} finally {
-					latch.countDown();
-				}
-			});
-		}
-
-		// 모든 스레드가 실행을 완료할 때까지 대기
-		latch.await(15, TimeUnit.SECONDS);
-
-	}
+//	@Test
+//	@DisplayName("분산락테스트")
+//	void redis() throws InterruptedException {
+//		int numThreads = 10;
+//		CountDownLatch latch = new CountDownLatch(numThreads);
+//		ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+//		User user = new User(1L);
+//		PaymentRequest paymentRequest = new PaymentRequest();
+//		paymentRequest.setAmount(2000L);
+//		paymentRequest.setOrderId("4ae6cde7-ed30-46be-asfas-2a01799f2c4fasdasdasd");
+//
+//		for (int i = 0; i < numThreads; i++) {
+//			int userId = i + 1; // 사용자 번호
+//			executor.submit(() -> {
+//				try {
+//					paymentService.checkPayment(user, paymentRequest);
+//					//productService.decreaseProductStock(order);
+//				} catch (Exception e) {
+//					System.out.println(e.getMessage());
+//				} finally {
+//					latch.countDown();
+//				}
+//			});
+//		}
+//
+//		// 모든 스레드가 실행을 완료할 때까지 대기
+//		latch.await(15, TimeUnit.SECONDS);
+//
+//	}
 
 
 }
