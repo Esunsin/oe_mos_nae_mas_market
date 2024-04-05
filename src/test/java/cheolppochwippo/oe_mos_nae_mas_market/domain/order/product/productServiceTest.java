@@ -55,21 +55,21 @@ public class productServiceTest {
 
     @BeforeEach
     void setUp() {
-//        productService = new ProductServiceImpl(productRepository, storeRepository);
-//
-//        seller = new User("seller", "password", SELLER);
-//        customer = new User("customer", "password", CONSUMER);
-//        store = new Store(seller, "Test Store", "Test Store Info");
-//        product = Product.builder()
-//            .id(1L)
-//            .productName("Test Product")
-//            .info("Test Product Info")
-//            .realPrice(10000L)
-//            .price(8000L)
-//            .discount(2000L)
-//            .quantity(10L)
-//            .store(store)
-//            .build();
+        productService = new ProductServiceImpl(productRepository, storeRepository);
+
+        seller = new User("seller", "password", SELLER);
+        customer = new User("customer", "password", CONSUMER);
+        store = new Store(seller, "Test Store", "Test Store Info");
+        product = Product.builder()
+            .id(1L)
+            .productName("Test Product")
+            .info("Test Product Info")
+            .realPrice(10000L)
+            .price(8000L)
+            .discount(2000L)
+            .quantity(10L)
+            .store(store)
+            .build();
     }
 
     @Test
