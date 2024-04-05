@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class StoreRequest {
+
     private String storeName;
 
     private String info;

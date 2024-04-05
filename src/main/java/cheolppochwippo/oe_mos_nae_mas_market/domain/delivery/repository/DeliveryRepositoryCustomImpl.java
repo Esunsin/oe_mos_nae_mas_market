@@ -14,6 +14,7 @@ public class DeliveryRepositoryCustomImpl implements DeliveryRepositoryCustom {
 
     private final JpaConfig jpaConfig;
 
+    @Override
     public List<Delivery> findDeliveryByUser(User user) {
         return jpaConfig.jpaQueryFactory()
             .selectFrom(delivery)
