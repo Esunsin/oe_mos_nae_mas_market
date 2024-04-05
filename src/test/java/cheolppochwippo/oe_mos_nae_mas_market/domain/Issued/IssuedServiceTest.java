@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity.Coupon;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.repository.CouponRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.service.CouponService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.dto.IssuedResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.entity.Issued;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.repository.IssuedRepository;
@@ -39,6 +41,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.redis.core.RedisTemplate;
 
 @ExtendWith(MockitoExtension.class)
 public class IssuedServiceTest {
@@ -53,9 +56,18 @@ public class IssuedServiceTest {
     RedisConfig redisConfig;
 
     @Mock
+    private RLock lock;
+    @Mock
+    private RedissonClient redissonClient;
+
+    @Mock
     CacheManager cacheManager;
+    @Mock
+    CouponService couponService;
 
     IssuedService issuedService;
+
+    private RedisTemplate<String, String> redisTemplate;
 
     @BeforeEach
     void before() {
@@ -89,7 +101,7 @@ public class IssuedServiceTest {
         RLock rLockMock = Mockito.mock(RLock.class);
 
         Mockito.when(redisConfigMock.redissonClient()).thenReturn(redissonClientMock);
-        Mockito.when(redissonClientMock.getLock(Mockito.anyString())).thenReturn(rLockMock);
+        Mockito.when(redissonClientMock.getLock(anyString())).thenReturn(rLockMock);
 
         IssuedServiceImpl issuedService = new IssuedServiceImpl(issuedRepository, couponRepository,
             redisConfigMock, cacheManagerMock);
@@ -121,7 +133,7 @@ public class IssuedServiceTest {
         RLock rLockMock = Mockito.mock(RLock.class);
 
         Mockito.when(redisConfigMock.redissonClient()).thenReturn(redissonClientMock);
-        Mockito.when(redissonClientMock.getLock(Mockito.anyString())).thenReturn(rLockMock);
+        Mockito.when(redissonClientMock.getLock(anyString())).thenReturn(rLockMock);
 
         IssuedServiceImpl issuedService = new IssuedServiceImpl(issuedRepository, couponRepository,
             redisConfigMock, cacheManager);
@@ -144,7 +156,7 @@ public class IssuedServiceTest {
         RLock rLockMock = Mockito.mock(RLock.class);
 
         Mockito.when(redisConfigMock.redissonClient()).thenReturn(redissonClientMock);
-        Mockito.when(redissonClientMock.getLock(Mockito.anyString())).thenReturn(rLockMock);
+        Mockito.when(redissonClientMock.getLock(anyString())).thenReturn(rLockMock);
 
         IssuedServiceImpl issuedService = new IssuedServiceImpl(issuedRepository, couponRepository,
             redisConfigMock, cacheManager);
@@ -170,13 +182,13 @@ public class IssuedServiceTest {
         RLock rLockMock = Mockito.mock(RLock.class);
 
         Mockito.when(redisConfigMock.redissonClient()).thenReturn(redissonClientMock);
-        Mockito.when(redissonClientMock.getLock(Mockito.anyString())).thenReturn(rLockMock);
+        Mockito.when(redissonClientMock.getLock(anyString())).thenReturn(rLockMock);
 
         IssuedServiceImpl issuedService = new IssuedServiceImpl(issuedRepository, couponRepository,
             redisConfigMock, cacheManager);
 
         // when, then
-        assertThrows(NullPointerException.class, () -> issuedService.issueCoupon(couponId, user));
+        assertThrows(IllegalStateException.class, () -> issuedService.issueCoupon(couponId, user));
     }
 
     @AfterEach
@@ -185,3 +197,4 @@ public class IssuedServiceTest {
     }
 
 }
+
