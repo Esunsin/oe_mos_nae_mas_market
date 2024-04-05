@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +32,7 @@ public class IssuedServiceImpl implements IssuedService {
     @Override
     @Transactional
     public IssuedResponse issueCoupon(Long couponId, User user) {
-        RLock lock = redisConfig.redissonClient().getLock("couponLock" + couponId);
+        RLock lock = redisConfig.redissonClient().getFairLock("couponLock" + couponId);
         try {
             lock.lock();
             List<Issued> issuedCoupons = issuedRepository.findByCouponIdAndUser(couponId, user);
@@ -67,8 +68,10 @@ public class IssuedServiceImpl implements IssuedService {
         }
     }
 
+
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "issuedCoupons", key = "#user.id", cacheManager = "cacheManager")
     public List<IssuedResponse> getIssuedCoupons(User user) {
         return issuedRepository.findCouponByUser(user);
     }
