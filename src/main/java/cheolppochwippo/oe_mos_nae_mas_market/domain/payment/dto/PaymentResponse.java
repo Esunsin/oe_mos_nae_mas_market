@@ -38,7 +38,6 @@ public class PaymentResponse {
 		orderName = payment.getOrderName();
 		paySuccessYN = payment.isPaySuccessYN();
 		paymentKey = payment.getPaymentKey();
-		failReason = payment.getFailReason();
 		cancelYN = payment.isCancelYN();
 		cancelReason = payment.getCancelReason();
 		statement = payment.getStatement();

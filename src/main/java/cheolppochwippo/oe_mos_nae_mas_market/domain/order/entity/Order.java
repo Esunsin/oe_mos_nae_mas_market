@@ -27,6 +27,8 @@ public class Order extends TimeStamped {
 
     private String merchantUid;
 
+    @Column
+    @Enumerated(EnumType.STRING)
     private Deleted deleted;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -48,6 +50,8 @@ public class Order extends TimeStamped {
         this.product = product;
         this.user = user;
     }
+
+
 
     public void updateQuantity(Long quantity) {
         this.quantity = quantity;

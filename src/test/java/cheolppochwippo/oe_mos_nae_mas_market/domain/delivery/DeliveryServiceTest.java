@@ -61,7 +61,7 @@ public class DeliveryServiceTest {
         Long deliveryId = 100L;
         User user = new User(100L, "customer", "CONSUMER");
         DeliveryRequest deliveryRequest = new DeliveryRequest("주소지 생성 테스트");
-        Delivery existingDelivery = new Delivery(100L, "주소지 수정 테스트", Deleted.UNDELETE, user);
+        Delivery existingDelivery = new Delivery(100L, "주소지 수정 테스트", Deleted.UNDELETE, "testId",user);
         given(deliveryRepository.save(any(Delivery.class))).willReturn(existingDelivery);
         given(deliveryRepository.findById(100L)).willReturn(Optional.of(existingDelivery));
 

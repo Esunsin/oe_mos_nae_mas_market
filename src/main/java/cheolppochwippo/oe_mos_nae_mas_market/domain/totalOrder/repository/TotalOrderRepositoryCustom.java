@@ -1,9 +1,11 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrdersGetResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import com.querydsl.core.Tuple;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,5 +27,6 @@ public interface TotalOrderRepositoryCustom {
 	void completeOrder(TotalOrder totalOrder);
 
 	Page<TotalOrdersGetResponse> getTotalOrderPageFindByUserId(Long userId, Pageable pageable);
+
 
 }
