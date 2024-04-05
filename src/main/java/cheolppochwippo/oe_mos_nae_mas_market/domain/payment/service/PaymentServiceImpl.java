@@ -40,7 +40,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -170,9 +169,6 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	public void failPayment(TotalOrder totalOrder, PaymentRequest paymentRequest) {
-		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
-		orders.parallelStream().forEach(productService::updateQuantity);
-		//재고 다시 증가시켜주는 메서드 필요
 		totalOrder.cancelInProgressOrder();
 		totalOrderRepository.save(totalOrder);
 	}
@@ -188,14 +184,14 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
 		try {
-			orders.forEach(productService::decreaseProductStock);
-		} catch (Exception e) {
+			orders.parallelStream().forEach(productService::decreaseProductStock);
+			//stream
+		} catch (IllegalArgumentException e) {
 			failPayment(totalOrder, paymentRequest);
 			throw new InsufficientQuantityException("재고가 부족합니다.");
 		}
 		return totalOrder;
 	}
-
 
 	@Override
 	public Payment checkCancelPayment(User user, PaymentCancelRequest paymentCancelRequest) {

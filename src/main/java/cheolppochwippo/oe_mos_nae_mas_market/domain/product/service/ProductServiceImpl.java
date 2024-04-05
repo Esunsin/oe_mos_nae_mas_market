@@ -13,6 +13,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -104,36 +105,28 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
-
-	//재고 다시 증가시켜주는 메서드
-	public void updateQuantity(Order order) {
-		RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
-		try {
-			lock.lock(); // 잠금 획득
-			Product product = productRepository.findByOrder(order);
-			product.quatityUpdate(product.getQuantity() + order.getQuantity());
-			productRepository.save(product);
-		} finally {
-			lock.unlock(); // 잠금 해제
-		}
-	}
-
 	//재고 감소시켜주는 메소드
 
 	public void decreaseProductStock(Order order) {
 		RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
 		try {
-			lock.lock();
-
-			Product product = productRepository.findByOrder(order);
-			Long newStock = product.getQuantity() - order.getQuantity();
-			product.quatityUpdate(newStock);
-			productRepository.save(product);
-			if (newStock < 0) {
-				throw new IllegalArgumentException("재고가 부족합니다.");
+			try {
+				boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
+				if (isLocked) {
+					Product product = productRepository.findByOrder(order);
+					Long newStock = product.getQuantity() - order.getQuantity();
+					System.out.println("재고남은 갯수"+newStock);
+					if (newStock < 0) {
+						throw new IllegalArgumentException("재고가 부족합니다.");
+					}
+					product.quatityUpdate(newStock);
+					productRepository.save(product);
+				}
+			} finally {
+				lock.unlock();
 			}
-		} finally {
-			lock.unlock();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 
 	}

@@ -25,6 +25,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.PriceMismatchException;
+import com.querydsl.core.Tuple;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
