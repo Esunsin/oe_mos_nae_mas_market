@@ -12,7 +12,6 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponses;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.Payment;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.repository.PaymentRepository;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductServiceImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository.TotalOrderRepository;
@@ -37,7 +36,6 @@ import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -60,15 +58,12 @@ public class PaymentServiceImpl implements PaymentService {
 
 	private final TossPaymentConfig tossPaymentConfig;
 
-	private final RedissonClient redissonClient;
-
 	private final ProductServiceImpl productService;
 
-	@Transactional
 	@Override
 	public PaymentJsonResponse confirmPayment(User user, PaymentRequest request)
 		throws IOException, ParseException {
-		TotalOrder totalOrder = checkPayment(user,request);
+		TotalOrder totalOrder = checkPayment(user, request);
 		JSONObject obj = new JSONObject();
 		obj.put("orderId", request.getOrderId());
 		obj.put("amount", request.getAmount());
@@ -99,22 +94,21 @@ public class PaymentServiceImpl implements PaymentService {
 		InputStream responseStream =
 			isSuccess ? connection.getInputStream() : connection.getErrorStream();
 		if (isSuccess) {
-			successPayment(totalOrder,request);
+			successPayment(totalOrder, request);
 		} else {
-			failPayment(totalOrder,request);
+			failPayment(totalOrder, request);
 		}
 		Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
 		JSONParser responseParser = new JSONParser();
 		JSONObject jsonObject = (JSONObject) responseParser.parse(reader);
 		responseStream.close();
-		return new PaymentJsonResponse(jsonObject,code);
+		return new PaymentJsonResponse(jsonObject, code);
 	}
 
-	@Transactional
 	@Override
-	public PaymentJsonResponse paymentCancel(User user,PaymentCancelRequest paymentCancelRequest)
+	public PaymentJsonResponse paymentCancel(User user, PaymentCancelRequest paymentCancelRequest)
 		throws IOException, ParseException {
-		Payment payment = checkCancelPayment(user,paymentCancelRequest);
+		Payment payment = checkCancelPayment(user, paymentCancelRequest);
 		JSONObject obj = new JSONObject();
 		obj.put("cancelReason", paymentCancelRequest.getCancelReason());
 
@@ -124,7 +118,9 @@ public class PaymentServiceImpl implements PaymentService {
 			(widgetSecretKey + ":").getBytes(StandardCharsets.UTF_8));
 		String authorizations = "Basic " + new String(encodedBytes);
 
-		URL url = new URL("https://api.tosspayments.com/v1/payments/"+paymentCancelRequest.getPaymentKey()+"/cancel");
+		URL url = new URL(
+			"https://api.tosspayments.com/v1/payments/" + paymentCancelRequest.getPaymentKey()
+				+ "/cancel");
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestProperty("Authorization", authorizations);
 		connection.setRequestProperty("Content-Type", "application/json");
@@ -137,8 +133,8 @@ public class PaymentServiceImpl implements PaymentService {
 		int code = connection.getResponseCode();
 		boolean isSuccess = code == 200;
 
-		if(isSuccess){
-			successCancelPayment(payment,paymentCancelRequest);
+		if (isSuccess) {
+			successCancelPayment(payment, paymentCancelRequest);
 		}
 
 		InputStream responseStream =
@@ -148,7 +144,7 @@ public class PaymentServiceImpl implements PaymentService {
 		JSONParser responseParser = new JSONParser();
 		JSONObject jsonObject = (JSONObject) responseParser.parse(reader);
 		responseStream.close();
-		return new PaymentJsonResponse(jsonObject,code);
+		return new PaymentJsonResponse(jsonObject, code);
 	}
 
 	@Override
@@ -156,10 +152,10 @@ public class PaymentServiceImpl implements PaymentService {
 		totalOrder.completeOrder();
 		totalOrderRepository.save(totalOrder);
 		totalOrderRepository.completeOrder(totalOrder);
-		if(totalOrder.getIssueId()!=0){
+		if (totalOrder.getIssueId() != 0) {
 			issuedRepository.setDeletedFindById(totalOrder.getIssueId());
 		}
-		Payment payment = new Payment(paymentRequest,totalOrder);
+		Payment payment = new Payment(paymentRequest, totalOrder);
 		paymentRepository.save(payment);
 		Delivery delivery = new Delivery(totalOrder);
 		deliveryRepository.save(delivery);
@@ -167,85 +163,68 @@ public class PaymentServiceImpl implements PaymentService {
 
 
 	@Override
-	public void successCancelPayment(Payment payment,PaymentCancelRequest paymentCancelRequest){
-		Payment cancelPayment = new Payment(payment,paymentCancelRequest);
+	public void successCancelPayment(Payment payment, PaymentCancelRequest paymentCancelRequest) {
+		Payment cancelPayment = new Payment(payment, paymentCancelRequest);
 		paymentRepository.save(cancelPayment);
 	}
 
 	@Override
-	public void failPayment(TotalOrder totalOrder,PaymentRequest paymentRequest){
-//		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
-//		orders.parallelStream().forEach(element -> method(element));
+	public void failPayment(TotalOrder totalOrder, PaymentRequest paymentRequest) {
+		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
+		orders.parallelStream().forEach(productService::updateQuantity);
 		//재고 다시 증가시켜주는 메서드 필요
 		totalOrder.cancelInProgressOrder();
 		totalOrderRepository.save(totalOrder);
 	}
 
 	@Override
-	public TotalOrder checkPayment(User user,PaymentRequest paymentRequest){
+	public TotalOrder checkPayment(User user, PaymentRequest paymentRequest) {
 		TotalOrder totalOrder = totalOrderRepository.findTotalOrderByUndeleted(user).orElseThrow(
 			() -> new NoEntityException("진행중인 주문이 없습니다.")
 		);
-		if(!Objects.equals(totalOrder.getPriceAmount(), paymentRequest.getAmount())
-			|| !Objects.equals(totalOrder.getMerchantUid(), paymentRequest.getOrderId())){
+		if (!Objects.equals(totalOrder.getPriceAmount(), paymentRequest.getAmount())
+			|| !Objects.equals(totalOrder.getMerchantUid(), paymentRequest.getOrderId())) {
 			throw new PriceMismatchException("올바르지 않은 요청 입니다.");
 		}
-//		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
-		try{
-			//orders.parallelStream().forEach(element -> method(element));
-		}catch (Exception e){
-			failPayment(totalOrder,paymentRequest);
+		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
+		try {
+			orders.forEach(productService::decreaseProductStock);
+		} catch (Exception e) {
+			failPayment(totalOrder, paymentRequest);
 			throw new InsufficientQuantityException("재고가 부족합니다.");
 		}
-		//락걸고 재고 뺴는 메서드 필요
 		return totalOrder;
 	}
 
+
 	@Override
-	public Payment checkCancelPayment(User user,PaymentCancelRequest paymentCancelRequest){
-		Payment payment = paymentRepository.findPaymentKey(paymentCancelRequest.getPaymentKey()).orElseThrow(
-			() -> new NoEntityException("존재하지 않는 결제번호 입니다.")
-		);
-		if(!Objects.equals(payment.getTotalOrder().getUser().getId(), user.getId())){
-			throw new NoPermissionException( "해당 결제를 취소하실 권한이 없습니다.");
+	public Payment checkCancelPayment(User user, PaymentCancelRequest paymentCancelRequest) {
+		Payment payment = paymentRepository.findPaymentKey(paymentCancelRequest.getPaymentKey())
+			.orElseThrow(
+				() -> new NoEntityException("존재하지 않는 결제번호 입니다.")
+			);
+		if (!Objects.equals(payment.getTotalOrder().getUser().getId(), user.getId())) {
+			throw new NoPermissionException("해당 결제를 취소하실 권한이 없습니다.");
 		}
 		return payment;
 	}
+
 	@Override
-	public PaymentResponse getPayment(User user,Long paymentId){
+	public PaymentResponse getPayment(User user, Long paymentId) {
 		Payment payment = paymentRepository.findById(paymentId).orElseThrow(
-			()-> new NoEntityException("존재하지 않는 결제정보 입니다.")
+			() -> new NoEntityException("존재하지 않는 결제정보 입니다.")
 		);
-		if(!Objects.equals(payment.getTotalOrder().getUser().getId(), user.getId())){
+		if (!Objects.equals(payment.getTotalOrder().getUser().getId(), user.getId())) {
 			throw new NoPermissionException("조회하실 권한이 없습니다.");
 		}
 		return new PaymentResponse(payment);
 	}
 
 	@Override
-	public Page<PaymentResponses> getPayments(User user,int page){
-		Pageable pageable = PageRequest.of(page,10);
-		return paymentRepository.getPaymentPageFindByUserId(user.getId(),pageable);
+	public Page<PaymentResponses> getPayments(User user, int page) {
+		Pageable pageable = PageRequest.of(page, 10);
+		return paymentRepository.getPaymentPageFindByUserId(user.getId(), pageable);
 	}
-
-	@Transactional
-	public void successPaymentTest(User user, PaymentRequest paymentRequest) {
-		TotalOrder totalOrder = totalOrderRepository.findByUserUndeleted(user).orElseThrow(
-			()-> new IllegalArgumentException("테스트 실패")
-		);
-		totalOrder.completeOrder();
-		totalOrderRepository.save(totalOrder);
-		totalOrderRepository.completeOrder(totalOrder);
-		if(totalOrder.getIssueId()!=0){
-			issuedRepository.setDeletedFindById(totalOrder.getIssueId());
-		}
-		System.out.println(paymentRequest.getAmount());
-		Payment payment = new Payment(paymentRequest,totalOrder);
-		paymentRepository.save(payment);
-		Delivery delivery = new Delivery(totalOrder);
-		deliveryRepository.save(delivery);
-	}
-
 
 }
 

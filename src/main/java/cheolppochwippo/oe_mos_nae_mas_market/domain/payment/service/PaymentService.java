@@ -33,4 +33,5 @@ public interface PaymentService {
 
 	PaymentJsonResponse paymentCancel(User user,PaymentCancelRequest paymentCancelRequest)
 		throws IOException, ParseException;
+
 }

@@ -66,17 +66,4 @@ public class PaymentController {
 			.build());
 	}
 
-	@PostMapping("/paymentTest")
-	public ResponseEntity<CommonResponse<Void>> testd(
-		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestBody PaymentRequest paymentRequest
-	){
-		paymentService.successPaymentTest(userDetails.getUser(),paymentRequest);
-
-		return ResponseEntity.ok().body(CommonResponse.<Void>builder()
-			.msg("테스트 성공!!")
-			.build());
-	}
-
-
 }

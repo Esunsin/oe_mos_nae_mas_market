@@ -3,7 +3,9 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository;
 import static cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.QProduct.product;
 import static cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.QStore.store;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.QProduct;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.JpaConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import com.querydsl.core.QueryResults;
@@ -33,5 +35,17 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         List<Product> content = queryResults.getResults();
         return content;
 
+    }
+
+    @Override
+    public Product findByOrder(Order order) {
+        Product query = jpaConfig.jpaQueryFactory()
+            .select(product)
+            .from(product)
+            .where(
+                product.id.eq(order.getProduct().getId())
+            )
+            .fetchOne();
+        return query;
     }
 }

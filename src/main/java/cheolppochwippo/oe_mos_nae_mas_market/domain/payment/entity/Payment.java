@@ -8,12 +8,14 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import jakarta.persistence.*;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Payment extends TimeStamped {
 
     @Id
