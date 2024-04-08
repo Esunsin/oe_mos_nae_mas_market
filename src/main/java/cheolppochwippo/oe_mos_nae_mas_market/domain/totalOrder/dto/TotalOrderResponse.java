@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class TotalOrderResponse {
 
-	private Long totalOrderId;
+	private String totalOrderId;
 
 	private Long price;
 
@@ -36,7 +36,7 @@ public class TotalOrderResponse {
 	private LocalDateTime modifiedAt;
 
 	public TotalOrderResponse(TotalOrder totalOrder) {
-		this.totalOrderId = totalOrder.getId();
+		this.totalOrderId = totalOrder.getMerchantUid();
 		this.price = totalOrder.getPrice();
 		this.discount = totalOrder.getDiscount();
 		this.priceAmount = totalOrder.getPriceAmount();
