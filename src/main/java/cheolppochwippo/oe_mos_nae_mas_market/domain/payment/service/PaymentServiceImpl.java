@@ -68,15 +68,12 @@ public class PaymentServiceImpl implements PaymentService {
 		obj.put("amount", request.getAmount());
 		obj.put("paymentKey", request.getPaymentKey());
 
-		// 토스페이먼츠 API는 시크릿 키를 사용자 ID로 사용하고, 비밀번호는 사용하지 않습니다.
-		// 비밀번호가 없다는 것을 알리기 위해 시크릿 키 뒤에 콜론을 추가합니다.
 		String widgetSecretKey = tossPaymentConfig.getSecretKey();
 		Base64.Encoder encoder = Base64.getEncoder();
 		byte[] encodedBytes = encoder.encode(
 			(widgetSecretKey + ":").getBytes(StandardCharsets.UTF_8));
 		String authorizations = "Basic " + new String(encodedBytes);
 
-		// 결제를 승인하면 결제수단에서 금액이 차감됩니다.
 		URL url = new URL("https://api.tosspayments.com/v1/payments/confirm");
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestProperty("Authorization", authorizations);
