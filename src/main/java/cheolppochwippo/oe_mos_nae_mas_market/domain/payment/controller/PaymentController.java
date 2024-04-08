@@ -6,6 +6,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponses;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.service.PaymentServiceImpl;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails.UserDetailsImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +64,17 @@ public class PaymentController {
 		return ResponseEntity.ok().body(CommonResponse.<Page<PaymentResponses>>builder()
 			.msg("show paymentPage complete!")
 			.data(paymentResponses)
+			.build());
+	}
+
+	@RequestMapping("/payments/confirm/pass")
+	public ResponseEntity<CommonResponse<Void>> confirmPassPayment(
+		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentRequest request) {
+		TotalOrder totalOrder = paymentService.checkPayment(userDetails.getUser(),request);
+		System.out.println("tSSSEtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt");
+		paymentService.successPayment(totalOrder,request);
+		return ResponseEntity.ok().body(CommonResponse.<Void>builder()
+			.msg("confirm Pass Payment complete!")
 			.build());
 	}
 
