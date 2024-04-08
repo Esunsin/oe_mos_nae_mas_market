@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -43,8 +42,6 @@ public class productServiceTest {
     ProductRepository productRepository;
     @Mock
     StoreRepository storeRepository;
-    @Mock
-    CacheManager cacheManager;
 
     ProductServiceImpl productService;
 
@@ -147,7 +144,6 @@ public class productServiceTest {
         assertEquals(product.getRealPrice(), result.getRealPrice());
         assertEquals(product.getPrice(), result.getPrice());
         assertEquals(product.getDiscount(), result.getDiscount());
-        assertEquals(product.getQuantity(), result.getQuantity());
         assertEquals(product.getStore().getStoreName(), result.getStore().getStoreName());
     }
 

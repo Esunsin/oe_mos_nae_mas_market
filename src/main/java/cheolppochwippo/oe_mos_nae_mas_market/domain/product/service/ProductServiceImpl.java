@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
@@ -57,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    @CacheEvict(cacheNames = "products", allEntries = true)
+    @Cacheable(cacheNames = "product", key = "#productId")
     public ProductResultResponse showProduct(long productId) {
         Product product = foundProduct(productId);
 
@@ -78,7 +79,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = "products", key = "#productId")
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public ProductResponse deleteProduct(Long productId, User user) {
         validateSeller(user);
 
