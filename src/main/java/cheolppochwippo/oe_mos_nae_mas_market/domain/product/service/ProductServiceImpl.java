@@ -100,14 +100,6 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
-
-	//재고 다시 증가시켜주는 메서드
-	public void updateQuantity(Order order) {
-		Product product = foundProduct(order.getProduct().getId());
-		product.quatityUpdate(order.getQuantity());
-		productRepository.save(product);
-	}
-
 	//재고 감소시켜주는 메소드
 	@Transactional
 	public void decreaseProductStock(Order order) {
