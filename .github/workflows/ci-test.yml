@@ -20,6 +20,13 @@ jobs:
     permissions:
       contents: write
 
+    env:
+      MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+      MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+
+
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -36,6 +43,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Start MySQL server
+        run: |
+          docker run --name mysql-server -p 3306:3306 -e MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_PASSWORD }} -d mysql:latest
+          sleep 30 # MySQL 서버가 시작되기를 기다립니다.
+
       - name: Start Redis server
         run: docker run --name redis-server -d redis
 
@@ -46,10 +58,22 @@ jobs:
           tar xzvf redis-stable.tar.gz
           cd redis-stable
           make
-          cd ..        
+          cd ..   
+
+      - name: Configure MySQL
+        run: |
+          echo "Waiting for MySQL to start..."
+          while ! mysqladmin ping -hlocalhost --silent; do
+            sleep 1
+          done
+          echo "MySQL started successfully!"
+          mysql -h${{ secrets.MYSQL_HOST }} -u${{ secrets.MYSQL_USERNAME }} -p${{ secrets.MYSQL_PASSWORD }} -e "CREATE DATABASE IF NOT EXISTS ${{ secrets.MYSQL_DATABASE }};"
 
       - name: Build with Gradle
         run: ./gradlew clean build
 
       - name: Stop and remove Redis container
         run: docker rm -f redis-server
+
+      - name: Stop and remove MySQL container
+        run: docker rm -f mysql-server
