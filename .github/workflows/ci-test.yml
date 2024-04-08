@@ -2,11 +2,15 @@ name: ci test
 
 on:
   push:
-    branches: [ dev, feat/* ]
+    branches: [ main ]
   pull_request:
     branches:
       - dev
       - main
+
+# 권한 설정으로, 내용물을 읽을 수 있는 권한을 부여합니다.
+permissions:
+  contents: read
 
 #------------------------------------------------
 #  PROJECT_NAME: 프로젝트 이름 설정. S3경로 설정에 사용.
@@ -21,7 +25,7 @@ env:
 #------------------------------------------------
 
 jobs:
-  ci:
+  build :
     runs-on: [ ubuntu-latest ]
     services:
       redis:
