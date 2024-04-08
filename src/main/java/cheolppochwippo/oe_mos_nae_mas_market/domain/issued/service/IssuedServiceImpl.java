@@ -9,8 +9,13 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.RedisConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.ErrorCode;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NotFoundException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RBucket;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.cache.Cache;
@@ -35,11 +40,12 @@ public class IssuedServiceImpl implements IssuedService {
         RLock lock = redisConfig.redissonClient().getFairLock("couponLock" + couponId);
         try {
             lock.lock();
-            List<Issued> issuedCoupons = issuedRepository.findByCouponIdAndUser(couponId, user);
-
-            if (!issuedCoupons.isEmpty()) {
-                throw new IllegalStateException("이미 쿠폰을 발급 받으셨습니다.");
+            Cache issuedCouponCache = cacheManager.getCache("IssuedCoupon");
+            RBucket<Issued> cacheBucket = redisConfig.redissonClient().getBucket("IssuedCoupon:" + couponId);
+            if (cacheBucket.isExists()) {
+                throw new IllegalArgumentException("이미 쿠폰을 발급 받으셨습니다.");
             }
+
             Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new NotFoundException(
                     ErrorCode.COUPON_NOT_FOUND));
@@ -51,11 +57,12 @@ public class IssuedServiceImpl implements IssuedService {
                 Issued issuedCoupon = new Issued(coupon, user);
                 issuedRepository.save(issuedCoupon);
 
-                Cache issuedCouponCache = cacheManager.getCache("IssuedCoupon");
                 if (issuedCouponCache != null) {
-                    issuedCouponCache.put(couponId, issuedCoupon);
-                } else {
-                    throw new IllegalStateException("IssuedCoupon 캐시를 찾을 수 없습니다.");
+                    LocalDateTime expirationDate = coupon.getEffective_date();
+                    LocalDateTime currentTime = LocalDateTime.now();
+                    Duration duration = Duration.between(currentTime, expirationDate);
+                    long timeToLive = duration.toMillis();
+                    cacheBucket.set(issuedCoupon, timeToLive, TimeUnit.MILLISECONDS);
                 }
 
                 return new IssuedResponse(couponId, coupon.getCouponInfo(),

@@ -56,18 +56,9 @@ public class IssuedServiceTest {
     RedisConfig redisConfig;
 
     @Mock
-    private RLock lock;
-    @Mock
-    private RedissonClient redissonClient;
-
-    @Mock
     CacheManager cacheManager;
-    @Mock
-    CouponService couponService;
 
     IssuedService issuedService;
-
-    private RedisTemplate<String, String> redisTemplate;
 
     @BeforeEach
     void before() {
