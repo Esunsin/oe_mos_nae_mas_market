@@ -15,7 +15,7 @@ on:
 #  DEPLOYMENT_GROUP_NAME: CodeDeploy 배포그룹이름
 env:
   PROJECT_NAME: oe_mos_nae_mas_market
-  BUCKET_NAME: omnmm-cicd-bucket
+  BUCKET_NAME: omnmm-bucket
   CODE_DEPLOY_APP_NAME: omnmm-cicd
   DEPLOYMENT_GROUP_NAME: omnmm
 #------------------------------------------------
@@ -23,6 +23,11 @@ env:
 jobs:
   ci:
     runs-on: [ ubuntu-latest ]
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
     steps:
       # 코드 체크아웃은 저장소에서 소스코드를 가져와서 현재 작업 디렉토리에 복사하는 작업입니다.
       # 최신 소스 코드를 가져와서 빌드, 테스트, 배포 등의 작업을 진행할 수 있습니다.
@@ -70,3 +75,6 @@ jobs:
                --deployment-config-name CodeDeployDefault.AllAtOnce
                --deployment-group-name $DEPLOYMENT_GROUP_NAME
                --s3-location bucket=$BUCKET_NAME,bundleType=zip,key=$PROJECT_NAME/$GITHUB_SHA.zip
+      # Redis에 연결하여 간단한 명령을 실행합니다.
+      - name: Redis 연결 및 테스트
+        run: redis-cli -h redis ping
