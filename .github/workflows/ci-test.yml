@@ -39,6 +39,15 @@ jobs:
       - name: Start Redis server
         run: docker run --name redis-server -d redis
 
+      # Install Redisson
+      - name: Install Redisson
+        run: |
+          curl -O https://download.redis.io/redis-stable.tar.gz
+          tar xzvf redis-stable.tar.gz
+          cd redis-stable
+          make
+          cd ..        
+
       - name: Build with Gradle
         run: ./gradlew clean build
 
