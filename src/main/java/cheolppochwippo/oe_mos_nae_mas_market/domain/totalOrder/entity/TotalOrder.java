@@ -1,6 +1,7 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.PaymentStatementEnum;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderNameDto;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
@@ -55,13 +56,13 @@ public class TotalOrder extends TimeStamped {
 
     private String merchantUid;
 
-    public TotalOrder(TotalOrderRequest request,User user, Tuple totalInfo,Tuple totalName,double discount){
-        price = totalInfo.get(0, Long.class);
+    public TotalOrder(TotalOrderRequest request,User user, TotalOrderNameDto totalInfo,double discount){
+        price = totalInfo.getSum();
         merchantUid = UUID.randomUUID().toString();
-        orderName = totalInfo.get(1, Long.class)>1 ? totalName.get(0, String.class)+" "+
-            totalName.get(1, Long.class)+"개 등 "+totalInfo.get(1, Long.class)+"종류의 상품":
-            totalName.get(0, String.class)+" "+
-                totalName.get(1, Long.class)+"개";
+        orderName = totalInfo.getCount()>1 ? totalInfo.getProductName()+" "+
+           totalInfo.getQuantity()+"개 등 "+totalInfo.getCount()+"종류의 상품":
+            totalInfo.getProductName()+" "+
+                totalInfo.getQuantity()+"개";
         address = request.getAddress();
         issueId = request.getIssuedId();
         paymentStatementEnum = PaymentStatementEnum.WAIT;

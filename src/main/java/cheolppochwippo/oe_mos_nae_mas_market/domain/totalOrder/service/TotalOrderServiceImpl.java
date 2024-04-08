@@ -2,6 +2,7 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.service;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.repository.IssuedRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderGetResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderNameDto;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrdersGetResponse;
@@ -36,18 +37,14 @@ public class TotalOrderServiceImpl implements TotalOrderService {
 			total.get().cancelInProgressOrder();
 			totalOrderRepository.save(total.get());
 		}
-		Tuple totalInfo = totalOrderRepository.getTotalInfoByUserId(user.getId()).orElseThrow(
+		TotalOrderNameDto totalInfo = totalOrderRepository.getTotalInfoByUserId(user.getId()).orElseThrow(
 			() -> new NoEntityException("현재 진행중인 주문이 없습니다")
 		);
-		Tuple totalName = totalOrderRepository.getTotalNameUserId(user.getId()).orElseThrow(
-			() -> new NoEntityException("현재 진행중인 주문이 없습니다")
-		);
-
 		double discount = request.getIssuedId() == 0 ? 0
 			: issuedRepository.getDiscountFindById(user.getId(), request.getIssuedId()).orElseThrow(
 				() -> new NoPermissionException("유효하지 않은 쿠폰 입니다.")
 			);
-		TotalOrder totalOrder = new TotalOrder(request, user, totalInfo, totalName, discount);
+		TotalOrder totalOrder = new TotalOrder(request, user, totalInfo, discount);
 		totalOrderRepository.save(totalOrder);
 		totalOrderRepository.pushOrder(totalOrder, user.getId());
 		TotalOrderResponse response = new TotalOrderResponse(totalOrder);

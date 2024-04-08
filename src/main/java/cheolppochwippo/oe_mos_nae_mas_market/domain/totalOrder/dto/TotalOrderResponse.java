@@ -1,5 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.PaymentStatementEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.DeliveryStatus;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import java.time.LocalDateTime;
@@ -10,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class TotalOrderResponse {
 
-	private Long totalOrderId;
+	private String totalOrderId;
 
 	private Long price;
 
@@ -28,14 +29,14 @@ public class TotalOrderResponse {
 
 	private String address;
 
-	private DeliveryStatus deliveryStatus;
+	private PaymentStatementEnum paymentStatementEnum;
 
 	private LocalDateTime createdAt;
 
 	private LocalDateTime modifiedAt;
 
 	public TotalOrderResponse(TotalOrder totalOrder) {
-		this.totalOrderId = totalOrder.getId();
+		this.totalOrderId = totalOrder.getMerchantUid();
 		this.price = totalOrder.getPrice();
 		this.discount = totalOrder.getDiscount();
 		this.priceAmount = totalOrder.getPriceAmount();
@@ -46,5 +47,6 @@ public class TotalOrderResponse {
 		this.address = totalOrder.getAddress();
 		this.createdAt = totalOrder.getCreatedAt();
 		this.modifiedAt = totalOrder.getModifiedAt();
+		this.paymentStatementEnum = totalOrder.getPaymentStatementEnum();
 	}
 }
