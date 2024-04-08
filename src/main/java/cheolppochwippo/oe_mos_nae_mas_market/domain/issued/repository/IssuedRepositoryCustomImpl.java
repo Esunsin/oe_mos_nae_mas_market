@@ -11,15 +11,19 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.config.JpaConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 public class IssuedRepositoryCustomImpl implements IssuedRepositoryCustom {
 
     private final JpaConfig jpaConfig;
+
+    private final EntityManager entityManager;
 
     @Override
     public List<Issued> findByCouponIdAndUser(Long couponId, User user) {
@@ -66,12 +70,15 @@ public class IssuedRepositoryCustomImpl implements IssuedRepositoryCustom {
     }
 
     @Override
+    @Transactional
     public void setDeletedFindById(Long issueId) {
         Long count = jpaConfig.jpaQueryFactory()
             .update(QIssued.issued)
             .set(QIssued.issued.deleted, Deleted.DELETE)
             .where(issueIdEq(issueId))
             .execute();
+        entityManager.flush();
+        entityManager.clear();
     }
 
     private BooleanExpression userIdEq(Long userId) {

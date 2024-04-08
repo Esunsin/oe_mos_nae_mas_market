@@ -1,5 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentCancelRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
@@ -7,12 +8,14 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import jakarta.persistence.*;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Payment extends TimeStamped {
 
     @Id
@@ -31,8 +34,6 @@ public class Payment extends TimeStamped {
 
     @Column
     private String paymentKey;
-    @Column
-    private String failReason;
 
     @Column
     private boolean cancelYN;
@@ -55,5 +56,17 @@ public class Payment extends TimeStamped {
         cancelYN = false;
         statement = PaymentStatementEnum.COMPLETE;
         this.totalOrder = totalOrder;
+    }
+
+    public Payment(Payment payment, PaymentCancelRequest paymentCancelRequest){
+        amount = payment.getAmount();
+        orderName = payment.getOrderName();
+        orderId = payment.getOrderId();
+        paymentKey = payment.getPaymentKey();
+        paySuccessYN = true;
+        cancelYN = true;
+        statement = PaymentStatementEnum.CANCEL;
+        totalOrder = payment.getTotalOrder();
+        cancelReason = paymentCancelRequest.getCancelReason();
     }
 }

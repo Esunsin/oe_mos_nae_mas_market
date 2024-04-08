@@ -12,10 +12,9 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.No
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.redisson.api.RedissonClient;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.stereotype.Service;
@@ -32,9 +31,8 @@ public class IssuedServiceImpl implements IssuedService {
     private final CacheManager cacheManager;
 
     @Override
-    @Transactional
     public IssuedResponse issueCoupon(Long couponId, User user) {
-        RLock lock = redisConfig.redissonClient().getLock("couponLock" + couponId);
+        RLock lock = redisConfig.redissonClient().getFairLock("couponLock" + couponId);
         try {
             lock.lock();
             List<Issued> issuedCoupons = issuedRepository.findByCouponIdAndUser(couponId, user);
@@ -53,7 +51,12 @@ public class IssuedServiceImpl implements IssuedService {
                 Issued issuedCoupon = new Issued(coupon, user);
                 issuedRepository.save(issuedCoupon);
 
-                cacheManager.getCache("IssuedCoupon").put(couponId, issuedCoupon);
+                Cache issuedCouponCache = cacheManager.getCache("IssuedCoupon");
+                if (issuedCouponCache != null) {
+                    issuedCouponCache.put(couponId, issuedCoupon);
+                } else {
+                    throw new IllegalStateException("IssuedCoupon 캐시를 찾을 수 없습니다.");
+                }
 
                 return new IssuedResponse(couponId, coupon.getCouponInfo(),
                     issuedCoupon.getCreatedAt(), issuedCoupon.getDeleted());
@@ -65,8 +68,10 @@ public class IssuedServiceImpl implements IssuedService {
         }
     }
 
+
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "issuedCoupons", key = "#user.id", cacheManager = "cacheManager")
     public List<IssuedResponse> getIssuedCoupons(User user) {
         return issuedRepository.findCouponByUser(user);
     }

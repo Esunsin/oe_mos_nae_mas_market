@@ -25,7 +25,11 @@ public class Delivery extends TimeStamped {
 
     private String address;
 
+    @Column
+    @Enumerated(EnumType.STRING)
     private Deleted deleted;
+
+    private String orderId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
@@ -33,6 +37,7 @@ public class Delivery extends TimeStamped {
     public Delivery(User user, DeliveryRequest deliveryRequest) {
         this.user = user;
         this.address = deliveryRequest.getAddress();
+        this.deleted = Deleted.UNDELETE;
     }
 
     public void update(DeliveryRequest deliveryRequest) {
@@ -44,6 +49,7 @@ public class Delivery extends TimeStamped {
     }
 
     public Delivery(TotalOrder totalOrder){
+        orderId = totalOrder.getMerchantUid();
         address = totalOrder.getAddress();
         deleted = Deleted.UNDELETE;
         user = totalOrder.getUser();

@@ -16,12 +16,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class TotalOrder extends TimeStamped {
 
     @Id
@@ -60,12 +63,12 @@ public class TotalOrder extends TimeStamped {
             totalName.get(0, String.class)+" "+
                 totalName.get(1, Long.class)+"개";
         address = request.getAddress();
-        issueId = request.getIssueId();
+        issueId = request.getIssuedId();
         paymentStatementEnum = PaymentStatementEnum.WAIT;
         deleted = Deleted.UNDELETE;
         deliveryCost = price>=40000 ? 0L : 3000L;
         this.discount = (long) (price*(1-discount));
-        this.priceAmount = (long) (price*(1-discount)-deliveryCost);
+        this.priceAmount = (long) (price*(1-discount)+deliveryCost);
         this.user = user;
     }
 

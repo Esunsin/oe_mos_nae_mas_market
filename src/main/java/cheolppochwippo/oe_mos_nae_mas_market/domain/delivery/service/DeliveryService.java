@@ -12,8 +12,6 @@ public interface DeliveryService {
 
     DeliveryResponse updateDelivery(Long deliveryId, DeliveryRequest deliveryRequest, User user);
 
-    Delivery findDelivery(Long deliveryId);
-
     void deleteDelivery(Long deliveryId, User user);
 
     List<DeliveryResponse> getDeliveries(User user);

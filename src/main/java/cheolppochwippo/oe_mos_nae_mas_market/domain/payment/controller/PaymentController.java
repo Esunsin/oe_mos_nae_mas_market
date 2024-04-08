@@ -1,5 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.payment.controller;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentCancelRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentJsonResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponse;
@@ -26,12 +27,20 @@ public class PaymentController {
 
 	private final PaymentServiceImpl paymentService;
 
-	@RequestMapping(value = "/confirm")
+	@RequestMapping(value = "/payments/confirm")
 	public ResponseEntity<JSONObject> confirmPayment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentRequest request)
 		throws Exception {
 		PaymentJsonResponse response = paymentService.confirmPayment(userDetails.getUser(),
 			request);
+		return ResponseEntity.status(response.getCode()).body(response.getJsonObject());
+	}
+
+	@RequestMapping(value = "/payments/cancel")
+	public ResponseEntity<JSONObject> cancelPayment(
+		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentCancelRequest request)
+		throws Exception {
+		PaymentJsonResponse response = paymentService.paymentCancel(userDetails.getUser(),request);
 		return ResponseEntity.status(response.getCode()).body(response.getJsonObject());
 	}
 
@@ -56,18 +65,5 @@ public class PaymentController {
 			.data(paymentResponses)
 			.build());
 	}
-
-	@PostMapping("/paymentTest")
-	public ResponseEntity<CommonResponse<Void>> testd(
-		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestBody PaymentRequest paymentRequest
-	){
-		paymentService.successPaymentTest(userDetails.getUser(),paymentRequest);
-
-		return ResponseEntity.ok().body(CommonResponse.<Void>builder()
-			.msg("테스트 성공!!")
-			.build());
-	}
-
 
 }

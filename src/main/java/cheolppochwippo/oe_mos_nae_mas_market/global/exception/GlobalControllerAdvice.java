@@ -1,7 +1,11 @@
 package cheolppochwippo.oe_mos_nae_mas_market.global.exception;
 
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.InsufficientQuantityException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NotFoundException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.PriceMismatchException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -76,5 +80,42 @@ public class GlobalControllerAdvice {
                         .msg(ex.getErrorCode().getMessage())
                         .data(ex.getErrorCode().getHttpStatus())
                         .build());
+    }
+
+    @ExceptionHandler({NoEntityException.class})
+    public ResponseEntity<ErrorResponse> handleNotFoundException(
+        Exception e) {
+        log.error(e.getMessage());
+        return createResponse(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler({NoPermissionException.class})
+    public ResponseEntity<ErrorResponse> handleForbiddenException(
+        Exception e) {
+        log.error(e.getMessage());
+        return createResponse(HttpStatus.FORBIDDEN, e.getMessage());
+    }
+
+    @ExceptionHandler({PriceMismatchException.class})
+    public ResponseEntity<ErrorResponse> handleBadRequestException(
+        Exception e) {
+        log.error(e.getMessage());
+        return createResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler({InsufficientQuantityException.class})
+    public ResponseEntity<ErrorResponse> handleConflictException(
+        Exception e) {
+        log.error(e.getMessage());
+        return createResponse(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+
+    private ResponseEntity<ErrorResponse> createResponse(HttpStatus status, String message) {
+        return ResponseEntity.status(status.value())
+            .body(ErrorResponse.builder()
+                .state(status)
+                .message(message)
+                .build());
     }
 }
