@@ -9,12 +9,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Table(name = "users")
 public class User extends TimeStamped {
 
@@ -33,6 +35,10 @@ public class User extends TimeStamped {
         this.username = username;
         this.password = password;
         this.role = role;
+    }
+
+    public User(Long id){
+        this.id = id;
     }
 
     public User(Long userId, String username, String role) {

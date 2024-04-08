@@ -4,6 +4,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.entity.QIssued;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.QOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponses;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.Payment;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.PaymentStatementEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.QPayment;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.QTotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
@@ -42,6 +43,18 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom{
 		}
 		List<PaymentResponses> paymentResponses = query.stream().map(PaymentResponses::new).toList();
 		return new PageImpl<>(paymentResponses,pageable,paymentResponses.size());
+	}
+
+	@Override
+	public Optional<Payment> findPaymentKey(String paymentKey) {
+		Payment query = jpaConfig.jpaQueryFactory()
+			.select(QPayment.payment)
+			.from(QPayment.payment)
+			.where(
+				QPayment.payment.paymentKey.eq(paymentKey),
+				QPayment.payment.statement.eq(PaymentStatementEnum.COMPLETE)
+			).fetchOne();
+		return Optional.ofNullable(query);
 	}
 
 	private BooleanExpression userIdEq(Long userId) {

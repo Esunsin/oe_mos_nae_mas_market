@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 @Entity
@@ -28,6 +29,8 @@ public class Delivery extends TimeStamped {
     @Enumerated(EnumType.STRING)
     private Deleted deleted;
 
+    private String orderId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
@@ -45,7 +48,8 @@ public class Delivery extends TimeStamped {
         this.deleted = Deleted.DELETE;
     }
 
-    public Delivery(TotalOrder totalOrder) {
+    public Delivery(TotalOrder totalOrder){
+        orderId = totalOrder.getMerchantUid();
         address = totalOrder.getAddress();
         deleted = Deleted.UNDELETE;
         user = totalOrder.getUser();

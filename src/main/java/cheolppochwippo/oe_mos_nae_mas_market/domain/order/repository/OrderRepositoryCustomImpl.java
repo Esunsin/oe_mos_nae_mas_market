@@ -1,6 +1,8 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.order.repository;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.QOrder;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.JpaConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
@@ -31,5 +33,16 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom{
                         .and(order.user.eq(user))
                         .and(order.product.id.eq(productId)))
                 .fetchOne());
+    }
+
+    @Override
+    public List<Order> getOrdersFindTotalOrder(TotalOrder totalOrder) {
+        List<Order> query = jpaConfig.jpaQueryFactory()
+            .select(QOrder.order)
+            .from(QOrder.order)
+            .where(
+                QOrder.order.totalOrder.id.eq(totalOrder.getId())
+            ).fetch();
+        return query;
     }
 }

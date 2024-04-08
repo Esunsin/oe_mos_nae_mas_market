@@ -38,11 +38,9 @@ public class TotalOrderController {
 	@PostMapping("/totalOrders")
 	public ResponseEntity<CommonResponse<TotalOrderResponse>> createTotalOrder(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestBody TotalOrderRequest request,
-		Model model) {
+		@RequestBody TotalOrderRequest request) {
 		TotalOrderResponse totalOrderResponse = totalOrderService.createTotalOrder(
 			userDetails.getUser(), request);
-		model.addAttribute("t", totalOrderResponse);
 		return ResponseEntity.ok()
 			.body(CommonResponse.<TotalOrderResponse>builder()
 				.data(totalOrderResponse)

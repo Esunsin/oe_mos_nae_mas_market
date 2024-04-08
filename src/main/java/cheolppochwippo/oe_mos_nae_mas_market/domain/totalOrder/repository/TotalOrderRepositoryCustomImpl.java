@@ -3,17 +3,15 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository;
 import static cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.QTotalOrder.totalOrder;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.QOrder;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponses;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.Payment;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.QPayment;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderGetResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderNameDto;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrdersGetResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.QTotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.JpaConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
-import com.querydsl.core.Tuple;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -48,22 +46,18 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 	}
 
 	@Override
-	public Optional<Tuple> getTotalInfoByUserId(Long userId) {
-		Tuple query = jpaConfig.jpaQueryFactory()
-			.select(QOrder.order.price.sum(), QOrder.order.count())
+	public Optional<TotalOrderNameDto> getTotalInfoByUserId(Long userId) {
+		TotalOrderNameDto query = jpaConfig.jpaQueryFactory()
+			.select(Projections.constructor(
+				TotalOrderNameDto.class,
+				QOrder.order.price.sum(),
+				QOrder.order.count(),
+				QOrder.order.product.productName,
+				QOrder.order.quantity
+			))
 			.from(QOrder.order)
 			.where(userIdEq(userId))
-			.fetchOne();
-		return Optional.ofNullable(query);
-	}
-
-	@Override
-	public Optional<Tuple> getTotalNameUserId(Long userId) {
-		Tuple query = jpaConfig.jpaQueryFactory()
-			.select(QOrder.order.product.productName, QOrder.order.quantity)
-			.from(QOrder.order)
-			.where(userIdEq(userId))
-			.limit(1)
+			.groupBy(QOrder.order.user.id)
 			.fetchOne();
 		return Optional.ofNullable(query);
 	}
@@ -93,12 +87,12 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 			)
 			.orderBy(totalOrder.modifiedAt.desc())
 			.fetch();
-		if(query.isEmpty()){
-			throw new IllegalArgumentException("주문 정보가 없습니다.");
+		if (query.isEmpty()) {
+			throw new NoEntityException("주문 정보가 없습니다.");
 		}
 		List<TotalOrdersGetResponse> totalOrdersGetResponses = query.stream().map(
 			TotalOrdersGetResponse::new).toList();
-		return new PageImpl<>(totalOrdersGetResponses,pageable,totalOrdersGetResponses.size());
+		return new PageImpl<>(totalOrdersGetResponses, pageable, totalOrdersGetResponses.size());
 	}
 
 	@Override

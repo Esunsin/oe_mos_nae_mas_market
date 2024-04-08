@@ -32,6 +32,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.redisson.api.RedissonClient;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -40,6 +42,8 @@ public class productServiceTest {
 
     @Mock
     ProductRepository productRepository;
+    @Mock
+    RedissonClient redissonClient;
     @Mock
     StoreRepository storeRepository;
 
@@ -52,7 +56,7 @@ public class productServiceTest {
 
     @BeforeEach
     void setUp() {
-        productService = new ProductServiceImpl(productRepository, storeRepository);
+        productService = new ProductServiceImpl(productRepository, storeRepository,redissonClient);
 
         seller = new User("seller", "password", SELLER);
         customer = new User("customer", "password", CONSUMER);

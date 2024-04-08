@@ -1,10 +1,13 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.payment.controller;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentCancelRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentJsonResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponses;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.Payment;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.service.PaymentServiceImpl;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails.UserDetailsImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +29,20 @@ public class PaymentController {
 
 	private final PaymentServiceImpl paymentService;
 
-	@RequestMapping(value = "/confirm")
+	@RequestMapping(value = "/payments/confirm")
 	public ResponseEntity<JSONObject> confirmPayment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentRequest request)
 		throws Exception {
 		PaymentJsonResponse response = paymentService.confirmPayment(userDetails.getUser(),
 			request);
+		return ResponseEntity.status(response.getCode()).body(response.getJsonObject());
+	}
+
+	@RequestMapping(value = "/payments/cancel")
+	public ResponseEntity<JSONObject> cancelPayment(
+		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentCancelRequest request)
+		throws Exception {
+		PaymentJsonResponse response = paymentService.paymentCancel(userDetails.getUser(),request);
 		return ResponseEntity.status(response.getCode()).body(response.getJsonObject());
 	}
 
@@ -57,17 +68,26 @@ public class PaymentController {
 			.build());
 	}
 
-	@PostMapping("/paymentTest")
-	public ResponseEntity<CommonResponse<Void>> testd(
-		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestBody PaymentRequest paymentRequest
-	){
-		paymentService.successPaymentTest(userDetails.getUser(),paymentRequest);
-
+	@RequestMapping("/payments/confirm/pass")
+	public ResponseEntity<CommonResponse<Void>> confirmPassPayment(
+		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentRequest request) {
+		TotalOrder totalOrder = paymentService.checkPayment(userDetails.getUser(),request);
+		paymentService.successPayment(totalOrder,request);
 		return ResponseEntity.ok().body(CommonResponse.<Void>builder()
-			.msg("테스트 성공!!")
+			.msg("confirm Pass Payment complete!")
 			.build());
 	}
 
+	//테스트용 실결제 승인을 제외시킨 결제 내역 생성 api
+	// 같은 주문번호의 결제 내역을 계속생성되는 이유는 제한시키는 로직이 실결제 승인에 있기 때문
+	@RequestMapping("/payments/cancel/pass")
+	public ResponseEntity<CommonResponse<Void>> cancelPassPayment(
+		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentCancelRequest request) {
+		Payment payment = paymentService.checkCancelPayment(userDetails.getUser(),request);
+		paymentService.successCancelPayment(payment,request);
+		return ResponseEntity.ok().body(CommonResponse.<Void>builder()
+			.msg("cancel Pass Payment complete!")
+			.build());
+	}
 
 }
