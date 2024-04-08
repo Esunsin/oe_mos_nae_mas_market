@@ -6,6 +6,7 @@ on:
   pull_request:
     branches:
       - dev
+      - main
 
 #------------------------------------------------
 #  PROJECT_NAME: 프로젝트 이름 설정. S3경로 설정에 사용.
@@ -37,6 +38,7 @@ jobs:
       - name: make executable gradlew
         run: chmod +x ./gradlew
         shell: bash
+
       # 스프링 프로젝트의 빌드도구인 gradle을 통해 빌드하는 설정입니다.
       - name: Gradle로 빌드
         uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
