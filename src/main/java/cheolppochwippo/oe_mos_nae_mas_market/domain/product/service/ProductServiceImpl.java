@@ -14,8 +14,11 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -31,6 +34,7 @@ public class ProductServiceImpl implements ProductService {
 
 	private final ProductRepository productRepository;
 	private final StoreRepository storeRepository;
+	private final RedissonClient redissonClient;
 
 	@Transactional
 	@CacheEvict(cacheNames = "products", allEntries = true)
@@ -101,26 +105,28 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 
-	//재고 다시 증가시켜주는 메서드
-	public void updateQuantity(Order order) {
-		Product product = foundProduct(order.getProduct().getId());
-		product.quatityUpdate(order.getQuantity());
-		productRepository.save(product);
-	}
-
 	//재고 감소시켜주는 메소드
-	@Transactional
 	public void decreaseProductStock(Order order) {
-		Product product = productRepository.findById(order.getProduct().getId()).orElseThrow(
-			() -> new IllegalArgumentException("상품이 존재하지 않습니다.")
-		);
-
-		if (product.getQuantity() < 1) {
-			throw new IllegalArgumentException("재고가 부족합니다");
+		RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
+		try {
+			try {
+				boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
+				if (isLocked) {
+					Product product = productRepository.findByOrder(order);
+					Long newStock = product.getQuantity() - order.getQuantity();
+					System.out.println("재고남은 갯수"+newStock);
+					if (newStock < 0) {
+						throw new IllegalArgumentException("재고가 부족합니다.");
+					}
+					product.quatityUpdate(newStock);
+					productRepository.save(product);
+				}
+			} finally {
+				lock.unlock();
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 
-		Long newStock = product.getQuantity() - order.getQuantity();
-		product.quatityUpdate(newStock);
-		productRepository.save(product);
 	}
 }

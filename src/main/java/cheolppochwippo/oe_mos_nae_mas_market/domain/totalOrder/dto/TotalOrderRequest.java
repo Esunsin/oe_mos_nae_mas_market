@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class TotalOrderRequest {
 
-	private Long issuedId;
+	private Long issuedId = 0L;
 
 	private String address;
 
