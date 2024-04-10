@@ -5,11 +5,11 @@ os: linux
 # 배포할 파일 및 디렉토리를 정의합니다.
 files:
   - source: /
-    destination: /home/ubuntu/plug
+    destination: /home/ubuntu/omnmm
 
 # 권한을 정의합니다.
 permissions:
-  - object: /home/ubuntu/plug/
+  - object: /home/ubuntu/omnmm/
     owner: ubuntu
     group: ubuntu
 

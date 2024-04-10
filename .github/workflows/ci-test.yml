@@ -1,7 +1,7 @@
 # 프로젝트의 CI/CD를 위한 설정 파일
 
 # 이름을 지정 (원하는 이름으로 지정해도 무관합니다.)
-name: Plug project CICD
+name: omnmm project CICD
 
 # main 브랜치에 Git 푸시 또는 풀 리퀘스트가 발생했을 때 실행되도록 설정합니다.
 # 다른 브랜치에서 CI/CD를 실행하고 싶다면 branches 항목을 수정하면 됩니다
