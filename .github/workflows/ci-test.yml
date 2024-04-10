@@ -17,10 +17,10 @@ on:
 #  CODE_DEPLOY_APP_NAME: CodeDeploy 애플리케이션 이름
 #  DEPLOYMENT_GROUP_NAME: CodeDeploy 배포그룹이름
 env:
-  PROJECT_NAME: plug-project
-  BUCKET_NAME: plug-cicd-bucket
-  CODE_DEPLOY_APP_NAME: plug_cicd
-  DEPLOYMENT_GROUP_NAME: plug_instance
+  PROJECT_NAME: omnmm-project
+  BUCKET_NAME: omnmm-cicd-bucket
+  CODE_DEPLOY_APP_NAME: omnmm_cicd
+  DEPLOYMENT_GROUP_NAME: omnmm_instance
 #------------------------------------------------
 
 
