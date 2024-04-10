@@ -11,6 +11,18 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main", "dev" ]
+#------------------------------------------------
+#  PROJECT_NAME: 프로젝트 이름 설정. S3경로 설정에 사용.
+#  BUCKET_NAME: 앞에서 생성한 S3 버킷이름
+#  CODE_DEPLOY_APP_NAME: CodeDeploy 애플리케이션 이름
+#  DEPLOYMENT_GROUP_NAME: CodeDeploy 배포그룹이름
+env:
+  PROJECT_NAME: plug-project
+  BUCKET_NAME: plug-cicd-bucket
+  CODE_DEPLOY_APP_NAME: plug_cicd
+  DEPLOYMENT_GROUP_NAME: plug_instance
+#------------------------------------------------
+
 
 # 권한 설정으로, 내용물을 읽을 수 있는 권한을 부여합니다.
 permissions:
@@ -48,3 +60,32 @@ jobs:
         uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
         with:
           arguments: build -x test
+
+      #------------------------------------------------
+
+      # S3 버킷으로 옮길 zip 파일을 생성합니다.
+      - name: ZIP 파일 생성
+        run: zip -qq -r ./$GITHUB_SHA.zip .
+        shell: bash
+
+      # AWS 계정의 서비스 접근 권한을 획득합니다.
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_PRIVATE_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      # 생성된 zip 파일을 S3에 업로드 합니다.
+      - name: Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$BUCKET_NAME/$PROJECT_NAME/$GITHUB_SHA.zip
+
+      # CodeDeploy에 배포요청을 진행합니다.
+      - name: Code Deploy To EC2 instance
+        run: aws deploy create-deployment
+          --application-name $CODE_DEPLOY_APP_NAME
+          --deployment-config-name CodeDeployDefault.AllAtOnce
+          --deployment-group-name $DEPLOYMENT_GROUP_NAME
+          --s3-location bucket=$BUCKET_NAME,bundleType=zip,key=$PROJECT_NAME/$GITHUB_SHA.zip
+
+#------------------------------------------------
