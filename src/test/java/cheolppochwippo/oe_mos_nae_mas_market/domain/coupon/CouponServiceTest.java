@@ -13,6 +13,8 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity.Coupon;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.repository.CouponRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.service.CouponService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.service.CouponServiceImpl;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.repository.UserRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.global.config.SQSConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -29,11 +31,17 @@ public class CouponServiceTest {
     @Mock
     CouponRepository couponRepository;
 
+    @Mock
+    UserRepository userRepository;
+
+    @Mock
+    SQSConfig sqsConfig;
+
     CouponService couponService;
 
     @BeforeEach
     void before() {
-        couponService = new CouponServiceImpl(couponRepository);
+        couponService = new CouponServiceImpl(couponRepository,userRepository,sqsConfig);
     }
 
     @Test
