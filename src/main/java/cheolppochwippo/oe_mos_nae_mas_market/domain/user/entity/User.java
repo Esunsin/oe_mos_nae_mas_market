@@ -31,10 +31,16 @@ public class User extends TimeStamped {
     @Enumerated(EnumType.STRING)
     private RoleEnum role;
 
-    public User(String username, String password, RoleEnum role) {
+    private String phoneNumber;
+
+    private boolean consent;
+
+    public User(String username, String password, RoleEnum role,String phoneNumber,boolean consent) {
         this.username = username;
         this.password = password;
         this.role = role;
+        this.phoneNumber = phoneNumber;
+        this.consent = consent;
     }
 
     public User(Long id){

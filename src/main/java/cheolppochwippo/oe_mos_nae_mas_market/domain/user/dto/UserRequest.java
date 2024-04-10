@@ -8,7 +8,13 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UserRequest {
 
-    private String username;
-    private String password;
-    private RoleEnum role;
+	private String username;
+
+	private String password;
+
+	private RoleEnum role;
+
+	private String phoneNumber;
+
+	private boolean consent = false;
 }

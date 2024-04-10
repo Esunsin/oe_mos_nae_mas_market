@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final StoreRepository storeRepository;
 
     public UserResponse signup(UserRequest userRequest){
 
@@ -31,7 +30,7 @@ public class UserServiceImpl implements UserService{
         }
 
         String encodedPassword = passwordEncoder.encode(userRequest.getPassword());
-        User user = new User(userRequest.getUsername(), encodedPassword, userRequest.getRole());
+        User user = new User(userRequest.getUsername(), encodedPassword, userRequest.getRole(),userRequest.getPhoneNumber(),userRequest.isConsent());
 
         User savedUser = userRepository.save(user);
         return new UserResponse(savedUser);
