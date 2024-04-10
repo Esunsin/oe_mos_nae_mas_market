@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-REPOSITORY=/home/ubuntu/plug
+REPOSITORY=/home/ubuntu/omnmm
 cd $REPOSITORY
 
 APP_NAME=plug
