@@ -63,7 +63,7 @@ public class PaymentServiceTest {
 
 
 	private User testUser() {
-		return new User(1L, "test", "12345678", RoleEnum.SELLER);
+		return new User(1L, "test", "12345678", RoleEnum.SELLER,"01012345678",false);
 	}
 
 	private TotalOrder testTotalOrder(User user) {
@@ -211,7 +211,7 @@ public class PaymentServiceTest {
 	void checkCanselPaymentForBiddenTest() {
 		//given
 		User user = testUser();
-		TotalOrder totalOrder = testTotalOrder(new User(5L, "test", "12345678", RoleEnum.SELLER));
+		TotalOrder totalOrder = testTotalOrder(new User(5L, "test", "12345678", RoleEnum.SELLER,"01012345678",false));
 		Payment payment = testPayment(totalOrder);
 		PaymentCancelRequest paymentRequest = new PaymentCancelRequest();
 		paymentRequest.setPaymentKey("testKey");
@@ -262,7 +262,7 @@ public class PaymentServiceTest {
 	void getPaymentForBiddenTest() {
 		//given
 		User user = testUser();
-		TotalOrder totalOrder = testTotalOrder(new User(5L, "test", "12345678", RoleEnum.SELLER));
+		TotalOrder totalOrder = testTotalOrder(new User(5L, "test", "12345678", RoleEnum.SELLER,"01012345678",false));
 		Payment payment = testPayment(totalOrder);
 		Long paymentId = 3L;
 		when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));

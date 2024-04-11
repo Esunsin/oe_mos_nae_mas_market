@@ -52,4 +52,10 @@ public class User extends TimeStamped {
         this.username = username;
         this.role = RoleEnum.valueOf(role);
     }
+
+    public User(String username,String password,RoleEnum role){
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
 }
