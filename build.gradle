@@ -6,6 +6,7 @@ plugins {
 
 group = 'cheolppochwippo'
 version = '0.0.1-SNAPSHOT'
+jar.enabled = false
 
 java {
 	sourceCompatibility = '17'
@@ -23,9 +24,6 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
-
-	//implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	//implementation 'org.redisson:redisson-spring-boot-starter:3.27.1'
 	//security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	//jwt
@@ -68,6 +66,7 @@ dependencies {
 	//redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.redisson:redisson-spring-boot-starter:3.27.1'
+
 }
 
 tasks.named('test') {
