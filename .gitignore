@@ -38,4 +38,4 @@ out/
 .vscode/
 
 # Ignore properties
-**/src/main/resources/application.properties
+**.properties
