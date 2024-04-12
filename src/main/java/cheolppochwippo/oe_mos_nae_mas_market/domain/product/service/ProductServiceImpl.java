@@ -34,6 +34,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
+    private final RedissonClient redissonClient;
 
     @Transactional
     @CacheEvict(cacheNames = "products", allEntries = true)
