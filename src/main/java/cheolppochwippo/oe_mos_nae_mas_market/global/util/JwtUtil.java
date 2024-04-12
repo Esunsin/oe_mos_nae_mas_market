@@ -84,9 +84,6 @@ public class JwtUtil {
 
         String accessToken = createAccessToken(userId, username, role);
         deleteRefreshToken(userId);
-        String token11 = accessToken.substring(7);
-        Claims claims = getUserInfoFromToken(token11);
-        System.out.println(claims.get(role));
 
         String refreshToken = BEARER_PREFIX +
             Jwts.builder()

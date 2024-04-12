@@ -36,7 +36,7 @@ public class TotalOrderServiceTest {
 	TotalOrderServiceImpl totalOrderService;
 
 	private User testUser() {
-		return new User(1L, "test", "12345678", RoleEnum.SELLER);
+		return new User(1L, "test", "12345678", RoleEnum.SELLER,"01012345678",false);
 	}
 
 	private TotalOrder testTotalOrder(User user) {
@@ -78,7 +78,7 @@ public class TotalOrderServiceTest {
 	@DisplayName("주문 정보보기 실패 테스트 - FORBIDDEN")
 	void getTotalOrderForbidden() {
 		//given
-		User user = new User(5L, "test", "12345678", RoleEnum.SELLER);
+		User user = new User(5L, "test", "12345678", RoleEnum.SELLER,"01012345678",false);
 		Long totalOrderId = 1L;
 		TotalOrder totalOrder = testTotalOrder(testUser());
 		when(totalOrderRepository.findById(totalOrderId)).thenReturn(Optional.of(totalOrder));

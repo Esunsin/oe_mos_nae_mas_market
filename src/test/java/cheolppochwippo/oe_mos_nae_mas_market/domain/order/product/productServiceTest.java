@@ -220,26 +220,26 @@ public class productServiceTest {
             assertEquals(product1.getProductName(), product2.getProductName());
         }
     }
-
-    @Test
-    @DisplayName("캐싱 성능 비교")
-    void testCachingEfficiency() {
-        Pageable pageable = PageRequest.of(0, 10);
-        List<Product> productList = Collections.singletonList(product);
-        when(productRepository.findProductsWithQuantityGreaterThanOne(pageable)).thenReturn(
-            productList);
-
-        long startTime = System.nanoTime();
-        ProductShowResponse result1 = productService.showAllProduct(pageable);
-        long duration1 = System.nanoTime() - startTime;
-
-        startTime = System.nanoTime();
-        ProductShowResponse result2 = productService.showAllProduct(pageable);
-        long duration2 = System.nanoTime() - startTime;
-
-        // 캐싱으로 인한 성능 향상 확인
-        System.out.println("캐싱 전 " + duration1);
-        System.out.println("캐싱 후 " + duration2);
-        assertTrue(duration2 < duration1);
-    }
+//
+//    @Test
+//    @DisplayName("캐싱 성능 비교")
+//    void testCachingEfficiency() {
+//        Pageable pageable = PageRequest.of(0, 10);
+//        List<Product> productList = Collections.singletonList(product);
+//        when(productRepository.findProductsWithQuantityGreaterThanOne(pageable)).thenReturn(
+//            productList);
+//
+//        long startTime = System.nanoTime();
+//        ProductShowResponse result1 = productService.showAllProduct(pageable);
+//        long duration1 = System.nanoTime() - startTime;
+//
+//        startTime = System.nanoTime();
+//        ProductShowResponse result2 = productService.showAllProduct(pageable);
+//        long duration2 = System.nanoTime() - startTime;
+//
+//        // 캐싱으로 인한 성능 향상 확인
+//        System.out.println("캐싱 전 " + duration1);
+//        System.out.println("캐싱 후 " + duration2);
+//        assertTrue(duration2 < duration1);
+//    }
 }

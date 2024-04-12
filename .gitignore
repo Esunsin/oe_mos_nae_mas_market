@@ -37,4 +37,4 @@ out/
 .vscode/
 
 # Ignore properties
-**.properties
+application.properties
