@@ -15,7 +15,7 @@ public class ProductResultResponse {
     private Long realPrice;
     private Long price;
     private Long discount;
-    private Long quantity;
+    //private Long quantity;
     private StoreResponse store;
 
     public ProductResultResponse(Product product) {
@@ -25,7 +25,7 @@ public class ProductResultResponse {
         this.realPrice = product.getRealPrice();
         this.price = product.getPrice();
         this.discount = product.getDiscount();
-        this.quantity = product.getQuantity();
+       // this.quantity = product.getQuantity();
         this.store = new StoreResponse(product.getStore());
     }
 }

@@ -32,77 +32,79 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 
-	private final ProductRepository productRepository;
-	private final StoreRepository storeRepository;
-	private final RedissonClient redissonClient;
+    private final ProductRepository productRepository;
+    private final StoreRepository storeRepository;
+    private final RedissonClient redissonClient;
 
-	@Transactional
-	@CacheEvict(cacheNames = "products", allEntries = true)
-	public ProductResponse createProduct(ProductRequest productRequest, User user) {
-		validateSeller(user);
-		Store store = storeRepository.findByUser_Id(user.getId())
-			.orElseThrow(() -> new NoSuchElementException("상점을 찾을 수 없습니다."));
+    @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
+    public ProductResponse createProduct(ProductRequest productRequest, User user) {
+        validateSeller(user);
+        Store store = storeRepository.findByUser_Id(user.getId())
+            .orElseThrow(() -> new NoSuchElementException("상점을 찾을 수 없습니다."));
 
-		Product product = new Product(productRequest, store);
-		productRepository.save(product);
-		return new ProductResponse(product);
-	}
+        Product product = new Product(productRequest, store);
+        productRepository.save(product);
 
-	@Override
-	@Transactional
-	@CacheEvict(cacheNames = "products", allEntries = true)
-	public ProductResponse updateProduct(ProductRequest productRequest, Long productId, User user) {
-		validateSeller(user);
+        return new ProductResponse(product);
+    }
 
-		Product product = foundProduct(productId);
-		product.update(productRequest);
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
+    public ProductResponse updateProduct(ProductRequest productRequest, Long productId, User user) {
+        validateSeller(user);
 
-		return new ProductResponse(product);
-	}
+        Product product = foundProduct(productId);
+        product.update(productRequest);
 
-
-	@Override
-	@Transactional(readOnly = true)
-	public ProductResultResponse showProduct(long productId) {
-		Product product = foundProduct(productId);
-
-		return new ProductResultResponse(product);
-	}
+        return new ProductResponse(product);
+    }
 
 
-	@Override
-	@Transactional(readOnly = true)
-	@Cacheable(cacheNames = "products", key = "#pageable")
-	public ProductShowResponse showAllProduct(Pageable pageable) {
-		List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne(
-			pageable);
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "product", key = "#productId")
+    public ProductResultResponse showProduct(long productId) {
+        Product product = foundProduct(productId);
 
-		return new ProductShowResponse(
-			productList.stream().map(product -> new ProductResultResponse(product)).toList());
-	}
+        return new ProductResultResponse(product);
+    }
 
-	@Override
-	@Transactional
-	@CacheEvict(cacheNames = "products", allEntries = true)
-	public ProductResponse deleteProduct(Long productId, User user) {
-		validateSeller(user);
 
-		Product product = foundProduct(productId);
-		product.delete();
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "products", key = "#pageable")
+    public ProductShowResponse showAllProduct(Pageable pageable) {
+        List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne(
+            pageable);
 
-		return new ProductResponse(product);
-	}
+        return new ProductShowResponse(
+            productList.stream().map(product -> new ProductResultResponse(product)).toList());
+    }
 
-	private Product foundProduct(Long productId) {
-		return productRepository.findById(productId)
-			.orElseThrow(() -> new NoSuchElementException("해당 상품을 찾을 수 없습니다."));
-	}
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = "products", key = "#productId")
+    public ProductResponse deleteProduct(Long productId, User user) {
+        validateSeller(user);
 
-	private void validateSeller(User user) {
-		if (!RoleEnum.SELLER.equals(user.getRole())) {
-			throw new IllegalArgumentException("판매자만 상품을 등록할 수 있습니다.");
-		}
-	}
+        Product product = foundProduct(productId);
+        product.delete();
+
+        return new ProductResponse(product);
+    }
+
+    private Product foundProduct(Long productId) {
+        return productRepository.findById(productId)
+            .orElseThrow(() -> new NoSuchElementException("해당 상품을 찾을 수 없습니다."));
+    }
+
+    private void validateSeller(User user) {
+        if (!RoleEnum.SELLER.equals(user.getRole())) {
+            throw new IllegalArgumentException("판매자만 상품을 등록할 수 있습니다.");
+        }
+    }
 
 
 	//재고 감소시켜주는 메소드

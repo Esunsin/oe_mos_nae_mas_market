@@ -46,8 +46,6 @@ public class productServiceTest {
     RedissonClient redissonClient;
     @Mock
     StoreRepository storeRepository;
-    @Mock
-    CacheManager cacheManager;
 
     ProductServiceImpl productService;
 
@@ -150,7 +148,6 @@ public class productServiceTest {
         assertEquals(product.getRealPrice(), result.getRealPrice());
         assertEquals(product.getPrice(), result.getPrice());
         assertEquals(product.getDiscount(), result.getDiscount());
-        assertEquals(product.getQuantity(), result.getQuantity());
         assertEquals(product.getStore().getStoreName(), result.getStore().getStoreName());
     }
 
