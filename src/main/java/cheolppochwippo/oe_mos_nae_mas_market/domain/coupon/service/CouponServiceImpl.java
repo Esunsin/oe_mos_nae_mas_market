@@ -11,6 +11,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.No
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,7 @@ public class CouponServiceImpl implements CouponService {
 
 	@Transactional(readOnly = true)
 	@Override
+	@Cacheable(value = "coupons", cacheManager = "cacheManager")
 	public List<CouponResponse> getCoupons() {
 		List<Coupon> coupons = couponRepository.findAll();
 		return coupons.stream()
