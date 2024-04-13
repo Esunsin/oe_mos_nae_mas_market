@@ -50,7 +50,4 @@ public class CustomAuthentication implements Authentication {
 	public String getName() {
 		return userDetails.getUsername(); // 사용자 이름
 	}
-
-
-
 }
