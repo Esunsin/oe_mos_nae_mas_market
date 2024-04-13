@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 public class IssuedResponse {
+    private Long issuedId;
     private Long couponId;
     private String couponInfo;
     private LocalDateTime createdAt;

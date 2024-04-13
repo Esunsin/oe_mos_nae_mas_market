@@ -42,33 +42,15 @@ public class IssuedServiceImpl implements IssuedService {
             boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
             if (isLocked) {
                 try {
-                    Cache issuedCouponCache = cacheManager.getCache("IssuedCoupon");
-                    RBucket<Issued> cacheBucket = redisConfig.redissonClient().getBucket("IssuedCoupon:" + couponId + ":" + user.getId());
-                    if (cacheBucket.isExists()) {
+                    if (isCouponAlreadyIssued(couponId, user.getId())) {
                         throw new IllegalArgumentException("이미 쿠폰을 발급 받으셨습니다.");
                     }
-
-                    Coupon coupon = couponRepository.findById(couponId)
-                        .orElseThrow(() -> new NotFoundException(
-                            ErrorCode.COUPON_NOT_FOUND));
-
+                    Coupon coupon = getCouponById(couponId);
                     if (coupon.getAmount() > 0) {
-                        coupon.decreaseAmount();
-                        couponRepository.save(coupon);
-
-                        Issued issuedCoupon = new Issued(coupon, user);
-                        issuedRepository.save(issuedCoupon);
-
-                        if (issuedCouponCache != null) {
-                            LocalDateTime expirationDate = coupon.getEffective_date();
-                            LocalDateTime currentTime = LocalDateTime.now();
-                            Duration duration = Duration.between(currentTime, expirationDate);
-                            long timeToLive = duration.toMillis();
-                            cacheBucket.set(issuedCoupon, timeToLive, TimeUnit.MILLISECONDS);
-                        }
-
-                        return new IssuedResponse(couponId, coupon.getCouponInfo(),
-                            issuedCoupon.getCreatedAt(), issuedCoupon.getDeleted());
+                        decreaseCouponAmount(coupon);
+                        Issued issuedCoupon = saveIssuedCoupon(coupon, user);
+                        cacheIssuedCoupon(couponId, user.getId(), issuedCoupon, coupon.getEffective_date());
+                        return createIssuedResponse(couponId, coupon, issuedCoupon);
                     } else {
                         throw new IllegalArgumentException("남아있는 쿠폰이 없습니다.");
                     }
@@ -82,6 +64,40 @@ public class IssuedServiceImpl implements IssuedService {
             Thread.currentThread().interrupt();
             throw new RuntimeException("락을 획득하는 동안 인터럽트가 발생했습니다.", e);
         }
+    }
+
+    private boolean isCouponAlreadyIssued(Long couponId, Long userId) {
+        RBucket<Issued> cacheBucket = redisConfig.redissonClient().getBucket("IssuedCoupon:" + couponId + ":" + userId);
+        Issued issuedCoupon = cacheBucket.get();
+        return issuedCoupon != null;
+    }
+
+    private Coupon getCouponById(Long couponId) {
+        return couponRepository.findById(couponId)
+            .orElseThrow(() -> new NotFoundException(ErrorCode.COUPON_NOT_FOUND));
+    }
+
+    private void decreaseCouponAmount(Coupon coupon) {
+        coupon.decreaseAmount();
+        couponRepository.save(coupon);
+    }
+
+    private Issued saveIssuedCoupon(Coupon coupon, User user) {
+        Issued issuedCoupon = new Issued(coupon, user);
+        return issuedRepository.save(issuedCoupon);
+    }
+
+    private void cacheIssuedCoupon(Long couponId, Long userId, Issued issuedCoupon, LocalDateTime expirationDate) {
+        LocalDateTime currentTime = LocalDateTime.now();
+        Duration duration = Duration.between(currentTime, expirationDate);
+        long timeToLive = duration.toMillis();
+
+        RBucket<Issued> cacheBucket = redisConfig.redissonClient().getBucket("IssuedCoupon:" + couponId + ":" + userId);
+        cacheBucket.set(issuedCoupon, timeToLive, TimeUnit.MILLISECONDS);
+    }
+
+    private IssuedResponse createIssuedResponse(Long couponId, Coupon coupon, Issued issuedCoupon) {
+        return new IssuedResponse(issuedCoupon.getId(), couponId, coupon.getCouponInfo(), issuedCoupon.getCreatedAt(), issuedCoupon.getDeleted());
     }
 
 
