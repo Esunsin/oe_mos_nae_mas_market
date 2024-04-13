@@ -16,7 +16,8 @@ public class ProductResultResponse {
     private Long price;
     private Long discount;
     private Long quantity;
-    private StoreResponse store;
+    private String storeName;
+    private String storeInfo;
 
     public ProductResultResponse(Product product) {
         this.id = product.getId();
@@ -26,6 +27,7 @@ public class ProductResultResponse {
         this.price = product.getPrice();
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();
-        this.store = new StoreResponse(product.getStore());
+        this.storeName = product.getStore().getStoreName();
+        this.storeInfo = product.getStore().getInfo();
     }
 }
