@@ -151,7 +151,7 @@ public class productServiceTest {
         assertEquals(product.getPrice(), result.getPrice());
         assertEquals(product.getDiscount(), result.getDiscount());
         assertEquals(product.getQuantity(), result.getQuantity());
-        assertEquals(product.getStore().getStoreName(), result.getStore().getStoreName());
+        assertEquals(product.getStore().getStoreName(), result.getStoreName());
     }
 
     @Test
