@@ -26,9 +26,11 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     @Override
     public List<Product> findProductsWithQuantityGreaterThanOne(Pageable pageable) {
         QueryResults<Product> queryResults = jpaConfig.jpaQueryFactory()
-            .selectFrom(product)
-            .innerJoin(product.store, store)
-            .where(product.quantity.gt(1)
+
+                .selectFrom(product)
+                .innerJoin(product.store,store).fetchJoin()
+                .innerJoin(store.user, user).fetchJoin()
+                .where(product.quantity.gt(1)
                 .and(product.deleted.eq(Deleted.UNDELETE)))
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())

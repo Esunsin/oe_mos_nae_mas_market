@@ -82,7 +82,7 @@ public class ProductController {
                 .data(productShowResponses)
                 .build());
     }
-    @GetMapping("/products/test")
+    @GetMapping("/products/search")
     public ResponseEntity<CommonResponse<ProductShowResponse>> showAllProductTest(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
