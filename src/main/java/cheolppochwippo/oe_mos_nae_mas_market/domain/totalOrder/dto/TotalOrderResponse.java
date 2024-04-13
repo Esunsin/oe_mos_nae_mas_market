@@ -4,6 +4,8 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.PaymentStatem
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.DeliveryStatus;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import java.time.LocalDateTime;
+
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -35,14 +37,14 @@ public class TotalOrderResponse {
 
 	private LocalDateTime modifiedAt;
 
-	public TotalOrderResponse(TotalOrder totalOrder) {
+	public TotalOrderResponse(TotalOrder totalOrder, User user) {
 		this.totalOrderId = totalOrder.getMerchantUid();
 		this.price = totalOrder.getPrice();
 		this.discount = totalOrder.getDiscount();
 		this.priceAmount = totalOrder.getPriceAmount();
 		this.deliveryCost = totalOrder.getDeliveryCost();
 		this.issuedId = totalOrder.getIssueId();
-		this.username = totalOrder.getUser().getUsername();
+		this.username = user.getUsername();
 		this.orderName = totalOrder.getOrderName();
 		this.address = totalOrder.getAddress();
 		this.createdAt = totalOrder.getCreatedAt();

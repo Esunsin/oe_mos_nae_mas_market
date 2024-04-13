@@ -67,12 +67,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.redisson:redisson-spring-boot-starter:3.27.1'
 
-
 	//sqs
 	implementation 'com.amazonaws:aws-java-sdk-sqs:1.12.160'
 	//jdbc
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
-
 
 }
 
