@@ -35,7 +35,7 @@ public class Store extends TimeStamped {
     @Enumerated(EnumType.STRING)
     private Deleted deleted;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
