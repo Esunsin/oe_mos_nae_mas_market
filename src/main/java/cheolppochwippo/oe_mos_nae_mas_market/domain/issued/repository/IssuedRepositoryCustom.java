@@ -8,8 +8,6 @@ import java.util.Optional;
 
 public interface IssuedRepositoryCustom {
 
-    List<Issued> findByCouponIdAndUser(Long couponId, User user);
-
     List<IssuedResponse> findCouponByUser(User user);
 
     Optional<Double> getDiscountFindById(Long userId,Long issueId);
