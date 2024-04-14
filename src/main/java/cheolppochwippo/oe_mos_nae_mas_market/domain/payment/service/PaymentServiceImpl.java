@@ -3,6 +3,7 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.payment.service;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.entity.Delivery;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.repository.DeliveryRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.repository.IssuedRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.service.IssuedServiceImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.repository.OrderRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentCancelRequest;
@@ -59,6 +60,8 @@ public class PaymentServiceImpl implements PaymentService {
 	private final TossPaymentConfig tossPaymentConfig;
 
 	private final ProductServiceImpl productService;
+
+	private final IssuedServiceImpl issuedService;
 
 	@Override
 	public PaymentJsonResponse confirmPayment(User user, PaymentRequest request)
@@ -172,6 +175,7 @@ public class PaymentServiceImpl implements PaymentService {
 		totalOrderRepository.save(totalOrder);
 	}
 
+	//todo : 결제를 할 때 쿠폰의 재고와 상품의 재고를 둘 다 감소시켜줘야하는데, 만약 상품이 다 팔려서 상품의 재고가 없는데 쿠폰의 재고만 감소하는 경우, 쿠폰의 재고가 없어서 결제 실패를 했는데 상품 재고만 빠지는 경우.
 	@Override
 	public TotalOrder checkPayment(User user, PaymentRequest paymentRequest) {
 		TotalOrder totalOrder = totalOrderRepository.findTotalOrderByUndeleted(user).orElseThrow(
@@ -184,6 +188,10 @@ public class PaymentServiceImpl implements PaymentService {
 		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
 		try {
 			orders.parallelStream().forEach(productService::decreaseProductStock);
+			Long issuedId = totalOrder.getIssueId();
+			if (issuedId != null && issuedId != 0) {
+				issuedService.decreaseCouponAmount(issuedId, user);
+			}
 			//stream
 		} catch (IllegalArgumentException e) {
 			failPayment(totalOrder, paymentRequest);
