@@ -44,7 +44,7 @@ dependencies {
 	//database
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	//데이터베이스 추적 -> 배포 서버에는 빼야됨.
-	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+	//implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 
 	//test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
