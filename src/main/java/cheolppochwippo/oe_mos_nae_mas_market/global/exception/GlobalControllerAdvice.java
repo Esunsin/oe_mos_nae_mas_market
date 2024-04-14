@@ -7,6 +7,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.No
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NotFoundException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.PriceMismatchException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -96,7 +97,7 @@ public class GlobalControllerAdvice {
         return createResponse(HttpStatus.FORBIDDEN, e.getMessage());
     }
 
-    @ExceptionHandler({PriceMismatchException.class})
+    @ExceptionHandler({PriceMismatchException.class, IOException.class})
     public ResponseEntity<ErrorResponse> handleBadRequestException(
         Exception e) {
         log.error(e.getMessage());
