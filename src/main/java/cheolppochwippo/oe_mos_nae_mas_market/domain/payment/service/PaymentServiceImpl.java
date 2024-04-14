@@ -62,25 +62,17 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	public PaymentJsonResponse confirmPayment(User user, PaymentRequest request)
-		throws IOException, ParseException {
+		throws IOException {
 		TotalOrder totalOrder = checkPayment(user, request);
 		JSONObject obj = new JSONObject();
 		obj.put("orderId", request.getOrderId());
 		obj.put("amount", request.getAmount());
 		obj.put("paymentKey", request.getPaymentKey());
 
-		String widgetSecretKey = tossPaymentConfig.getSecretKey();
-		Base64.Encoder encoder = Base64.getEncoder();
-		byte[] encodedBytes = encoder.encode(
-			(widgetSecretKey + ":").getBytes(StandardCharsets.UTF_8));
-		String authorizations = "Basic " + new String(encodedBytes);
+		String authorizations = getAuthorizations();
 
 		URL url = new URL("https://api.tosspayments.com/v1/payments/confirm");
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.setRequestProperty("Authorization", authorizations);
-		connection.setRequestProperty("Content-Type", "application/json");
-		connection.setRequestMethod("POST");
-		connection.setDoOutput(true);
+		HttpURLConnection connection = getConnection(url,authorizations,"POST");
 
 		OutputStream outputStream = connection.getOutputStream();
 		outputStream.write(obj.toString().getBytes("UTF-8"));
@@ -88,42 +80,30 @@ public class PaymentServiceImpl implements PaymentService {
 		int code = connection.getResponseCode();
 		boolean isSuccess = code == 200;
 
-		InputStream responseStream =
-			isSuccess ? connection.getInputStream() : connection.getErrorStream();
 		if (isSuccess) {
 			successPayment(totalOrder, request);
 		} else {
 			failPayment(totalOrder, request);
 		}
-		Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
-		JSONParser responseParser = new JSONParser();
-		JSONObject jsonObject = (JSONObject) responseParser.parse(reader);
-		responseStream.close();
+
+		JSONObject jsonObject = getJSONObject(connection,isSuccess);
+
 		return new PaymentJsonResponse(jsonObject, code);
 	}
 
 	@Override
 	public PaymentJsonResponse paymentCancel(User user, PaymentCancelRequest paymentCancelRequest)
-		throws IOException, ParseException {
+		throws IOException {
 		Payment payment = checkCancelPayment(user, paymentCancelRequest);
 		JSONObject obj = new JSONObject();
 		obj.put("cancelReason", paymentCancelRequest.getCancelReason());
 
-		String widgetSecretKey = tossPaymentConfig.getSecretKey();
-		Base64.Encoder encoder = Base64.getEncoder();
-		byte[] encodedBytes = encoder.encode(
-			(widgetSecretKey + ":").getBytes(StandardCharsets.UTF_8));
-		String authorizations = "Basic " + new String(encodedBytes);
+		String authorizations = getAuthorizations();
 
 		URL url = new URL(
 			"https://api.tosspayments.com/v1/payments/" + paymentCancelRequest.getPaymentKey()
 				+ "/cancel");
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.setRequestProperty("Authorization", authorizations);
-		connection.setRequestProperty("Content-Type", "application/json");
-		connection.setRequestMethod("POST");
-		connection.setDoOutput(true);
-
+		HttpURLConnection connection = getConnection(url,authorizations,"POST");
 		OutputStream outputStream = connection.getOutputStream();
 		outputStream.write(obj.toString().getBytes("UTF-8"));
 
@@ -134,13 +114,8 @@ public class PaymentServiceImpl implements PaymentService {
 			successCancelPayment(payment, paymentCancelRequest);
 		}
 
-		InputStream responseStream =
-			isSuccess ? connection.getInputStream() : connection.getErrorStream();
+		JSONObject jsonObject = getJSONObject(connection,isSuccess);
 
-		Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
-		JSONParser responseParser = new JSONParser();
-		JSONObject jsonObject = (JSONObject) responseParser.parse(reader);
-		responseStream.close();
 		return new PaymentJsonResponse(jsonObject, code);
 	}
 
@@ -202,6 +177,44 @@ public class PaymentServiceImpl implements PaymentService {
 			throw new NoPermissionException("해당 결제를 취소하실 권한이 없습니다.");
 		}
 		return payment;
+	}
+
+	public String getAuthorizations(){
+		String widgetSecretKey = tossPaymentConfig.getSecretKey();
+		Base64.Encoder encoder = Base64.getEncoder();
+		byte[] encodedBytes = encoder.encode(
+			(widgetSecretKey + ":").getBytes(StandardCharsets.UTF_8));
+		return "Basic " + new String(encodedBytes);
+	}
+
+	public HttpURLConnection getConnection(URL url,String authorizations,String method){
+		try{
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestProperty("Authorization", authorizations);
+			connection.setRequestProperty("Content-Type", "application/json");
+			connection.setRequestMethod(method);
+			connection.setDoOutput(true);
+			return connection;
+		}catch (IOException e){
+			throw new IllegalArgumentException("test");
+		}
+	}
+
+	public JSONObject getJSONObject(HttpURLConnection connection,boolean isSuccess){
+		try{
+			InputStream responseStream =
+				isSuccess ? connection.getInputStream() : connection.getErrorStream();
+
+			Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
+			JSONParser responseParser = new JSONParser();
+			JSONObject jsonObject = (JSONObject) responseParser.parse(reader);
+			responseStream.close();
+			return jsonObject;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (ParseException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
