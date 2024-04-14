@@ -32,7 +32,7 @@ public class CouponServiceImpl implements CouponService {
 		Coupon savedCoupon = couponRepository.save(coupon);
 		List<String> phoneNumbers = userRepository.getPhoneNumberFindByConsentTrue();
 		if (!phoneNumbers.isEmpty()) {
-			sqsConfig.sendCouponMessages(phoneNumbers, coupon.getCouponInfo() + "쿠폰이 발행되었습니다!");
+			sqsConfig.sendCouponMessages(phoneNumbers, "[외못내맛 마켓]\n"+coupon.getCouponInfo() + "쿠폰이 발행되었습니다!");
 		}
 		return new CouponResponse(savedCoupon);
 	}
