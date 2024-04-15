@@ -37,6 +37,8 @@ import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -62,6 +64,8 @@ public class PaymentServiceImpl implements PaymentService {
 	private final ProductServiceImpl productService;
 
 	private final IssuedServiceImpl issuedService;
+
+	private final RedissonClient redissonClient;
 
 	@Override
 	public PaymentJsonResponse confirmPayment(User user, PaymentRequest request)
@@ -175,28 +179,30 @@ public class PaymentServiceImpl implements PaymentService {
 		totalOrderRepository.save(totalOrder);
 	}
 
-	//todo : 결제를 할 때 쿠폰의 재고와 상품의 재고를 둘 다 감소시켜줘야하는데, 만약 상품이 다 팔려서 상품의 재고가 없는데 쿠폰의 재고만 감소하는 경우, 쿠폰의 재고가 없어서 결제 실패를 했는데 상품 재고만 빠지는 경우.
 	@Override
 	public TotalOrder checkPayment(User user, PaymentRequest paymentRequest) {
-		TotalOrder totalOrder = totalOrderRepository.findTotalOrderByUndeleted(user).orElseThrow(
-			() -> new NoEntityException("진행중인 주문이 없습니다.")
-		);
+		TotalOrder totalOrder = totalOrderRepository.findTotalOrderByUndeleted(user)
+			.orElseThrow(() -> new NoEntityException("진행중인 주문이 없습니다."));
+
 		if (!Objects.equals(totalOrder.getPriceAmount(), paymentRequest.getAmount())
 			|| !Objects.equals(totalOrder.getMerchantUid(), paymentRequest.getOrderId())) {
 			throw new PriceMismatchException("올바르지 않은 요청 입니다.");
 		}
 		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
+		RLock orderLock = redissonClient.getFairLock("orderLock:" + totalOrder.getId());
+
 		try {
-			orders.parallelStream().forEach(productService::decreaseProductStock);
-			Long issuedId = totalOrder.getIssueId();
-			if (issuedId != null && issuedId != 0) {
-				issuedService.decreaseCouponAmount(issuedId, user);
+			orderLock.lock();
+			for (Order order : orders) {
+				issuedService.decreaseCouponAmountAndProductStock(totalOrder.getIssueId(), order);
 			}
-			//stream
 		} catch (IllegalArgumentException e) {
 			failPayment(totalOrder, paymentRequest);
 			throw new InsufficientQuantityException("재고가 부족합니다.");
+		} finally {
+			orderLock.unlock();
 		}
+
 		return totalOrder;
 	}
 

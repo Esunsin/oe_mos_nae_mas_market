@@ -5,6 +5,9 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.repository.CouponRepo
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.dto.IssuedResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.entity.Issued;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.repository.IssuedRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository.ProductRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.RedisConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.ErrorCode;
@@ -31,6 +34,7 @@ public class IssuedServiceImpl implements IssuedService {
     private final CouponRepository couponRepository;
     private final RedisConfig redisConfig;
     private final RedissonClient redissonClient;
+    private final ProductRepository productRepository;
 
     @Override
     public IssuedResponse issueCoupon(Long couponId, User user) {
@@ -54,6 +58,7 @@ public class IssuedServiceImpl implements IssuedService {
         return couponRepository.findById(couponId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.COUPON_NOT_FOUND));
     }
+
     @Transactional
     public void decreaseCouponAmount(Long issuedId, User user) {
         RLock lock = redissonClient.getFairLock("issuedCoupon:" + issuedId + ":" + user);
@@ -78,6 +83,43 @@ public class IssuedServiceImpl implements IssuedService {
             Thread.currentThread().interrupt();
         }
     }
+
+    @Transactional
+    public void decreaseCouponAmountAndProductStock(Long issuedId, Order order) {
+        RLock lock = redissonClient.getFairLock(
+            "issuedAndProduct:" + issuedId + ":" + order.getProduct().getId());
+        try {
+            try {
+                boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
+
+                if (isLocked) {
+                    // 쿠폰 감소 로직
+                    Issued issuedCoupon = issuedRepository.findById(issuedId)
+                        .orElseThrow(() -> new IllegalArgumentException("발급된 쿠폰이 없습니다."));
+                    Long couponId = issuedCoupon.getCoupon().getId();
+                    Coupon coupon = couponRepository.findById(couponId)
+                        .orElseThrow(() -> new IllegalArgumentException("해당 쿠폰을 찾을 수 없습니다."));
+                        coupon.decreaseAmount();
+                        couponRepository.save(coupon);
+
+                    // 상품 재고 감소 로직
+                    Product product = productRepository.findByOrder(order);
+                    Long newStock = product.getQuantity() - order.getQuantity();
+                    if (newStock < 0) {
+                        throw new IllegalArgumentException("재고가 부족합니다.");
+                    }
+                    product.quatityUpdate(newStock);
+                    productRepository.save(product);
+                }
+            } finally {
+                lock.unlock();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+
     private Issued saveIssuedCoupon(Coupon coupon, User user) {
         Issued issuedCoupon = new Issued(coupon, user);
         return issuedRepository.save(issuedCoupon);
