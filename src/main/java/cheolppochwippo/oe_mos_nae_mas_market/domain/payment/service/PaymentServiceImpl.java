@@ -18,8 +18,10 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository.TotalO
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.TossPaymentConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.InsufficientQuantityException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.InvalidUrlException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.ParsedException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.PriceMismatchException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,11 +33,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -60,9 +64,10 @@ public class PaymentServiceImpl implements PaymentService {
 
 	private final ProductServiceImpl productService;
 
+	private final MessageSource messageSource;
+
 	@Override
-	public PaymentJsonResponse confirmPayment(User user, PaymentRequest request)
-		throws IOException {
+	public PaymentJsonResponse confirmPayment(User user, PaymentRequest request) {
 		TotalOrder totalOrder = checkPayment(user, request);
 		JSONObject obj = new JSONObject();
 		obj.put("orderId", request.getOrderId());
@@ -70,14 +75,10 @@ public class PaymentServiceImpl implements PaymentService {
 		obj.put("paymentKey", request.getPaymentKey());
 
 		String authorizations = getAuthorizations();
+		HttpURLConnection connection = getConnection(
+			"https://api.tosspayments.com/v1/payments/confirm", authorizations, "POST");
 
-		URL url = new URL("https://api.tosspayments.com/v1/payments/confirm");
-		HttpURLConnection connection = getConnection(url,authorizations,"POST");
-
-		OutputStream outputStream = connection.getOutputStream();
-		outputStream.write(obj.toString().getBytes("UTF-8"));
-
-		int code = connection.getResponseCode();
+		int code = getCode(obj, connection);
 		boolean isSuccess = code == 200;
 
 		if (isSuccess) {
@@ -86,35 +87,31 @@ public class PaymentServiceImpl implements PaymentService {
 			failPayment(totalOrder, request);
 		}
 
-		JSONObject jsonObject = getJSONObject(connection,isSuccess);
+		JSONObject jsonObject = getJSONObject(connection, isSuccess);
 
 		return new PaymentJsonResponse(jsonObject, code);
 	}
 
 	@Override
-	public PaymentJsonResponse paymentCancel(User user, PaymentCancelRequest paymentCancelRequest)
-		throws IOException {
+	public PaymentJsonResponse paymentCancel(User user, PaymentCancelRequest paymentCancelRequest) {
 		Payment payment = checkCancelPayment(user, paymentCancelRequest);
 		JSONObject obj = new JSONObject();
 		obj.put("cancelReason", paymentCancelRequest.getCancelReason());
 
 		String authorizations = getAuthorizations();
 
-		URL url = new URL(
+		HttpURLConnection connection = getConnection(
 			"https://api.tosspayments.com/v1/payments/" + paymentCancelRequest.getPaymentKey()
-				+ "/cancel");
-		HttpURLConnection connection = getConnection(url,authorizations,"POST");
-		OutputStream outputStream = connection.getOutputStream();
-		outputStream.write(obj.toString().getBytes("UTF-8"));
+				+ "/cancel", authorizations, "POST");
 
-		int code = connection.getResponseCode();
+		int code = getCode(obj, connection);
 		boolean isSuccess = code == 200;
 
 		if (isSuccess) {
 			successCancelPayment(payment, paymentCancelRequest);
 		}
 
-		JSONObject jsonObject = getJSONObject(connection,isSuccess);
+		JSONObject jsonObject = getJSONObject(connection, isSuccess);
 
 		return new PaymentJsonResponse(jsonObject, code);
 	}
@@ -150,19 +147,22 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	public TotalOrder checkPayment(User user, PaymentRequest paymentRequest) {
 		TotalOrder totalOrder = totalOrderRepository.findTotalOrderByUndeleted(user).orElseThrow(
-			() -> new NoEntityException("진행중인 주문이 없습니다.")
+			() -> new NoEntityException(
+				messageSource.getMessage("noEntity.totalOrder", null, Locale.KOREA))
 		);
 		if (!Objects.equals(totalOrder.getPriceAmount(), paymentRequest.getAmount())
 			|| !Objects.equals(totalOrder.getMerchantUid(), paymentRequest.getOrderId())) {
-			throw new PriceMismatchException("올바르지 않은 요청 입니다.");
+			throw new PriceMismatchException(
+				messageSource.getMessage("price.mismatch", null, Locale.KOREA));
 		}
 		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
 		try {
 			orders.parallelStream().forEach(productService::decreaseProductStock);
 			//stream
-		} catch (IllegalArgumentException e) {
+		} catch (InsufficientQuantityException e) {
 			failPayment(totalOrder, paymentRequest);
-			throw new InsufficientQuantityException("재고가 부족합니다.");
+			throw new InsufficientQuantityException(
+				messageSource.getMessage("insufficient.quantity.product", null, Locale.KOREA));
 		}
 		return totalOrder;
 	}
@@ -171,15 +171,18 @@ public class PaymentServiceImpl implements PaymentService {
 	public Payment checkCancelPayment(User user, PaymentCancelRequest paymentCancelRequest) {
 		Payment payment = paymentRepository.findPaymentKey(paymentCancelRequest.getPaymentKey())
 			.orElseThrow(
-				() -> new NoEntityException("존재하지 않는 결제번호 입니다.")
+				() -> new NoEntityException(
+					messageSource.getMessage("noEntity.payment", null, Locale.KOREA))
 			);
 		if (!Objects.equals(payment.getTotalOrder().getUser().getId(), user.getId())) {
-			throw new NoPermissionException("해당 결제를 취소하실 권한이 없습니다.");
+			throw new NoPermissionException(
+				messageSource.getMessage("noPermission.payment", null, Locale.KOREA));
 		}
 		return payment;
 	}
 
-	public String getAuthorizations(){
+	@Override
+	public String getAuthorizations() {
 		String widgetSecretKey = tossPaymentConfig.getSecretKey();
 		Base64.Encoder encoder = Base64.getEncoder();
 		byte[] encodedBytes = encoder.encode(
@@ -187,21 +190,24 @@ public class PaymentServiceImpl implements PaymentService {
 		return "Basic " + new String(encodedBytes);
 	}
 
-	public HttpURLConnection getConnection(URL url,String authorizations,String method){
-		try{
+	@Override
+	public HttpURLConnection getConnection(String urls, String authorizations, String method) {
+		try {
+			URL url = new URL(urls);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestProperty("Authorization", authorizations);
 			connection.setRequestProperty("Content-Type", "application/json");
 			connection.setRequestMethod(method);
 			connection.setDoOutput(true);
 			return connection;
-		}catch (IOException e){
+		} catch (IOException e) {
 			throw new IllegalArgumentException("test");
 		}
 	}
 
-	public JSONObject getJSONObject(HttpURLConnection connection,boolean isSuccess){
-		try{
+	@Override
+	public JSONObject getJSONObject(HttpURLConnection connection, boolean isSuccess) {
+		try {
 			InputStream responseStream =
 				isSuccess ? connection.getInputStream() : connection.getErrorStream();
 
@@ -211,19 +217,35 @@ public class PaymentServiceImpl implements PaymentService {
 			responseStream.close();
 			return jsonObject;
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new InvalidUrlException(
+				messageSource.getMessage("invalid.url", null, Locale.KOREA));
 		} catch (ParseException e) {
-			throw new RuntimeException(e);
+			throw new ParsedException(messageSource.getMessage("parse", null, Locale.KOREA));
+		}
+	}
+
+	@Override
+	public int getCode(JSONObject obj, HttpURLConnection connection) {
+		try {
+			OutputStream outputStream = connection.getOutputStream();
+			outputStream.write(obj.toString().getBytes("UTF-8"));
+
+			return connection.getResponseCode();
+		} catch (IOException e) {
+			throw new InvalidUrlException(
+				messageSource.getMessage("invalid.url", null, Locale.KOREA));
 		}
 	}
 
 	@Override
 	public PaymentResponse getPayment(User user, Long paymentId) {
 		Payment payment = paymentRepository.findById(paymentId).orElseThrow(
-			() -> new NoEntityException("존재하지 않는 결제정보 입니다.")
+			() -> new NoEntityException(
+				messageSource.getMessage("noEntity.payment", null, Locale.KOREA))
 		);
 		if (!Objects.equals(payment.getTotalOrder().getUser().getId(), user.getId())) {
-			throw new NoPermissionException("조회하실 권한이 없습니다.");
+			throw new NoPermissionException(
+				messageSource.getMessage("noPermission.payment", null, Locale.KOREA));
 		}
 		return new PaymentResponse(payment);
 	}
