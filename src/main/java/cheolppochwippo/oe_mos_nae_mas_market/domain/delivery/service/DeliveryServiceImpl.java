@@ -5,10 +5,13 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.dto.DeliveryRespons
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.entity.Delivery;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.repository.DeliveryRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeliveryServiceImpl implements DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
+
+    private final MessageSource messageSource;
 
     @Override
     @Transactional
@@ -53,7 +58,7 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     private Delivery findDelivery(Long deliveryId) {
         return deliveryRepository.findById(deliveryId)
-            .orElseThrow(() -> new NoSuchElementException("없는 주소지 입니다."));
+            .orElseThrow(() -> new NoEntityException(messageSource.getMessage("noEntity.delivery", null, Locale.KOREA)));
     }
 
 }

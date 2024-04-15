@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 
 @ExtendWith(MockitoExtension.class)
 public class TotalOrderServiceTest {
@@ -31,6 +32,9 @@ public class TotalOrderServiceTest {
 
 	@Mock
 	IssuedRepository issuedRepository;
+
+	@Mock
+	MessageSource messageSource;
 
 	@InjectMocks
 	TotalOrderServiceImpl totalOrderService;
@@ -70,8 +74,6 @@ public class TotalOrderServiceTest {
 		//when
 		Exception exception = assertThrows(NoEntityException.class,
 			() -> totalOrderService.getTotalOrder(user, totalOrderId));
-		//then
-		assertEquals(exception.getMessage(), "존재하지 않는 주문정보 입니다.");
 	}
 
 	@Test
@@ -85,8 +87,6 @@ public class TotalOrderServiceTest {
 		//when
 		Exception exception = assertThrows(NoPermissionException.class,
 			() -> totalOrderService.getTotalOrder(user, totalOrderId));
-		//then
-		assertEquals(exception.getMessage(), "조회하실 권한이 없습니다.");
 	}
 
 }

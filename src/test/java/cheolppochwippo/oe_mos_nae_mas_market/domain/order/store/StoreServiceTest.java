@@ -15,6 +15,8 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.store.service.StoreServiceIm
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.repository.UserRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.CreationLimitExceededException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 
 @ExtendWith(MockitoExtension.class)
 public class StoreServiceTest {
@@ -32,6 +35,9 @@ public class StoreServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    MessageSource messageSource;
 
     private StoreServiceImpl storeService;
 
@@ -43,7 +49,7 @@ public class StoreServiceTest {
     @BeforeEach
     void setUp() {
 
-        storeService = new StoreServiceImpl(storeRepository, userRepository);
+        storeService = new StoreServiceImpl(storeRepository, userRepository,messageSource);
 
         seller = new User("seller", "password", SELLER);
         customer = new User("customer", "password", CONSUMER);
@@ -76,7 +82,7 @@ public class StoreServiceTest {
         when(userRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
 
         // When, Then
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NoPermissionException.class,
             () -> storeService.createStore(new StoreRequest("Test Store", "Test Store Info"),
                 customer));
     }
@@ -89,7 +95,7 @@ public class StoreServiceTest {
         when(storeRepository.existsByUserId(seller.getId())).thenReturn(true);
 
         // When, Then
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(CreationLimitExceededException.class,
             () -> storeService.createStore(new StoreRequest("Test Store", "Test Store Info"),
                 seller));
     }
@@ -130,7 +136,7 @@ public class StoreServiceTest {
         when(userRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
 
         // When, Then
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NoPermissionException.class,
             () -> storeService.updateStore(new StoreRequest("Updated Store", "Updated Store Info"),
                 customer));
     }

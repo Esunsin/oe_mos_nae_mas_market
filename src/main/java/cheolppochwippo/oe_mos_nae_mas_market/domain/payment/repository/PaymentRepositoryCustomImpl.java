@@ -10,6 +10,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.QTotalOrde
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.QUser;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.JpaConfig;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
 import com.querydsl.core.types.Operation;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -38,9 +39,6 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom{
 			)
 			.orderBy(QPayment.payment.modifiedAt.desc())
 			.fetch();
-		if(query.isEmpty()){
-			throw new IllegalArgumentException("결제 정보가 없습니다.");
-		}
 		List<PaymentResponses> paymentResponses = query.stream().map(PaymentResponses::new).toList();
 		return new PageImpl<>(paymentResponses,pageable,paymentResponses.size());
 	}

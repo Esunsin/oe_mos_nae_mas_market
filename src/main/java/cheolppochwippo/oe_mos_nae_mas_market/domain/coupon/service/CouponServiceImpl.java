@@ -6,12 +6,13 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity.Coupon;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.repository.CouponRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.repository.UserRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.SQSConfig;
-import cheolppochwippo.oe_mos_nae_mas_market.global.exception.ErrorCode;
-import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NotFoundException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,8 @@ public class CouponServiceImpl implements CouponService {
 
 	private final SQSConfig sqsConfig;
 
+	private final MessageSource messageSource;
+
 	@Transactional
 	@Override
 	public CouponResponse createCoupon(CouponRequest couponRequest) {
@@ -32,7 +35,10 @@ public class CouponServiceImpl implements CouponService {
 		Coupon savedCoupon = couponRepository.save(coupon);
 		List<String> phoneNumbers = userRepository.getPhoneNumberFindByConsentTrue();
 		if (!phoneNumbers.isEmpty()) {
-			sqsConfig.sendCouponMessages(phoneNumbers, coupon.getCouponInfo() + "쿠폰이 발행되었습니다!");
+			sqsConfig.sendCouponMessages(phoneNumbers,
+				messageSource.getMessage("logo", null, Locale.KOREA) + "\n" + coupon.getCouponInfo()
+					+
+					messageSource.getMessage("publish.coupon", null, Locale.KOREA));
 		}
 		return new CouponResponse(savedCoupon);
 	}
@@ -67,6 +73,7 @@ public class CouponServiceImpl implements CouponService {
 
 	private Coupon findCoupon(Long couponId) {
 		return couponRepository.findById(couponId)
-			.orElseThrow(() -> new NotFoundException(ErrorCode.COUPON_NOT_FOUND));
+			.orElseThrow(() -> new NoEntityException(
+				messageSource.getMessage("noEntity.coupon", null, Locale.KOREA)));
 	}
 }
