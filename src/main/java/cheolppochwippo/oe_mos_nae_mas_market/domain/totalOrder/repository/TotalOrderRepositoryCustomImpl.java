@@ -87,9 +87,6 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 			)
 			.orderBy(totalOrder.modifiedAt.desc())
 			.fetch();
-		if (query.isEmpty()) {
-			throw new NoEntityException("주문 정보가 없습니다.");
-		}
 		List<TotalOrdersGetResponse> totalOrdersGetResponses = query.stream().map(
 			TotalOrdersGetResponse::new).toList();
 		return new PageImpl<>(totalOrdersGetResponses, pageable, totalOrdersGetResponses.size());
