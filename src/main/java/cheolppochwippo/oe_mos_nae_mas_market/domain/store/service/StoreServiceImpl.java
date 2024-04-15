@@ -7,10 +7,15 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreReposi
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.repository.UserRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.CreationLimitExceededException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 import jakarta.transaction.Transactional;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,6 +25,8 @@ public class StoreServiceImpl implements StoreService {
 
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    private final MessageSource messageSource;
+
 
     @Transactional
     public StoreResponse createStore(StoreRequest storeRequest, User user) {
@@ -40,7 +47,7 @@ public class StoreServiceImpl implements StoreService {
         User seller = getUser(user);
         checkUserRole(user);
         Store store = storeRepository.findByUser_Id(seller.getId())
-            .orElseThrow(() -> new NoSuchElementException("상점을 찾을 수 없습니다."));
+            .orElseThrow(() -> new NoSuchElementException(messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
 
         store.update(storeRequest);
 
@@ -50,18 +57,18 @@ public class StoreServiceImpl implements StoreService {
 
     private User getUser(User user) {
         return userRepository.findById(user.getId())
-            .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+            .orElseThrow(() -> new NoEntityException(messageSource.getMessage("noEntity.user", null, Locale.KOREA)));
     }
 
     private void checkUserRole(User user) {
         if (!RoleEnum.SELLER.equals(user.getRole())) {
-            throw new IllegalArgumentException("판매자만 상점을 생성 또는 수정할 수 있습니다.");
+            throw new NoPermissionException(messageSource.getMessage("noPermission.role.seller.update", null, Locale.KOREA));
         }
     }
 
     private void checkExistingStore(User seller) {
         if (storeRepository.existsByUserId(seller.getId())) {
-            throw new IllegalArgumentException("상점은 한개만 생성 할 수 있습니다.");
+            throw new CreationLimitExceededException(messageSource.getMessage("create.limit.shop", null, Locale.KOREA));
         }
     }
 }

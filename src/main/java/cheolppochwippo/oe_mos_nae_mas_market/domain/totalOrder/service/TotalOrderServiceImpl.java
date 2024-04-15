@@ -12,9 +12,11 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 import com.querydsl.core.Tuple;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,8 @@ public class TotalOrderServiceImpl implements TotalOrderService {
 
 	private final IssuedRepository issuedRepository;
 
+	private final MessageSource messageSource;
+
 	@Transactional
 	@Override
 	public TotalOrderResponse createTotalOrder(User user, TotalOrderRequest request) {
@@ -38,11 +42,12 @@ public class TotalOrderServiceImpl implements TotalOrderService {
 			totalOrderRepository.save(total.get());
 		}
 		TotalOrderNameDto totalInfo = totalOrderRepository.getTotalInfoByUserId(user.getId()).orElseThrow(
-			() -> new NoEntityException("현재 진행중인 주문이 없습니다")
+			() -> new NoEntityException(
+				messageSource.getMessage("noEntity.totalOrder", null, Locale.KOREA))
 		);
 		double discount = request.getIssuedId() == 0 ? 0
 			: issuedRepository.getDiscountFindById(user.getId(), request.getIssuedId()).orElseThrow(
-				() -> new NoPermissionException("유효하지 않은 쿠폰 입니다.")
+				() -> new NoPermissionException(messageSource.getMessage("noPermission.coupon", null, Locale.KOREA))
 			);
 		TotalOrder totalOrder = new TotalOrder(request, user, totalInfo, discount);
 		totalOrderRepository.save(totalOrder);
@@ -54,10 +59,11 @@ public class TotalOrderServiceImpl implements TotalOrderService {
 	@Override
 	public TotalOrderGetResponse getTotalOrder(User user, Long totalOrderId) {
 		TotalOrder totalOrder = totalOrderRepository.findById(totalOrderId).orElseThrow(
-			() -> new NoEntityException("존재하지 않는 주문정보 입니다.")
+			() -> new NoEntityException(
+				messageSource.getMessage("noEntity.totalOrder", null, Locale.KOREA))
 		);
 		if (!Objects.equals(totalOrder.getUser().getId(), user.getId())) {
-			throw new NoPermissionException("조회하실 권한이 없습니다.");
+			throw new NoPermissionException(messageSource.getMessage("noPermission.totalOrder", null, Locale.KOREA));
 		}
 		return new TotalOrderGetResponse(totalOrder);
 	}

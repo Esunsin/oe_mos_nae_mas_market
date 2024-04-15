@@ -17,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,20 +29,25 @@ public class PaymentController {
 	private final PaymentServiceImpl paymentService;
 
 	@RequestMapping(value = "/payments/confirm")
-	public ResponseEntity<JSONObject> confirmPayment(
-		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentRequest request)
-		throws Exception {
+	public ResponseEntity<CommonResponse<JSONObject>> confirmPayment(
+		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentRequest request) {
 		PaymentJsonResponse response = paymentService.confirmPayment(userDetails.getUser(),
 			request);
-		return ResponseEntity.status(response.getCode()).body(response.getJsonObject());
+		return ResponseEntity.status(response.getCode()).body(CommonResponse.<JSONObject>builder()
+			.msg("confirm payment complete!")
+			.data(response.getJsonObject())
+			.build());
 	}
 
 	@RequestMapping(value = "/payments/cancel")
-	public ResponseEntity<JSONObject> cancelPayment(
-		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentCancelRequest request)
-		throws Exception {
-		PaymentJsonResponse response = paymentService.paymentCancel(userDetails.getUser(),request);
-		return ResponseEntity.status(response.getCode()).body(response.getJsonObject());
+	public ResponseEntity<CommonResponse<JSONObject>> cancelPayment(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@RequestBody PaymentCancelRequest request) {
+		PaymentJsonResponse response = paymentService.paymentCancel(userDetails.getUser(), request);
+		return ResponseEntity.status(response.getCode()).body(CommonResponse.<JSONObject>builder()
+			.msg("cancel payment complete!")
+			.data(response.getJsonObject())
+			.build());
 	}
 
 	@GetMapping("/payments/{paymentId}")
@@ -59,9 +63,10 @@ public class PaymentController {
 
 	@GetMapping("/payments")
 	public ResponseEntity<CommonResponse<Page<PaymentResponses>>> getPayment(
-		@RequestParam("page")int page,
+		@RequestParam("page") int page,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
-		Page<PaymentResponses> paymentResponses = paymentService.getPayments(userDetails.getUser(),page);
+		Page<PaymentResponses> paymentResponses = paymentService.getPayments(userDetails.getUser(),
+			page);
 		return ResponseEntity.ok().body(CommonResponse.<Page<PaymentResponses>>builder()
 			.msg("show paymentPage complete!")
 			.data(paymentResponses)
@@ -71,8 +76,8 @@ public class PaymentController {
 	@RequestMapping("/payments/confirm/pass")
 	public ResponseEntity<CommonResponse<Void>> confirmPassPayment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentRequest request) {
-		TotalOrder totalOrder = paymentService.checkPayment(userDetails.getUser(),request);
-		paymentService.successPayment(totalOrder,request);
+		TotalOrder totalOrder = paymentService.checkPayment(userDetails.getUser(), request);
+		paymentService.successPayment(totalOrder, request);
 		return ResponseEntity.ok().body(CommonResponse.<Void>builder()
 			.msg("confirm Pass Payment complete!")
 			.build());
@@ -82,9 +87,10 @@ public class PaymentController {
 	// 같은 주문번호의 결제 내역을 계속생성되는 이유는 제한시키는 로직이 실결제 승인에 있기 때문
 	@RequestMapping("/payments/cancel/pass")
 	public ResponseEntity<CommonResponse<Void>> cancelPassPayment(
-		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentCancelRequest request) {
-		Payment payment = paymentService.checkCancelPayment(userDetails.getUser(),request);
-		paymentService.successCancelPayment(payment,request);
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@RequestBody PaymentCancelRequest request) {
+		Payment payment = paymentService.checkCancelPayment(userDetails.getUser(), request);
+		paymentService.successCancelPayment(payment, request);
 		return ResponseEntity.ok().body(CommonResponse.<Void>builder()
 			.msg("cancel Pass Payment complete!")
 			.build());
