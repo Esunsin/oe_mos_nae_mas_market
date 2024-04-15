@@ -107,7 +107,6 @@ public class IssuedServiceImpl implements IssuedService {
             try {
                 boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
                 if (isLocked) {
-                    // 쿠폰 감소 로직
                     Issued issuedCoupon = issuedRepository.findById(issuedId)
                         .orElseThrow(() -> new IllegalArgumentException("발급된 쿠폰이 없습니다."));
                     Long couponId = issuedCoupon.getCoupon().getId();
@@ -116,7 +115,6 @@ public class IssuedServiceImpl implements IssuedService {
                     coupon.decreaseAmount();
                     couponRepository.save(coupon);
 
-                    // 상품 재고 감소 로직
                     Product product = productRepository.findByOrder(order);
                     Long newStock = product.getQuantity() - order.getQuantity();
                     if (newStock < 0) {
