@@ -8,6 +8,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository.ProductRe
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,6 +74,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "ordersInCart", key = "#user.id", cacheManager = "cacheManager")
     public List<SingleOrderInCartResponse> showOrdersInCart(User user) {
         List<Order> orders = orderRepository.findOrderByUserBeforeBuy(user);
         return orders.stream().map(SingleOrderInCartResponse::new).toList();

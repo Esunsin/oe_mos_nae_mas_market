@@ -131,4 +131,20 @@ public class ProductServiceImpl implements ProductService {
 		}
 
 	}
+
+	@Transactional(readOnly = true)
+	public ProductShowResponse showAllProductWithValue(Pageable pageable,String searchValue) {
+		List<Product> productList;
+		if(searchValue == null) {
+			log.info("없을때");
+			productList = productRepository.findProductsWithQuantityGreaterThanOne(pageable);
+		}
+		else {
+			log.info("있을때");
+			productList = productRepository.findProductsWithQuantityGreaterThanOneAndSearchValue(
+				pageable,searchValue);
+		}
+		return new ProductShowResponse(
+				productList.stream().map(product -> new ProductResultResponse(product)).toList());
+	}
 }

@@ -47,7 +47,7 @@ public class TotalOrderServiceImpl implements TotalOrderService {
 		TotalOrder totalOrder = new TotalOrder(request, user, totalInfo, discount);
 		totalOrderRepository.save(totalOrder);
 		totalOrderRepository.pushOrder(totalOrder, user.getId());
-		TotalOrderResponse response = new TotalOrderResponse(totalOrder);
+		TotalOrderResponse response = new TotalOrderResponse(totalOrder, user);
 		return response;
 	}
 

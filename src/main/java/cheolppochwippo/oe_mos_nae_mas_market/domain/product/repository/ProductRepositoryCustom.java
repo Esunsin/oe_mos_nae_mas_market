@@ -10,4 +10,6 @@ public interface ProductRepositoryCustom {
     List<Product> findProductsWithQuantityGreaterThanOne(Pageable pageable);
 
     Product findByOrder(Order order);
+
+    List<Product> findProductsWithQuantityGreaterThanOneAndSearchValue(Pageable pageable,String searchValue);
 }
