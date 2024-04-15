@@ -33,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 
 @ExtendWith(MockitoExtension.class)
 public class PaymentServiceTest {
@@ -57,6 +58,9 @@ public class PaymentServiceTest {
 
 	@Mock
 	ProductServiceImpl productService;
+
+	@Mock
+	MessageSource messageSource;
 
 	@InjectMocks
 	PaymentServiceImpl paymentService;
@@ -146,8 +150,6 @@ public class PaymentServiceTest {
 		//when
 		Exception exception = assertThrows(NoEntityException.class,
 			() -> paymentService.checkPayment(user, paymentRequest));
-		//then
-		assertEquals(exception.getMessage(), "진행중인 주문이 없습니다.");
 	}
 
 	@Test
@@ -165,8 +167,6 @@ public class PaymentServiceTest {
 		//when
 		Exception exception = assertThrows(PriceMismatchException.class,
 			() -> paymentService.checkPayment(user, paymentRequest));
-		//then
-		assertEquals(exception.getMessage(), "올바르지 않은 요청 입니다.");
 	}
 
 	@Test
@@ -202,8 +202,6 @@ public class PaymentServiceTest {
 		//when
 		Exception exception = assertThrows(NoEntityException.class,
 			() -> paymentService.checkCancelPayment(user, paymentRequest));
-		//then
-		assertEquals(exception.getMessage(), "존재하지 않는 결제번호 입니다.");
 	}
 
 	@Test
@@ -221,8 +219,6 @@ public class PaymentServiceTest {
 		//when
 		Exception exception = assertThrows(NoPermissionException.class,
 			() -> paymentService.checkCancelPayment(user, paymentRequest));
-		//then
-		assertEquals(exception.getMessage(), "해당 결제를 취소하실 권한이 없습니다.");
 	}
 
 	@Test
@@ -253,8 +249,6 @@ public class PaymentServiceTest {
 		//when
 		Exception exception = assertThrows(NoEntityException.class,
 			() -> paymentService.getPayment(user, paymentId));
-		//then
-		assertEquals(exception.getMessage(), "존재하지 않는 결제정보 입니다.");
 	}
 
 	@Test
@@ -269,8 +263,6 @@ public class PaymentServiceTest {
 		//when
 		Exception exception = assertThrows(NoPermissionException.class,
 			() -> paymentService.getPayment(user, paymentId));
-		//then
-		assertEquals(exception.getMessage(), "조회하실 권한이 없습니다.");
 	}
 
 }

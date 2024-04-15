@@ -22,6 +22,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductServi
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -34,6 +35,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.redisson.api.RedissonClient;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -48,6 +50,8 @@ public class productServiceTest {
     StoreRepository storeRepository;
     @Mock
     CacheManager cacheManager;
+    @Mock
+    MessageSource messageSource;
 
     ProductServiceImpl productService;
 
@@ -58,7 +62,7 @@ public class productServiceTest {
 
     @BeforeEach
     void setUp() {
-        productService = new ProductServiceImpl(productRepository, storeRepository,redissonClient);
+        productService = new ProductServiceImpl(productRepository, storeRepository,redissonClient,messageSource);
 
         seller = new User("seller", "password", SELLER);
         customer = new User("customer", "password", CONSUMER);
@@ -97,7 +101,7 @@ public class productServiceTest {
         ProductRequest productRequest = new ProductRequest("Test Product", "Test Product Info",
             10000L, 8000L, 2000L, 10L);
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NoPermissionException.class,
             () -> productService.createProduct(productRequest, customer));
     }
 
@@ -117,7 +121,7 @@ public class productServiceTest {
     @Test
     @DisplayName("상품 수정_SELLER 아닐때_실패")
     void updateProduct_CustomerRole_ThrowsIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(NoPermissionException.class, () -> {
             ProductRequest updatedProductRequest = new ProductRequest("Updated Product",
                 "Updated Product Info", 12000L, 10000L, 2000L, 15L);
             productService.updateProduct(updatedProductRequest, 1L, customer);
@@ -131,7 +135,7 @@ public class productServiceTest {
         ProductRequest updatedProductRequest = new ProductRequest("Updated Product",
             "Updated Product Info", 12000L, 10000L, 2000L, 15L);
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NoPermissionException.class,
             () -> productService.updateProduct(updatedProductRequest, 2L, customer));
 
     }
@@ -194,7 +198,7 @@ public class productServiceTest {
     @Test
     @DisplayName("상품 삭제_실패")
     void deleteProduct_CustomerRole_ThrowsIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(NoPermissionException.class, () -> {
             productService.deleteProduct(1L, customer);
         });
     }
