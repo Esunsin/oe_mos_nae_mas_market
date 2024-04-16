@@ -22,13 +22,13 @@ public class PaymentLockTest {
 //	@Test
 //	@DisplayName("분산락테스트")
 //	void redis() throws InterruptedException {
-//		int numThreads = 11;
+//		int numThreads = 200;
 //		CountDownLatch latch = new CountDownLatch(numThreads);
 //		ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-//		User user = new User(1L);
+//		User user = new User(6L);
 //		PaymentRequest paymentRequest = new PaymentRequest();
-//		paymentRequest.setAmount(1000L);
-//		paymentRequest.setOrderId("5c0ca37a-469d-49c7-99af-1111212asfas");
+//		paymentRequest.setAmount(4700L);
+//		paymentRequest.setOrderId("96de40ea-d4ab-4842-9919-20037a34a0c3");
 //
 //		for (int i = 0; i < numThreads; i++) {
 //			int userId = i + 1; // 사용자 번호

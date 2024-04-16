@@ -3,6 +3,8 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.issued.repository;
 import static cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity.QCoupon.coupon;
 import static cheolppochwippo.oe_mos_nae_mas_market.domain.issued.entity.QIssued.issued;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity.Coupon;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity.QCoupon;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.dto.IssuedResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.entity.Issued;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.entity.QIssued;
@@ -68,6 +70,22 @@ public class IssuedRepositoryCustomImpl implements IssuedRepositoryCustom {
             .execute();
         entityManager.flush();
         entityManager.clear();
+    }
+
+    @Override
+    public Coupon findByIssued(Long issuedId) {
+        Issued issued = jpaConfig.jpaQueryFactory()
+            .selectFrom(QIssued.issued)
+            .where(QIssued.issued.id.eq(issuedId))
+            .fetchOne();
+        if (issued == null) {
+            throw new IllegalArgumentException("해당 쿠폰이 없습니다.");
+        }
+        Coupon coupon = jpaConfig.jpaQueryFactory()
+            .selectFrom(QCoupon.coupon)
+            .where(QCoupon.coupon.eq(issued.getCoupon()))
+            .fetchOne();
+        return coupon;
     }
 
     private BooleanExpression userIdEq(Long userId) {

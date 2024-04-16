@@ -3,6 +3,7 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.payment.service;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.entity.Delivery;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.repository.DeliveryRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.repository.IssuedRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.service.IssuedServiceImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.repository.OrderRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentCancelRequest;
@@ -39,6 +40,8 @@ import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -64,7 +67,11 @@ public class PaymentServiceImpl implements PaymentService {
 
 	private final ProductServiceImpl productService;
 
+	private final RedissonClient redissonClient;
+
 	private final MessageSource messageSource;
+
+	private final IssuedServiceImpl issuedService;
 
 	@Override
 	public PaymentJsonResponse confirmPayment(User user, PaymentRequest request) {
@@ -158,14 +165,14 @@ public class PaymentServiceImpl implements PaymentService {
 		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
 		try {
 			orders.parallelStream().forEach(productService::decreaseProductStock);
-			//stream
-		} catch (InsufficientQuantityException e) {
-			failPayment(totalOrder, paymentRequest);
-			throw new InsufficientQuantityException(
-				messageSource.getMessage("insufficient.quantity.product", null, Locale.KOREA));
-		}
-		return totalOrder;
+	} catch (InsufficientQuantityException e) {
+		failPayment(totalOrder, paymentRequest);
+		throw new InsufficientQuantityException(
+			messageSource.getMessage("insufficient.quantity.product", null, Locale.KOREA));
 	}
+		return totalOrder;
+}
+
 
 	@Override
 	public Payment checkCancelPayment(User user, PaymentCancelRequest paymentCancelRequest) {

@@ -83,7 +83,7 @@ public class JwtUtil {
         Date date = new Date();
 
         String accessToken = createAccessToken(userId, username, role);
-        //deleteRefreshToken(userId);
+        deleteRefreshToken(userId);
 
         String refreshToken = BEARER_PREFIX +
             Jwts.builder()
