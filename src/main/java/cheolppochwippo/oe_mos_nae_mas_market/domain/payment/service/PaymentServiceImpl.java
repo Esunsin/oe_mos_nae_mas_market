@@ -164,7 +164,7 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
 		try {
-			orders.parallelStream().forEach(order -> issuedService.decreaseCouponAmountAndProductStock(totalOrder.getIssueId(), order));
+			orders.parallelStream().forEach(productService::decreaseProductStock);
 	} catch (InsufficientQuantityException e) {
 		failPayment(totalOrder, paymentRequest);
 		throw new InsufficientQuantityException(
