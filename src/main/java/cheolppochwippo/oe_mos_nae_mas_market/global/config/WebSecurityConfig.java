@@ -61,6 +61,7 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/coupons/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH,"/coupons/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE,"/coupons/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/health-check").permitAll()
                         .requestMatchers(HttpMethod.GET,"/products/**").permitAll()
                         .anyRequest().authenticated()
         );

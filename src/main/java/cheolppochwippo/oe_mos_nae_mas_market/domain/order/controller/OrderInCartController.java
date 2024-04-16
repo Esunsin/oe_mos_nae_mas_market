@@ -20,6 +20,9 @@ public class OrderInCartController {
 
     private final CartService cartService;
 
+    @GetMapping("/health-check")
+    public ResponseEntity<HttpStatus> healthCheck(){ return new ResponseEntity<>(HttpStatus.OK); }
+
     @GetMapping("/orders")
     public ResponseEntity<CartResponse<List<SingleOrderInCartResponse>, AllOrderInCartResponse>> showOrdersInCart(
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
