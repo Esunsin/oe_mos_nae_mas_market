@@ -33,7 +33,7 @@ public class WebSecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
-            throws Exception {
+        throws Exception {
         return configuration.getAuthenticationManager();
     }
 
@@ -48,21 +48,22 @@ public class WebSecurityConfig {
         http.csrf((csrf) -> csrf.disable());
 
         http.sessionManagement((sessionManagement) ->
-                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         );
 
         http.authorizeHttpRequests((authorizeHttpRequests) ->
-                authorizeHttpRequests
-                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
-                        .permitAll()
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/coupons/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/coupons/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH,"/coupons/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/coupons/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/products/**").permitAll()
-                        .anyRequest().authenticated()
+            authorizeHttpRequests
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+                .permitAll()
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                .requestMatchers(HttpMethod.GET,"/coupons/**").permitAll()
+                .requestMatchers(HttpMethod.POST,"/coupons/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH,"/coupons/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE,"/coupons/**").hasRole("ADMIN")
+                .requestMatchers("/").permitAll()
+                .requestMatchers(HttpMethod.GET,"/products/**").permitAll()
+                .anyRequest().authenticated()
         );
 
         // 필터 관리
