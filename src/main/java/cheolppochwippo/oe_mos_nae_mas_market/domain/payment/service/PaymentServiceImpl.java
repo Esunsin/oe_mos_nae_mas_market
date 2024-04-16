@@ -163,22 +163,16 @@ public class PaymentServiceImpl implements PaymentService {
 				messageSource.getMessage("price.mismatch", null, Locale.KOREA));
 		}
 		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
-		RLock orderLock = redissonClient.getFairLock("orderLock:" + totalOrder.getId());
-
 		try {
-			orderLock.lock();
-			for (Order order : orders) {
-				issuedService.decreaseCouponAmountAndProductStock(totalOrder.getIssueId(), order);
-			}
-		} catch (IllegalArgumentException e) {
-			failPayment(totalOrder, paymentRequest);
-			throw new InsufficientQuantityException(
-				messageSource.getMessage("insufficient.quantity.product", null, Locale.KOREA));
-		} finally {
-            orderLock.unlock();
-        }
-		return totalOrder;
+			orders.parallelStream().forEach(order -> issuedService.decreaseCouponAmountAndProductStock(totalOrder.getIssueId(), order));
+	} catch (InsufficientQuantityException e) {
+		failPayment(totalOrder, paymentRequest);
+		throw new InsufficientQuantityException(
+			messageSource.getMessage("insufficient.quantity.product", null, Locale.KOREA));
 	}
+		return totalOrder;
+}
+
 
 	@Override
 	public Payment checkCancelPayment(User user, PaymentCancelRequest paymentCancelRequest) {
