@@ -32,6 +32,7 @@ public class IssuedRepositoryCustomImpl implements IssuedRepositoryCustom {
             .select(
                 Projections.constructor(
                     IssuedResponse.class,
+                    issued.id,
                     issued.coupon.id,
                     issued.coupon.couponInfo,
                     issued.createdAt,
