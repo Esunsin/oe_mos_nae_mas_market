@@ -85,6 +85,8 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 			.where(
 				totalOrder.user.id.eq(userId)
 			)
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
 			.orderBy(totalOrder.modifiedAt.desc())
 			.fetch();
 		List<TotalOrdersGetResponse> totalOrdersGetResponses = query.stream().map(
