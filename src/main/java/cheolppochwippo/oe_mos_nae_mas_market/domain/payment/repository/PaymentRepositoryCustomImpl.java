@@ -37,6 +37,8 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom{
 			.where(
 				userIdEq(userId)
 			)
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
 			.orderBy(QPayment.payment.modifiedAt.desc())
 			.fetch();
 		List<PaymentResponses> paymentResponses = query.stream().map(PaymentResponses::new).toList();

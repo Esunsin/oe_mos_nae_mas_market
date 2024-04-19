@@ -259,7 +259,7 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	public Page<PaymentResponses> getPayments(User user, int page) {
-		Pageable pageable = PageRequest.of(page, 10);
+		Pageable pageable = PageRequest.of(page-1, 10);
 		return paymentRepository.getPaymentPageFindByUserId(user.getId(), pageable);
 	}
 

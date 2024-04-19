@@ -63,8 +63,9 @@ public class PaymentController {
 
 	@GetMapping("/payments")
 	public ResponseEntity<CommonResponse<Page<PaymentResponses>>> getPayment(
-		@RequestParam("page") int page,
+		@RequestParam(defaultValue = "1") int page,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+
 		Page<PaymentResponses> paymentResponses = paymentService.getPayments(userDetails.getUser(),
 			page);
 		return ResponseEntity.ok().body(CommonResponse.<Page<PaymentResponses>>builder()
