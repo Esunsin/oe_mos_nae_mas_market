@@ -52,6 +52,7 @@ public class TotalOrder extends TimeStamped {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     private PaymentStatementEnum paymentStatementEnum;
 
     private String merchantUid;
