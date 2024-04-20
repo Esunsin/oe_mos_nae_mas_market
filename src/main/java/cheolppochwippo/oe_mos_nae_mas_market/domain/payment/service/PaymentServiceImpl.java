@@ -142,6 +142,7 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	public void successCancelPayment(Payment payment, PaymentCancelRequest paymentCancelRequest) {
 		Payment cancelPayment = new Payment(payment, paymentCancelRequest);
+		payment.getTotalOrder().refundOrder();
 		paymentRepository.save(cancelPayment);
 	}
 
@@ -208,7 +209,8 @@ public class PaymentServiceImpl implements PaymentService {
 			connection.setDoOutput(true);
 			return connection;
 		} catch (IOException e) {
-			throw new IllegalArgumentException("test");
+			throw new InvalidUrlException(
+				messageSource.getMessage("invalid.url", null, Locale.KOREA));
 		}
 	}
 

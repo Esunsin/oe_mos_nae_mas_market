@@ -83,5 +83,8 @@ public class TotalOrder extends TimeStamped {
         deleted = Deleted.DELETE;
         paymentStatementEnum = PaymentStatementEnum.COMPLETE;
     }
+    public void refundOrder(){
+        paymentStatementEnum = PaymentStatementEnum.REFUND;
+    }
 
 }
