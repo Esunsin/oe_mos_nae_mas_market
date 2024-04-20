@@ -57,7 +57,9 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 				QOrder.order.quantity
 			))
 			.from(QOrder.order)
-			.where(userIdEq(userId))
+			.where(userIdEq(userId),
+				QOrder.order.deleted.eq(Deleted.UNDELETE)
+				)
 			.groupBy(QOrder.order.user.id)
 			.fetchOne();
 		return Optional.ofNullable(query);
