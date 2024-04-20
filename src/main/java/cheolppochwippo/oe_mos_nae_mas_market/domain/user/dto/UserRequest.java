@@ -12,8 +12,6 @@ public class UserRequest {
 
 	private String password;
 
-	private RoleEnum role;
-
 	private String phoneNumber;
 
 	private boolean consent = false;
