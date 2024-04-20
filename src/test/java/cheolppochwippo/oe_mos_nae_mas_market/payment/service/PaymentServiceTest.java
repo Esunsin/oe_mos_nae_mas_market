@@ -72,7 +72,7 @@ public class PaymentServiceTest {
 
 	private TotalOrder testTotalOrder(User user) {
 		return new TotalOrder(1L, 50L, 10L, 50L, 0L, "테스트", "서울", 0L, Deleted.UNDELETE, user,
-			PaymentStatementEnum.WAIT, "testId");
+			PaymentStatementEnum.WAIT, "testId","testKey");
 	}
 
 	private Payment testPayment(TotalOrder totalOrder) {
