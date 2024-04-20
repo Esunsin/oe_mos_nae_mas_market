@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService{
         }
 
         String encodedPassword = passwordEncoder.encode(userRequest.getPassword());
-        User user = new User(userRequest.getUsername(), encodedPassword, userRequest.getRole(),userRequest.getPhoneNumber(),userRequest.isConsent());
+        User user = new User(userRequest, encodedPassword);
 
         User savedUser = userRepository.save(user);
         return CompletableFuture.completedFuture(new UserResponse(savedUser));

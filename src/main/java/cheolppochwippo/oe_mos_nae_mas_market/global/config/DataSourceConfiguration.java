@@ -13,50 +13,50 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 
-@Configuration
+//@Configuration
 public class DataSourceConfiguration {
-    public static final String PRIMARY_DATASOURCE = "primaryDataSource";
-    public static final String SECONDARY_DATASOURCE = "secondaryDataSource";
-
-    @Bean(PRIMARY_DATASOURCE)
-    @ConfigurationProperties(prefix = "spring.datasource.primary.hikari")
-    public DataSource primaryDataSource() {
-        return DataSourceBuilder.create()
-            .type(HikariDataSource.class)
-            .build();
-    }
-
-    @Bean(SECONDARY_DATASOURCE)
-    @ConfigurationProperties(prefix = "spring.datasource.secondary.hikari")
-    public DataSource secondaryDataSource() {
-        return DataSourceBuilder.create()
-            .type(HikariDataSource.class)
-            .build();
-    }
-
-    @Bean
-    @Primary
-    @DependsOn({PRIMARY_DATASOURCE, SECONDARY_DATASOURCE})
-    public DataSource routingDataSource(@Qualifier(PRIMARY_DATASOURCE) DataSource primaryDataSource,
-        @Qualifier(SECONDARY_DATASOURCE) DataSource secondaryDataSource) {
-
-        RoutingDataSource routingDataSource = new RoutingDataSource();
-        Map<Object, Object> dataSourceMap = new HashMap<>();
-
-        dataSourceMap.put("primary", primaryDataSource);
-        dataSourceMap.put("secondary", secondaryDataSource);
-
-        routingDataSource.setTargetDataSources(dataSourceMap);
-        routingDataSource.setDefaultTargetDataSource(primaryDataSource);
-
-        return routingDataSource;
-    }
-
-    @Bean
-    @DependsOn("routingDataSource")
-    public LazyConnectionDataSourceProxy dataSource(DataSource routingDataSource) {
-        return new LazyConnectionDataSourceProxy(routingDataSource);
-    }
+//    public static final String PRIMARY_DATASOURCE = "primaryDataSource";
+//    public static final String SECONDARY_DATASOURCE = "secondaryDataSource";
+//
+//    @Bean(PRIMARY_DATASOURCE)
+//    @ConfigurationProperties(prefix = "spring.datasource.primary.hikari")
+//    public DataSource primaryDataSource() {
+//        return DataSourceBuilder.create()
+//            .type(HikariDataSource.class)
+//            .build();
+//    }
+//
+//    @Bean(SECONDARY_DATASOURCE)
+//    @ConfigurationProperties(prefix = "spring.datasource.secondary.hikari")
+//    public DataSource secondaryDataSource() {
+//        return DataSourceBuilder.create()
+//            .type(HikariDataSource.class)
+//            .build();
+//    }
+//
+//    @Bean
+//    @Primary
+//    @DependsOn({PRIMARY_DATASOURCE, SECONDARY_DATASOURCE})
+//    public DataSource routingDataSource(@Qualifier(PRIMARY_DATASOURCE) DataSource primaryDataSource,
+//        @Qualifier(SECONDARY_DATASOURCE) DataSource secondaryDataSource) {
+//
+//        RoutingDataSource routingDataSource = new RoutingDataSource();
+//        Map<Object, Object> dataSourceMap = new HashMap<>();
+//
+//        dataSourceMap.put("primary", primaryDataSource);
+//        dataSourceMap.put("secondary", secondaryDataSource);
+//
+//        routingDataSource.setTargetDataSources(dataSourceMap);
+//        routingDataSource.setDefaultTargetDataSource(primaryDataSource);
+//
+//        return routingDataSource;
+//    }
+//
+//    @Bean
+//    @DependsOn("routingDataSource")
+//    public LazyConnectionDataSourceProxy dataSource(DataSource routingDataSource) {
+//        return new LazyConnectionDataSourceProxy(routingDataSource);
+//    }
 
 }
 

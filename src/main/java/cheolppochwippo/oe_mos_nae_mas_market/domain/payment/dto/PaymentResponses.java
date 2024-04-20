@@ -21,6 +21,7 @@ public class PaymentResponses {
 	public PaymentResponses(Payment payment){
 		id = payment.getPaymentId();
 		amount = payment.getAmount();
+		orderId= payment.getOrderId();
 		orderName = payment.getOrderName();
 		statement = payment.getStatement();
 	}

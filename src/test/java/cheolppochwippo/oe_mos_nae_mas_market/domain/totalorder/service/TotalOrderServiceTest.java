@@ -45,7 +45,7 @@ public class TotalOrderServiceTest {
 
 	private TotalOrder testTotalOrder(User user) {
 		return new TotalOrder(1L, 50L, 10L, 40L, 0L, "테스트", "서울", 0L, Deleted.UNDELETE, user,
-			PaymentStatementEnum.WAIT, "id");
+			PaymentStatementEnum.WAIT, "id","testKey");
 	}
 
 	@Test

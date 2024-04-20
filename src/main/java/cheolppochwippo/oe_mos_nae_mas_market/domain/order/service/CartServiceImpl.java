@@ -83,7 +83,6 @@ public class CartServiceImpl implements CartService {
 	}
 
 	@Transactional(readOnly = true)
-	@Cacheable(cacheNames = "ordersInCart", key = "#user.id", cacheManager = "cacheManager")
 	public List<SingleOrderInCartResponse> showOrdersInCart(User user) {
 		List<Order> orders = orderRepository.findOrderByUserBeforeBuy(user);
 		return orders.stream().map(SingleOrderInCartResponse::new).toList();

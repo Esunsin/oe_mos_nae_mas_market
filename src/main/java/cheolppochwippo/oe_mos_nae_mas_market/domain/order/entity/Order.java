@@ -25,8 +25,6 @@ public class Order extends TimeStamped {
 
     private Long price;
 
-    private String merchantUid;
-
     @Column
     @Enumerated(EnumType.STRING)
     private Deleted deleted;

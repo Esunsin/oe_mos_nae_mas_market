@@ -126,7 +126,7 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	@Transactional
 	public void successPayment(TotalOrder totalOrder, PaymentRequest paymentRequest) {
-		totalOrder.completeOrder();
+		totalOrder.completeOrder(paymentRequest.getPaymentKey());
 		totalOrderRepository.save(totalOrder);
 		totalOrderRepository.completeOrder(totalOrder);
 		if (totalOrder.getIssueId() != 0) {
@@ -142,6 +142,7 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	public void successCancelPayment(Payment payment, PaymentCancelRequest paymentCancelRequest) {
 		Payment cancelPayment = new Payment(payment, paymentCancelRequest);
+		payment.getTotalOrder().refundOrder();
 		paymentRepository.save(cancelPayment);
 	}
 
@@ -208,7 +209,8 @@ public class PaymentServiceImpl implements PaymentService {
 			connection.setDoOutput(true);
 			return connection;
 		} catch (IOException e) {
-			throw new IllegalArgumentException("test");
+			throw new InvalidUrlException(
+				messageSource.getMessage("invalid.url", null, Locale.KOREA));
 		}
 	}
 
@@ -259,7 +261,7 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	public Page<PaymentResponses> getPayments(User user, int page) {
-		Pageable pageable = PageRequest.of(page, 10);
+		Pageable pageable = PageRequest.of(page-1, 10);
 		return paymentRepository.getPaymentPageFindByUserId(user.getId(), pageable);
 	}
 

@@ -31,6 +31,8 @@ public class TotalOrderResponse {
 
 	private String address;
 
+	private String paymentKey;
+
 	private PaymentStatementEnum paymentStatementEnum;
 
 	private LocalDateTime createdAt;
@@ -50,5 +52,6 @@ public class TotalOrderResponse {
 		this.createdAt = totalOrder.getCreatedAt();
 		this.modifiedAt = totalOrder.getModifiedAt();
 		this.paymentStatementEnum = totalOrder.getPaymentStatementEnum();
+		this.paymentKey = totalOrder.getPaymentKey();
 	}
 }
