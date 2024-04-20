@@ -2,6 +2,7 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.PaymentStatementEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,6 +28,12 @@ public class TotalOrderGetResponse {
 
 	private String merchantUid;
 
+	private LocalDateTime createdAt;
+
+	private LocalDateTime modifiedAt;
+
+	private String paymentKey;
+
 	public TotalOrderGetResponse(TotalOrder totalOrder) {
 		id = totalOrder.getId();
 		price = totalOrder.getPrice();
@@ -37,6 +44,9 @@ public class TotalOrderGetResponse {
 		address = totalOrder.getAddress();
 		paymentStatementEnum = totalOrder.getPaymentStatementEnum();
 		merchantUid = totalOrder.getMerchantUid();
+		paymentKey = totalOrder.getPaymentKey();
+		createdAt = totalOrder.getCreatedAt();
+		modifiedAt = totalOrder.getModifiedAt();
 	}
 
 }

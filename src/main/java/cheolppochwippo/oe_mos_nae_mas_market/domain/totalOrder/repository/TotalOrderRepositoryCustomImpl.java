@@ -86,6 +86,7 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 			.where(
 				totalOrder.user.id.eq(userId),
 				totalOrder.paymentStatementEnum.eq(PaymentStatementEnum.COMPLETE)
+					.or(totalOrder.paymentStatementEnum.eq(PaymentStatementEnum.REFUND))
 			)
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())

@@ -126,7 +126,7 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	@Transactional
 	public void successPayment(TotalOrder totalOrder, PaymentRequest paymentRequest) {
-		totalOrder.completeOrder();
+		totalOrder.completeOrder(paymentRequest.getPaymentKey());
 		totalOrderRepository.save(totalOrder);
 		totalOrderRepository.completeOrder(totalOrder);
 		if (totalOrder.getIssueId() != 0) {
