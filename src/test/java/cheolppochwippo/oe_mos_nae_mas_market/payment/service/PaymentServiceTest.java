@@ -33,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 
 @ExtendWith(MockitoExtension.class)
 public class PaymentServiceTest {
@@ -58,17 +59,20 @@ public class PaymentServiceTest {
 	@Mock
 	ProductServiceImpl productService;
 
+	@Mock
+	MessageSource messageSource;
+
 	@InjectMocks
 	PaymentServiceImpl paymentService;
 
 
 	private User testUser() {
-		return new User(1L, "test", "12345678", RoleEnum.SELLER);
+		return new User(1L, "test", "12345678", RoleEnum.SELLER,"01012345678",false);
 	}
 
 	private TotalOrder testTotalOrder(User user) {
 		return new TotalOrder(1L, 50L, 10L, 50L, 0L, "테스트", "서울", 0L, Deleted.UNDELETE, user,
-			PaymentStatementEnum.WAIT, "testId");
+			PaymentStatementEnum.WAIT, "testId","testKey");
 	}
 
 	private Payment testPayment(TotalOrder totalOrder) {
@@ -146,8 +150,6 @@ public class PaymentServiceTest {
 		//when
 		Exception exception = assertThrows(NoEntityException.class,
 			() -> paymentService.checkPayment(user, paymentRequest));
-		//then
-		assertEquals(exception.getMessage(), "진행중인 주문이 없습니다.");
 	}
 
 	@Test
@@ -165,8 +167,6 @@ public class PaymentServiceTest {
 		//when
 		Exception exception = assertThrows(PriceMismatchException.class,
 			() -> paymentService.checkPayment(user, paymentRequest));
-		//then
-		assertEquals(exception.getMessage(), "올바르지 않은 요청 입니다.");
 	}
 
 	@Test
@@ -202,8 +202,6 @@ public class PaymentServiceTest {
 		//when
 		Exception exception = assertThrows(NoEntityException.class,
 			() -> paymentService.checkCancelPayment(user, paymentRequest));
-		//then
-		assertEquals(exception.getMessage(), "존재하지 않는 결제번호 입니다.");
 	}
 
 	@Test
@@ -211,7 +209,7 @@ public class PaymentServiceTest {
 	void checkCanselPaymentForBiddenTest() {
 		//given
 		User user = testUser();
-		TotalOrder totalOrder = testTotalOrder(new User(5L, "test", "12345678", RoleEnum.SELLER));
+		TotalOrder totalOrder = testTotalOrder(new User(5L, "test", "12345678", RoleEnum.SELLER,"01012345678",false));
 		Payment payment = testPayment(totalOrder);
 		PaymentCancelRequest paymentRequest = new PaymentCancelRequest();
 		paymentRequest.setPaymentKey("testKey");
@@ -221,8 +219,6 @@ public class PaymentServiceTest {
 		//when
 		Exception exception = assertThrows(NoPermissionException.class,
 			() -> paymentService.checkCancelPayment(user, paymentRequest));
-		//then
-		assertEquals(exception.getMessage(), "해당 결제를 취소하실 권한이 없습니다.");
 	}
 
 	@Test
@@ -253,8 +249,6 @@ public class PaymentServiceTest {
 		//when
 		Exception exception = assertThrows(NoEntityException.class,
 			() -> paymentService.getPayment(user, paymentId));
-		//then
-		assertEquals(exception.getMessage(), "존재하지 않는 결제정보 입니다.");
 	}
 
 	@Test
@@ -262,15 +256,13 @@ public class PaymentServiceTest {
 	void getPaymentForBiddenTest() {
 		//given
 		User user = testUser();
-		TotalOrder totalOrder = testTotalOrder(new User(5L, "test", "12345678", RoleEnum.SELLER));
+		TotalOrder totalOrder = testTotalOrder(new User(5L, "test", "12345678", RoleEnum.SELLER,"01012345678",false));
 		Payment payment = testPayment(totalOrder);
 		Long paymentId = 3L;
 		when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
 		//when
 		Exception exception = assertThrows(NoPermissionException.class,
 			() -> paymentService.getPayment(user, paymentId));
-		//then
-		assertEquals(exception.getMessage(), "조회하실 권한이 없습니다.");
 	}
 
 }

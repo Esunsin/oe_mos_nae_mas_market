@@ -1,18 +1,11 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.payment.repository;
 
-import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.entity.QIssued;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.QOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponses;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.Payment;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.PaymentStatementEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.QPayment;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.QTotalOrder;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.QUser;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.JpaConfig;
-import com.querydsl.core.types.Operation;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -36,13 +29,22 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom{
 			.where(
 				userIdEq(userId)
 			)
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
 			.orderBy(QPayment.payment.modifiedAt.desc())
 			.fetch();
-		if(query.isEmpty()){
-			throw new IllegalArgumentException("결제 정보가 없습니다.");
-		}
 		List<PaymentResponses> paymentResponses = query.stream().map(PaymentResponses::new).toList();
-		return new PageImpl<>(paymentResponses,pageable,paymentResponses.size());
+		return new PageImpl<>(paymentResponses,pageable,getPageCount(userId));
+	}
+
+	private Long getPageCount(Long userId){
+		return jpaConfig.jpaQueryFactory()
+			.select(QPayment.payment.count())
+			.from(QPayment.payment)
+			.where(
+				userIdEq(userId)
+			)
+			.fetchOne();
 	}
 
 	@Override

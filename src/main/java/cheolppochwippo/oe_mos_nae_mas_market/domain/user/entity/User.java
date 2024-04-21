@@ -1,5 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -31,10 +32,16 @@ public class User extends TimeStamped {
     @Enumerated(EnumType.STRING)
     private RoleEnum role;
 
-    public User(String username, String password, RoleEnum role) {
-        this.username = username;
+    private String phoneNumber;
+
+    private boolean consent;
+
+    public User(UserRequest request,String password) {
+        this.username = request.getUsername();
         this.password = password;
-        this.role = role;
+        this.role =RoleEnum.CONSUMER;
+        this.phoneNumber = request.getPhoneNumber();
+        this.consent = request.isConsent();
     }
 
     public User(Long id){
@@ -45,5 +52,11 @@ public class User extends TimeStamped {
         this.id = userId;
         this.username = username;
         this.role = RoleEnum.valueOf(role);
+    }
+
+    public User(String username,String password,RoleEnum role){
+        this.username = username;
+        this.password = password;
+        this.role = role;
     }
 }

@@ -3,6 +3,8 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.issued.repository;
 import static cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity.QCoupon.coupon;
 import static cheolppochwippo.oe_mos_nae_mas_market.domain.issued.entity.QIssued.issued;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity.Coupon;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity.QCoupon;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.dto.IssuedResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.entity.Issued;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.entity.QIssued;
@@ -25,22 +27,12 @@ public class IssuedRepositoryCustomImpl implements IssuedRepositoryCustom {
 
     private final EntityManager entityManager;
 
-    @Override
-    public List<Issued> findByCouponIdAndUser(Long couponId, User user) {
-        return jpaConfig.jpaQueryFactory()
-            .selectFrom(issued)
-            .leftJoin(issued.coupon).fetchJoin()
-            .where(issued.deleted.eq(Deleted.UNDELETE)
-                .and(issued.user.eq(user))
-                .and(issued.coupon.id.eq(couponId)))
-            .fetch();
-    }
-
     public List<IssuedResponse> findCouponByUser(User user) {
         return jpaConfig.jpaQueryFactory()
             .select(
                 Projections.constructor(
                     IssuedResponse.class,
+                    issued.id,
                     issued.coupon.id,
                     issued.coupon.couponInfo,
                     issued.createdAt,
@@ -79,6 +71,22 @@ public class IssuedRepositoryCustomImpl implements IssuedRepositoryCustom {
             .execute();
         entityManager.flush();
         entityManager.clear();
+    }
+
+    @Override
+    public Coupon findByIssued(Long issuedId) {
+        Issued issued = jpaConfig.jpaQueryFactory()
+            .selectFrom(QIssued.issued)
+            .where(QIssued.issued.id.eq(issuedId))
+            .fetchOne();
+        if (issued == null) {
+            throw new IllegalArgumentException("해당 쿠폰이 없습니다.");
+        }
+        Coupon coupon = jpaConfig.jpaQueryFactory()
+            .selectFrom(QCoupon.coupon)
+            .where(QCoupon.coupon.eq(issued.getCoupon()))
+            .fetchOne();
+        return coupon;
     }
 
     private BooleanExpression userIdEq(Long userId) {

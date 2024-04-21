@@ -36,6 +36,7 @@ public class PaymentResponse {
 		id = payment.getPaymentId();
 		amount = payment.getAmount();
 		orderName = payment.getOrderName();
+		orderId = payment.getOrderId();
 		paySuccessYN = payment.isPaySuccessYN();
 		paymentKey = payment.getPaymentKey();
 		cancelYN = payment.isCancelYN();

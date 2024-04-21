@@ -25,18 +25,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 
 @ExtendWith(MockitoExtension.class)
 public class DeliveryServiceTest {
 
     @Mock
     DeliveryRepository deliveryRepository;
+    @Mock
+    MessageSource messageSource;
 
     DeliveryService deliveryService;
 
     @BeforeEach
     void before(){
-        deliveryService = new DeliveryServiceImpl(deliveryRepository);
+        deliveryService = new DeliveryServiceImpl(deliveryRepository,messageSource);
     }
 
     @Test

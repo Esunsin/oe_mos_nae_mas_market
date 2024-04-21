@@ -17,8 +17,6 @@ public class SingleOrderInCartResponse {
 
     private Long price;
 
-    private String merchant;
-
     private Deleted deleted;
 
     private LocalDateTime createdAt;
@@ -30,7 +28,6 @@ public class SingleOrderInCartResponse {
         this.productName = order.getProduct().getProductName();
         this.quantity = order.getQuantity();
         this.price = order.getPrice();
-        this.merchant = order.getMerchantUid();
         this.deleted = order.getDeleted();
         this.createdAt = order.getCreatedAt();
         this.modifiedAt = order.getModifiedAt();

@@ -3,6 +3,7 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository;
 import static cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.QTotalOrder.totalOrder;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.QOrder;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.PaymentStatementEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderNameDto;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrdersGetResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.QTotalOrder;
@@ -56,7 +57,9 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 				QOrder.order.quantity
 			))
 			.from(QOrder.order)
-			.where(userIdEq(userId))
+			.where(userIdEq(userId),
+				QOrder.order.deleted.eq(Deleted.UNDELETE)
+				)
 			.groupBy(QOrder.order.user.id)
 			.fetchOne();
 		return Optional.ofNullable(query);
@@ -83,16 +86,28 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 		List<TotalOrder> query = jpaConfig.jpaQueryFactory()
 			.selectFrom(totalOrder)
 			.where(
-				totalOrder.user.id.eq(userId)
+				totalOrder.user.id.eq(userId),
+				totalOrder.paymentStatementEnum.eq(PaymentStatementEnum.COMPLETE)
+					.or(totalOrder.paymentStatementEnum.eq(PaymentStatementEnum.REFUND))
 			)
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
 			.orderBy(totalOrder.modifiedAt.desc())
 			.fetch();
-		if (query.isEmpty()) {
-			throw new NoEntityException("주문 정보가 없습니다.");
-		}
 		List<TotalOrdersGetResponse> totalOrdersGetResponses = query.stream().map(
 			TotalOrdersGetResponse::new).toList();
-		return new PageImpl<>(totalOrdersGetResponses, pageable, totalOrdersGetResponses.size());
+		return new PageImpl<>(totalOrdersGetResponses, pageable, getTotalOrderCount(userId));
+	}
+
+	private Long getTotalOrderCount(Long userId){
+		return jpaConfig.jpaQueryFactory()
+			.select(totalOrder.count())
+			.from(totalOrder)
+			.where(
+				totalOrder.user.id.eq(userId),
+				totalOrder.paymentStatementEnum.eq(PaymentStatementEnum.COMPLETE)
+					.or(totalOrder.paymentStatementEnum.eq(PaymentStatementEnum.REFUND))
+			).fetchOne();
 	}
 
 	@Override

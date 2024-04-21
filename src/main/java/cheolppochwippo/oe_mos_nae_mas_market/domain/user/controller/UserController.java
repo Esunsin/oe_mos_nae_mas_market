@@ -8,6 +8,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.global.util.JwtUtil;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +26,9 @@ public class UserController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/auth/signup")
-    public ResponseEntity<CommonResponse<UserResponse>> signup(@RequestBody UserRequest userRequest) {
-        UserResponse signupedUser = userService.signup(userRequest);
+    public ResponseEntity<CommonResponse<UserResponse>> signup(@RequestBody UserRequest userRequest)
+        throws ExecutionException, InterruptedException {
+        UserResponse signupedUser = userService.signup(userRequest).get();
         return ResponseEntity.status(HttpStatus.OK.value())
                 .body(CommonResponse.<UserResponse>builder()
                         .msg("signup complete!")
@@ -35,8 +37,9 @@ public class UserController {
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<CommonResponse<UserResponse>> login(@RequestBody UserRequest userRequest, HttpServletResponse response) {
-        UserResponse loginedUser = userService.login(userRequest);
+    public ResponseEntity<CommonResponse<UserResponse>> login(@RequestBody UserRequest userRequest, HttpServletResponse response)
+        throws ExecutionException, InterruptedException {
+        UserResponse loginedUser = userService.login(userRequest).get();
         response.setHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(loginedUser.getUserId(), loginedUser.getUsername(),loginedUser.getRole()));
         return ResponseEntity.status(HttpStatus.OK.value())
                 .body(CommonResponse.<UserResponse>builder()

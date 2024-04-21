@@ -86,7 +86,8 @@ public class ProductController {
     //상품 전체 조회
     @GetMapping("/products")
     public ResponseEntity<CommonResponse<ProductShowResponse>> showAllProduct(
-        @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         ProductShowResponse productShowResponses = productService.showAllProduct(pageable);
         return ResponseEntity.status(HttpStatus.OK.value())
@@ -94,6 +95,19 @@ public class ProductController {
                 .msg("get all products complete!")
                 .data(productShowResponses)
                 .build());
+    }
+    @GetMapping("/products/search")
+    public ResponseEntity<CommonResponse<ProductShowResponse>> showAllProductTest(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String searchValue) {
+        Pageable pageable = PageRequest.of(page, size);
+        ProductShowResponse productShowResponses = productService.showAllProductWithValue(pageable,searchValue);
+        return ResponseEntity.status(HttpStatus.OK.value())
+                .body(CommonResponse.<ProductShowResponse>builder()
+                        .msg("get all products complete!")
+                        .data(productShowResponses)
+                        .build());
     }
 
     //상품 삭제

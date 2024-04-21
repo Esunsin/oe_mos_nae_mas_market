@@ -60,7 +60,7 @@ public class TotalOrderController {
 
 	@GetMapping("/totalOrders")
 	public ResponseEntity<CommonResponse<Page<TotalOrdersGetResponse>>> getTotalOrders(
-		@RequestParam(name = "page")int page,@AuthenticationPrincipal UserDetailsImpl userDetails){
+		@RequestParam(defaultValue = "1") int page,@AuthenticationPrincipal UserDetailsImpl userDetails){
 		Page<TotalOrdersGetResponse> totalOrdersGetResponses = totalOrderService.getTotalOrders(userDetails.getUser(),page);
 		return ResponseEntity.ok().body(CommonResponse.<Page<TotalOrdersGetResponse>>builder()
 			.msg("show totalOrders complete!")

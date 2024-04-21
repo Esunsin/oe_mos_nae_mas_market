@@ -52,9 +52,12 @@ public class TotalOrder extends TimeStamped {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     private PaymentStatementEnum paymentStatementEnum;
 
     private String merchantUid;
+
+    private String paymentKey;
 
     public TotalOrder(TotalOrderRequest request,User user, TotalOrderNameDto totalInfo,double discount){
         price = totalInfo.getSum();
@@ -78,9 +81,13 @@ public class TotalOrder extends TimeStamped {
         paymentStatementEnum = PaymentStatementEnum.CANCEL;
     }
 
-    public void completeOrder(){
+    public void completeOrder(String paymentKey){
         deleted = Deleted.DELETE;
         paymentStatementEnum = PaymentStatementEnum.COMPLETE;
+        this.paymentKey = paymentKey;
+    }
+    public void refundOrder(){
+        paymentStatementEnum = PaymentStatementEnum.REFUND;
     }
 
 }

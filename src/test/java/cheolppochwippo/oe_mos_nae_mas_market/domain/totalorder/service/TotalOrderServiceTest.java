@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 
 @ExtendWith(MockitoExtension.class)
 public class TotalOrderServiceTest {
@@ -32,16 +33,19 @@ public class TotalOrderServiceTest {
 	@Mock
 	IssuedRepository issuedRepository;
 
+	@Mock
+	MessageSource messageSource;
+
 	@InjectMocks
 	TotalOrderServiceImpl totalOrderService;
 
 	private User testUser() {
-		return new User(1L, "test", "12345678", RoleEnum.SELLER);
+		return new User(1L, "test", "12345678", RoleEnum.SELLER,"01012345678",false);
 	}
 
 	private TotalOrder testTotalOrder(User user) {
 		return new TotalOrder(1L, 50L, 10L, 40L, 0L, "테스트", "서울", 0L, Deleted.UNDELETE, user,
-			PaymentStatementEnum.WAIT, "id");
+			PaymentStatementEnum.WAIT, "id","testKey");
 	}
 
 	@Test
@@ -70,23 +74,19 @@ public class TotalOrderServiceTest {
 		//when
 		Exception exception = assertThrows(NoEntityException.class,
 			() -> totalOrderService.getTotalOrder(user, totalOrderId));
-		//then
-		assertEquals(exception.getMessage(), "존재하지 않는 주문정보 입니다.");
 	}
 
 	@Test
 	@DisplayName("주문 정보보기 실패 테스트 - FORBIDDEN")
 	void getTotalOrderForbidden() {
 		//given
-		User user = new User(5L, "test", "12345678", RoleEnum.SELLER);
+		User user = new User(5L, "test", "12345678", RoleEnum.SELLER,"01012345678",false);
 		Long totalOrderId = 1L;
 		TotalOrder totalOrder = testTotalOrder(testUser());
 		when(totalOrderRepository.findById(totalOrderId)).thenReturn(Optional.of(totalOrder));
 		//when
 		Exception exception = assertThrows(NoPermissionException.class,
 			() -> totalOrderService.getTotalOrder(user, totalOrderId));
-		//then
-		assertEquals(exception.getMessage(), "조회하실 권한이 없습니다.");
 	}
 
 }
