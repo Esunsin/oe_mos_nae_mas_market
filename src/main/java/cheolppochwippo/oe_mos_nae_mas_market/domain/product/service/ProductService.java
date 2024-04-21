@@ -22,4 +22,8 @@ public interface ProductService {
     ProductShowResponse showAllProduct(Pageable pageable);
 
     ProductResponse deleteProduct(Long productId, User user);
+
+    ProductShowResponse showAllProductWithValue(Pageable pageable,String searchValue);
+
+    ProductShowResponse showStoreProduct( Pageable pageable,User user);
 }
