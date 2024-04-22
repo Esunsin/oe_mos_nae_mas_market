@@ -56,6 +56,20 @@ public class ProductController {
                 .data(updateProduct) //productId
                 .build());
     }
+    //상점상품조회
+    @GetMapping("/stores/products")
+    public ResponseEntity<CommonResponse<ProductShowResponse>> showStoreProduct(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+    @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Pageable pageable = PageRequest.of(page, size);
+        ProductShowResponse showProduct = productService.showStoreProduct(pageable,userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.OK.value())
+            .body(CommonResponse.<ProductShowResponse>builder()
+                .msg("get store products complete!")
+                .data(showProduct)
+                .build());
+    }
 
     //상품조회
     @GetMapping("/products/{productId}")

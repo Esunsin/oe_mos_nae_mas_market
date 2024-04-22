@@ -16,11 +16,13 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.No
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
@@ -37,6 +39,7 @@ public class ProductServiceImpl implements ProductService {
 	private final StoreRepository storeRepository;
 	private final RedissonClient redissonClient;
 	private final MessageSource messageSource;
+	private final CacheManager cacheManager;
 
 	@Transactional
 	@CacheEvict(cacheNames = "products", allEntries = true)
@@ -44,12 +47,21 @@ public class ProductServiceImpl implements ProductService {
 		validateSeller(user);
 		Store store = storeRepository.findByUser_Id(user.getId())
 			.orElseThrow(() -> new NoSuchElementException(
-				messageSource.getMessage("noSuch.product", null, Locale.KOREA)));
+				messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
 
 		Product product = new Product(productRequest, store);
 		productRepository.save(product);
 
 		return new ProductResponse(product);
+	}
+	@Override
+	public ProductShowResponse showStoreProduct(Pageable pageable,User user) {
+		validateSeller(user);
+		List<Product> productList = productRepository.findByStore_User_Id(pageable,user.getId());
+
+		return new ProductShowResponse(
+			productList.stream().map(product -> new ProductResultResponse(product)).toList());
+
 	}
 
 	@Override
@@ -60,6 +72,9 @@ public class ProductServiceImpl implements ProductService {
 
 		Product product = foundProduct(productId);
 		product.update(productRequest);
+
+		ProductResultResponse response = new ProductResultResponse(product);
+		Objects.requireNonNull(cacheManager.getCache("product")).put(productId,response);
 
 		return new ProductResponse(product);
 	}

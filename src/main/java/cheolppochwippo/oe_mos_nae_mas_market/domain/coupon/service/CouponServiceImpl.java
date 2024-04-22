@@ -5,6 +5,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.dto.CouponResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.entity.Coupon;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.repository.CouponRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.repository.UserRepository;
+//import cheolppochwippo.oe_mos_nae_mas_market.global.config.SQSConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.SQSConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
 import java.util.List;

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 public class CouponResponse {
-
+    private Long couponId;
     private String couponInfo;
     private Double discount;
     private Long amount;
@@ -23,6 +23,7 @@ public class CouponResponse {
     private Deleted deleted;
 
     public CouponResponse(Coupon coupon) {
+        this.couponId = coupon.getId();
         this.couponInfo = coupon.getCouponInfo();
         this.discount = coupon.getDiscount();
         this.amount = coupon.getAmount();
