@@ -14,7 +14,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		registry.addMapping("/**")
 			.exposedHeaders("Authorization")
 			// Origin이 http:localhost:3000에 대해
-			.allowedOrigins("https://fronts-two.vercel.app")
+			.allowedOrigins("https://fronts-lu7dfebm9-oemosnaemas.vercel.app/")
 			// GET, POST, PUT, PATCH, DELETE, OPTIONS 메서드를 허용한다.
 			.allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
 			.allowedHeaders("*")
