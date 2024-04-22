@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 public class IssuedResponse {
     private Long issuedId;
     private Long couponId;
+    private Double discount;
+    private LocalDateTime effectiveDate;
     private String couponInfo;
     private LocalDateTime createdAt;
     private Deleted deleted;

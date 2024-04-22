@@ -112,14 +112,16 @@ public class IssuedServiceImpl implements IssuedService {
     }
 
     private IssuedResponse createIssuedResponse(Long couponId, Coupon coupon, Issued issuedCoupon) {
-        return new IssuedResponse(issuedCoupon.getId(), couponId, coupon.getCouponInfo(),
+        return new IssuedResponse(issuedCoupon.getId(), couponId,
+            issuedCoupon.getCoupon().getDiscount(), issuedCoupon.getCoupon().getEffective_date(),
+            coupon.getCouponInfo(),
             issuedCoupon.getCreatedAt(), issuedCoupon.getDeleted());
     }
 
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "issuedCoupons", key = "#user.id", cacheManager = "cacheManager")
+    //@Cacheable(value = "issuedCoupons", key = "#user.id", cacheManager = "cacheManager")
     public List<IssuedResponse> getIssuedCoupons(User user) {
         return issuedRepository.findCouponByUser(user);
     }
