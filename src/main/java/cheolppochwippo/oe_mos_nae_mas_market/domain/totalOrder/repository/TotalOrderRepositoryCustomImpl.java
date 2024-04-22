@@ -72,8 +72,7 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 			.update(QOrder.order)
 			.set(QOrder.order.deleted, Deleted.DELETE)
 			.where(
-				QOrder.order.totalOrder.id.eq(totalOrder.getId()),
-				QOrder.order.deleted.eq(Deleted.UNDELETE)
+				QOrder.order.totalOrder.id.eq(totalOrder.getId())
 			)
 			.execute();
 		entityManager.flush();
