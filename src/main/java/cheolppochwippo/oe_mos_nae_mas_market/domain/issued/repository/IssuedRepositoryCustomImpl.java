@@ -34,6 +34,8 @@ public class IssuedRepositoryCustomImpl implements IssuedRepositoryCustom {
                     IssuedResponse.class,
                     issued.id,
                     issued.coupon.id,
+                    issued.coupon.discount,
+                    issued.coupon.effective_date,
                     issued.coupon.couponInfo,
                     issued.createdAt,
                     issued.deleted

@@ -74,4 +74,17 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
     }
+
+    @Override
+    public List<Product> findByStore_User_Id(Pageable pageable, Long userId) {
+        return jpaConfig.jpaQueryFactory()
+            .selectFrom(product)
+            .innerJoin(product.store, store)
+            .innerJoin(store.user, user)
+            .where(user.id.eq(userId)
+                .and(product.deleted.eq(Deleted.UNDELETE)))
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+    }
 }
