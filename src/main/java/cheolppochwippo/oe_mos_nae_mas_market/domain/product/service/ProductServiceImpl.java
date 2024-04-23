@@ -62,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
 		List<Product> productList = productRepository.findByStoreUserId(pageable,user.getId());
 		List<ProductResultResponse> productResultResponseList = new ArrayList<>();
 		for (Product product : productList) {
-			List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(product.getId());
+			List<Image> imageByProductId = productImageRepository.getImageByProductId(product.getId());
 			productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
 		}
 		return new ProductShowResponse(productResultResponseList);
@@ -76,7 +76,7 @@ public class ProductServiceImpl implements ProductService {
 
 		Product product = foundProduct(productId);
 		product.update(productRequest);
-		List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
+		List<Image> imageByProductId = productImageRepository.getImageByProductId(productId);
 		ProductResultResponse response = new ProductResultResponse(product, imageByProductId);
 		Objects.requireNonNull(cacheManager.getCache("product")).put(productId,response);
 
@@ -89,7 +89,7 @@ public class ProductServiceImpl implements ProductService {
 	@Cacheable(cacheNames = "product", key = "#productId")
 	public ProductResultResponse showProduct(long productId) {
 		Product product = foundProduct(productId);
-		List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
+		List<Image> imageByProductId = productImageRepository.getImageByProductId(productId);
 		return new ProductResultResponse(product,imageByProductId);
 	}
 
@@ -104,7 +104,7 @@ public class ProductServiceImpl implements ProductService {
 		List<ProductResultResponse> productResultResponseList = new ArrayList<>();
 
 		for (Product product : productList) {
-			List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(product.getId());
+			List<Image> imageByProductId = productImageRepository.getImageByProductId(product.getId());
 			productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
 		}
 
@@ -183,7 +183,7 @@ public class ProductServiceImpl implements ProductService {
 		List<ProductResultResponse> productResultResponseList = new ArrayList<>();
 
 		for (Product product : productList) {
-			List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(product.getId());
+			List<Image> imageByProductId = productImageRepository.getImageByProductId(product.getId());
 			productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
 		}
 

@@ -2,6 +2,7 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.image.repository;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.Image;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.ProductImage;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.QImage;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.QProductImage;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.JpaConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
@@ -18,9 +19,9 @@ public class ProductImageRepositoryCustomImpl implements ProductImageRepositoryC
 
     private final JpaConfig jpaConfig;
 
-    public List<ProductImage> getImageByProductId(Long productId) {
+    public List<Image> getImageByProductId(Long productId) {
         return jpaConfig.jpaQueryFactory()
-                .selectFrom(productImage)
+                .selectFrom(image)
                 .innerJoin(product)
                 .where(product.id.eq(productId)
                         .and(product.deleted.eq(Deleted.UNDELETE)))

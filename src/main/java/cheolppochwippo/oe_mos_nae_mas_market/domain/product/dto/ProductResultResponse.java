@@ -1,5 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.Image;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.ProductImage;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.dto.StoreResponse;
@@ -23,7 +24,7 @@ public class ProductResultResponse {
     private String storeInfo;
     private final List<String> imageUrls = new ArrayList<>();
 
-    public ProductResultResponse(Product product, List<ProductImage> productImages) {
+    public ProductResultResponse(Product product, List<Image> productImages) {
         this.id = product.getId();
         this.productName = product.getProductName();
         this.info = product.getInfo();
@@ -32,7 +33,7 @@ public class ProductResultResponse {
         this.discount = product.getDiscount();
         this.storeName = product.getStore().getStoreName();
         this.storeInfo = product.getStore().getInfo();
-        for (ProductImage productImage : productImages) {
+        for (Image productImage : productImages) {
             this.imageUrls.add(productImage.getUrl());
         }
     }
