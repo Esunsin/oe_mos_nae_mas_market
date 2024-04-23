@@ -1,8 +1,10 @@
-package cheolppochwippo.oe_mos_nae_mas_market.global.entity;
+package cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "DTYPE")
 public abstract class Image {

@@ -1,9 +1,11 @@
-package cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity;
+package cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity;
 
-import cheolppochwippo.oe_mos_nae_mas_market.global.entity.Image;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 @DiscriminatorValue("P")
 public class ProductImage extends Image{
 
