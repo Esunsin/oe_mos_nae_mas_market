@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface ProductImageRepositoryCustom {
 
-    List<Image> getImageByProductId(Long productId);
+    List<ProductImage> getImageByProductId(Long productId);
 }
