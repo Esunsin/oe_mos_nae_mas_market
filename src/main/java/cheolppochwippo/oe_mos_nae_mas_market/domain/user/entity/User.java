@@ -36,15 +36,15 @@ public class User extends TimeStamped {
 
     private boolean consent;
 
-    public User(UserRequest request,String password) {
+    public User(UserRequest request, String password) {
         this.username = request.getUsername();
         this.password = password;
-        this.role =RoleEnum.CONSUMER;
+        this.role = RoleEnum.CONSUMER;
         this.phoneNumber = request.getPhoneNumber();
         this.consent = request.isConsent();
     }
 
-    public User(Long id){
+    public User(Long id) {
         this.id = id;
     }
 
@@ -54,9 +54,13 @@ public class User extends TimeStamped {
         this.role = RoleEnum.valueOf(role);
     }
 
-    public User(String username,String password,RoleEnum role){
+    public User(String username, String password, RoleEnum role) {
         this.username = username;
         this.password = password;
         this.role = role;
+    }
+
+    public void changeRoleToSeller() {
+        this.role = RoleEnum.SELLER;
     }
 }

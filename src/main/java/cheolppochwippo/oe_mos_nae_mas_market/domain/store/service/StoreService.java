@@ -11,4 +11,6 @@ public interface StoreService {
     StoreResponse updateStore(StoreRequest storeRequest, User user);
 
     StoreResponse showStore(User user);
+
+    StoreResponse approveStore(Long requestId, User user);
 }

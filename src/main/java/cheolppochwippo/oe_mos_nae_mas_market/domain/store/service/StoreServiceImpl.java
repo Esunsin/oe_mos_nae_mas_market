@@ -31,14 +31,12 @@ public class StoreServiceImpl implements StoreService {
     @Transactional
     public StoreResponse createStore(StoreRequest storeRequest, User user) {
         User seller = getUser(user);
-        checkUserRole(user);
         checkExistingStore(seller);
 
         Store store = new Store(storeRequest, seller);
         storeRepository.save(store);
 
         return new StoreResponse(store);
-
     }
 
     @Transactional
@@ -58,13 +56,31 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public StoreResponse showStore(User user) {
-        User seller = getUser(user);
-        checkUserRole(user);
-        Store store = storeRepository.findByUser_Id(seller.getId())
+        Store store = storeRepository.findByUser_Id(user.getId())
             .orElseThrow(() -> new NoSuchElementException(
                 messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
 
         return new StoreResponse(store);
+    }
+
+    @Transactional
+    @Override
+    public StoreResponse approveStore(Long requestId, User user) {
+        validateAdmin(user);
+        Store store = storeRepository.findById(requestId)
+            .orElseThrow(() -> new NoSuchElementException(
+                messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
+        store.approve();
+        User seller = store.getUser();
+        seller.changeRoleToSeller();
+        return new StoreResponse(store);
+    }
+
+    private void validateAdmin(User user) {
+        if (!RoleEnum.ADMIN.equals(user.getRole())) {
+            throw new NoPermissionException(
+                messageSource.getMessage("noPermission.role.admin", null, Locale.KOREA));
+        }
     }
 
     private User getUser(User user) {
