@@ -17,4 +17,6 @@ public interface IssuedRepositoryCustom {
 
     Coupon findByIssued(Long issueId);
 
+    List<Issued> findByCouponIdAndUser(Long couponId, User user);
+
 }
