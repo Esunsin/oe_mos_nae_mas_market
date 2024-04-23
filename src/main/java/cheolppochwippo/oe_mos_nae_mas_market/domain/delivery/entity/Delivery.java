@@ -34,6 +34,9 @@ public class Delivery extends TimeStamped {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    private DeliveryStatementEnum deliveryStatementEnum;
+
     public Delivery(User user, DeliveryRequest deliveryRequest) {
         this.user = user;
         this.address = deliveryRequest.getAddress();
@@ -53,5 +56,6 @@ public class Delivery extends TimeStamped {
         address = totalOrder.getAddress();
         deleted = Deleted.UNDELETE;
         user = totalOrder.getUser();
+        deliveryStatementEnum = DeliveryStatementEnum.WAIT;
     }
 }
