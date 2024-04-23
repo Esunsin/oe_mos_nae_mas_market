@@ -54,11 +54,10 @@ public class ProductServiceImpl implements ProductService {
 
         return new ProductResponse(product);
     }
-
     @Override
-    public ProductShowResponse showStoreProduct(Pageable pageable, User user) {
+    public ProductShowResponse showStoreProduct(Pageable pageable,User user) {
         validateSeller(user);
-        List<Product> productList = productRepository.findByStore_User_Id(pageable, user.getId());
+        List<Product> productList = productRepository.findByStore_User_Id(pageable,user.getId());
 
         return new ProductShowResponse(
             productList.stream().map(product -> new ProductResultResponse(product)).toList());
@@ -75,7 +74,7 @@ public class ProductServiceImpl implements ProductService {
         product.update(productRequest);
 
         ProductResultResponse response = new ProductResultResponse(product);
-        Objects.requireNonNull(cacheManager.getCache("product")).put(productId, response);
+        Objects.requireNonNull(cacheManager.getCache("product")).put(productId,response);
 
         return new ProductResponse(product);
     }
@@ -128,52 +127,51 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-	//재고 감소시켜주는 메소드
-	public void decreaseProductStock(Order order) {
-		RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
-		try {
-			try {
-				boolean isLocked = lock.tryLock(1000, 3000, TimeUnit.SECONDS);
-				if (isLocked) {
-					decreaseProductStockTransaction(order);
-				}
-			} finally {
-				lock.unlock();
-			}
-		} catch (Exception e) {
-			Thread.currentThread().interrupt();
-			System.out.println(e.getMessage());
-		}
+    //재고 감소시켜주는 메소드
+    public void decreaseProductStock(Order order) {
+        RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
+        try {
+            try {
+                boolean isLocked = lock.tryLock(1000, 3000, TimeUnit.SECONDS);
+                if (isLocked) {
+                    decreaseProductStockTransaction(order);
+                }
+            } finally {
+                lock.unlock();
+            }
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+            System.out.println(e.getMessage());
+        }
 
-	}
+    }
 
-	@Transactional
-	public void decreaseProductStockTransaction(Order order) {
-		Product product = productRepository.findByOrder(order);
-		Long newStock = product.getQuantity() - order.getQuantity();
-		if (newStock < 0) {
-			throw new InsufficientQuantityException(
-				messageSource.getMessage("insufficient.quantity.product", null,
-					Locale.KOREA));
-		}
-		product.quatityUpdate(newStock);
-		productRepository.save(product);
-	}
+    @Transactional
+    public void decreaseProductStockTransaction(Order order) {
+        Product product = productRepository.findByOrder(order);
+        Long newStock = product.getQuantity() - order.getQuantity();
+        if (newStock < 0) {
+            throw new InsufficientQuantityException(
+                messageSource.getMessage("insufficient.quantity.product", null,
+                    Locale.KOREA));
+        }
+        product.quatityUpdate(newStock);
+        productRepository.save(product);
+    }
 
-	}
 
-	@Transactional(readOnly = true)
-	public ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue) {
-		List<Product> productList;
-		if (searchValue == null) {
-			log.info("없을때");
-			productList = productRepository.findProductsWithQuantityGreaterThanOne(pageable);
-		} else {
-			log.info("있을때");
-			productList = productRepository.findProductsWithQuantityGreaterThanOneAndSearchValue(
-				pageable, searchValue);
-		}
-		return new ProductShowResponse(
-			productList.stream().map(ProductResultResponse::new).toList());
-	}
+    @Transactional(readOnly = true)
+    public ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue) {
+        List<Product> productList;
+        if (searchValue == null) {
+            log.info("없을때");
+            productList = productRepository.findProductsWithQuantityGreaterThanOne(pageable);
+        } else {
+            log.info("있을때");
+            productList = productRepository.findProductsWithQuantityGreaterThanOneAndSearchValue(
+                pageable, searchValue);
+        }
+        return new ProductShowResponse(
+            productList.stream().map(ProductResultResponse::new).toList());
+    }
 }
