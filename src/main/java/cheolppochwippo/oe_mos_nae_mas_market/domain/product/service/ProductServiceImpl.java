@@ -142,27 +142,32 @@ public class ProductServiceImpl implements ProductService {
 		RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
 		try {
 			try {
-				boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
+				boolean isLocked = lock.tryLock(1000, 3000, TimeUnit.SECONDS);
 				if (isLocked) {
-					Product product = productRepository.findByOrder(order);
-					Long newStock = product.getQuantity() - order.getQuantity();
-					if (newStock < 0) {
-						throw new InsufficientQuantityException(
-							messageSource.getMessage("insufficient.quantity.product", null,
-								Locale.KOREA));
-					}
-					product.quatityUpdate(newStock);
-					productRepository.save(product);
+					decreaseProductStockTransaction(order);
 				}
 			} finally {
 				lock.unlock();
 			}
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			Thread.currentThread().interrupt();
+			System.out.println(e.getMessage());
 		}
 
 	}
 
+	@Transactional
+	public void decreaseProductStockTransaction(Order order) {
+		Product product = productRepository.findByOrder(order);
+		Long newStock = product.getQuantity() - order.getQuantity();
+		if (newStock < 0) {
+			throw new InsufficientQuantityException(
+				messageSource.getMessage("insufficient.quantity.product", null,
+					Locale.KOREA));
+		}
+		product.quatityUpdate(newStock);
+		productRepository.save(product);
+	}
 	@Transactional(readOnly = true)
 	public ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue) {
 		List<Product> productList;
@@ -172,7 +177,7 @@ public class ProductServiceImpl implements ProductService {
 		} else {
 			log.info("있을때");
 			productList = productRepository.findProductsWithQuantityGreaterThanOneAndSearchValue(
-				pageable, searchValue);
+					pageable, searchValue);
 		}
 
 		List<ProductResultResponse> productResultResponseList = new ArrayList<>();

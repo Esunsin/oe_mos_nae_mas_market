@@ -51,6 +51,17 @@ public class IssuedRepositoryCustomImpl implements IssuedRepositoryCustom {
     }
 
     @Override
+    public List<Issued> findByCouponIdAndUser(Long couponId, User user) {
+        return jpaConfig.jpaQueryFactory()
+            .selectFrom(issued)
+            .leftJoin(issued.coupon).fetchJoin()
+            .where(issued.deleted.eq(Deleted.UNDELETE)
+                .and(issued.user.eq(user))
+                .and(issued.coupon.id.eq(couponId)))
+            .fetch();
+    }
+
+    @Override
     public Optional<Double> getDiscountFindById(Long userId,Long issueId){
         Double discount = jpaConfig.jpaQueryFactory()
             .select(QIssued.issued.coupon.discount)

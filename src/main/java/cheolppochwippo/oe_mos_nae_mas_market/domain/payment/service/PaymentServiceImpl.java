@@ -166,13 +166,13 @@ public class PaymentServiceImpl implements PaymentService {
 		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
 		try {
 			orders.parallelStream().forEach(productService::decreaseProductStock);
-	} catch (InsufficientQuantityException e) {
-		failPayment(totalOrder, paymentRequest);
-		throw new InsufficientQuantityException(
-			messageSource.getMessage("insufficient.quantity.product", null, Locale.KOREA));
-	}
+		} catch (InsufficientQuantityException e) {
+			failPayment(totalOrder, paymentRequest);
+			throw new InsufficientQuantityException(
+				messageSource.getMessage("insufficient.quantity.product", null, Locale.KOREA));
+		}
 		return totalOrder;
-}
+	}
 
 
 	@Override
@@ -266,6 +266,5 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 }
-
 
 
