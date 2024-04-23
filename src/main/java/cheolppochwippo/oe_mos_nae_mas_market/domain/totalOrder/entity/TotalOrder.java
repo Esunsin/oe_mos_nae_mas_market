@@ -60,10 +60,6 @@ public class TotalOrder extends TimeStamped {
 
 	private String paymentKey;
 
-	@OneToOne()
-	@JoinColumn(name = "total_order_id", nullable = false)
-	private Delivery delivery;
-
 	public TotalOrder(TotalOrderRequest request, User user, TotalOrderNameDto totalInfo,
 		double discount) {
 		price = totalInfo.getSum();
