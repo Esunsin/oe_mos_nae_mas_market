@@ -47,7 +47,8 @@ public class StoreServiceImpl implements StoreService {
         User seller = getUser(user);
         checkUserRole(user);
         Store store = storeRepository.findByUser_Id(seller.getId())
-            .orElseThrow(() -> new NoSuchElementException(messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
+            .orElseThrow(() -> new NoSuchElementException(
+                messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
 
         store.update(storeRequest);
 
@@ -60,25 +61,29 @@ public class StoreServiceImpl implements StoreService {
         User seller = getUser(user);
         checkUserRole(user);
         Store store = storeRepository.findByUser_Id(seller.getId())
-            .orElseThrow(() -> new NoSuchElementException(messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
+            .orElseThrow(() -> new NoSuchElementException(
+                messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
 
         return new StoreResponse(store);
     }
 
     private User getUser(User user) {
         return userRepository.findById(user.getId())
-            .orElseThrow(() -> new NoEntityException(messageSource.getMessage("noEntity.user", null, Locale.KOREA)));
+            .orElseThrow(() -> new NoEntityException(
+                messageSource.getMessage("noEntity.user", null, Locale.KOREA)));
     }
 
     private void checkUserRole(User user) {
         if (!RoleEnum.SELLER.equals(user.getRole())) {
-            throw new NoPermissionException(messageSource.getMessage("noPermission.role.seller.update", null, Locale.KOREA));
+            throw new NoPermissionException(
+                messageSource.getMessage("noPermission.role.seller.update", null, Locale.KOREA));
         }
     }
 
     private void checkExistingStore(User seller) {
         if (storeRepository.existsByUserId(seller.getId())) {
-            throw new CreationLimitExceededException(messageSource.getMessage("create.limit.shop", null, Locale.KOREA));
+            throw new CreationLimitExceededException(
+                messageSource.getMessage("create.limit.shop", null, Locale.KOREA));
         }
     }
 }

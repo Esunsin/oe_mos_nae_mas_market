@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,7 +46,7 @@ public class StoreController {
     }
 
     @GetMapping("/stores")
-    public ResponseEntity<CommonResponse<StoreResponse>> showStore (
+    public ResponseEntity<CommonResponse<StoreResponse>> showStore(
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         StoreResponse updateStore = storeService.showStore(userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK.value())
@@ -56,4 +55,7 @@ public class StoreController {
                 .data(updateStore)
                 .build());
     }
+
+
+
 }

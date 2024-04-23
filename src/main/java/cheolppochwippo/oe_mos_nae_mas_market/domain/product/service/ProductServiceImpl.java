@@ -35,136 +35,137 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 
-	private final ProductRepository productRepository;
-	private final StoreRepository storeRepository;
-	private final RedissonClient redissonClient;
-	private final MessageSource messageSource;
-	private final CacheManager cacheManager;
+    private final ProductRepository productRepository;
+    private final StoreRepository storeRepository;
+    private final RedissonClient redissonClient;
+    private final MessageSource messageSource;
+    private final CacheManager cacheManager;
 
-	@Transactional
-	@CacheEvict(cacheNames = "products", allEntries = true)
-	public ProductResponse createProduct(ProductRequest productRequest, User user) {
-		validateSeller(user);
-		Store store = storeRepository.findByUser_Id(user.getId())
-			.orElseThrow(() -> new NoSuchElementException(
-				messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
+    @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
+    public ProductResponse createProduct(ProductRequest productRequest, User user) {
+        validateSeller(user);
+        Store store = storeRepository.findByUser_Id(user.getId())
+            .orElseThrow(() -> new NoSuchElementException(
+                messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
 
-		Product product = new Product(productRequest, store);
-		productRepository.save(product);
+        Product product = new Product(productRequest, store);
+        productRepository.save(product);
 
-		return new ProductResponse(product);
-	}
-	@Override
-	public ProductShowResponse showStoreProduct(Pageable pageable,User user) {
-		validateSeller(user);
-		List<Product> productList = productRepository.findByStore_User_Id(pageable,user.getId());
+        return new ProductResponse(product);
+    }
 
-		return new ProductShowResponse(
-			productList.stream().map(product -> new ProductResultResponse(product)).toList());
+    @Override
+    public ProductShowResponse showStoreProduct(Pageable pageable, User user) {
+        validateSeller(user);
+        List<Product> productList = productRepository.findByStore_User_Id(pageable, user.getId());
 
-	}
+        return new ProductShowResponse(
+            productList.stream().map(product -> new ProductResultResponse(product)).toList());
 
-	@Override
-	@Transactional
-	@CacheEvict(cacheNames = "products", allEntries = true)
-	public ProductResponse updateProduct(ProductRequest productRequest, Long productId, User user) {
-		validateSeller(user);
+    }
 
-		Product product = foundProduct(productId);
-		product.update(productRequest);
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
+    public ProductResponse updateProduct(ProductRequest productRequest, Long productId, User user) {
+        validateSeller(user);
 
-		ProductResultResponse response = new ProductResultResponse(product);
-		Objects.requireNonNull(cacheManager.getCache("product")).put(productId,response);
+        Product product = foundProduct(productId);
+        product.update(productRequest);
 
-		return new ProductResponse(product);
-	}
+        ProductResultResponse response = new ProductResultResponse(product);
+        Objects.requireNonNull(cacheManager.getCache("product")).put(productId, response);
 
-
-	@Override
-	@Transactional(readOnly = true)
-	@Cacheable(cacheNames = "product", key = "#productId")
-	public ProductResultResponse showProduct(long productId) {
-		Product product = foundProduct(productId);
-
-		return new ProductResultResponse(product);
-	}
+        return new ProductResponse(product);
+    }
 
 
-	@Override
-	@Transactional(readOnly = true)
-	@Cacheable(cacheNames = "products", key = "#pageable")
-	public ProductShowResponse showAllProduct(Pageable pageable) {
-		List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne(
-			pageable);
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "product", key = "#productId")
+    public ProductResultResponse showProduct(long productId) {
+        Product product = foundProduct(productId);
 
-		return new ProductShowResponse(
-			productList.stream().map(product -> new ProductResultResponse(product)).toList());
-	}
-
-	@Override
-	@Transactional
-	@CacheEvict(cacheNames = "products", key = "#productId")
-	public ProductResponse deleteProduct(Long productId, User user) {
-		validateSeller(user);
-
-		Product product = foundProduct(productId);
-		product.delete();
-
-		return new ProductResponse(product);
-	}
-
-	private Product foundProduct(Long productId) {
-		return productRepository.findById(productId)
-			.orElseThrow(() -> new NoSuchElementException(
-				messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
-	}
-
-	private void validateSeller(User user) {
-		if (!RoleEnum.SELLER.equals(user.getRole())) {
-			throw new NoPermissionException(
-				messageSource.getMessage("noPermission.role.seller", null, Locale.KOREA));
-		}
-	}
+        return new ProductResultResponse(product);
+    }
 
 
-	//재고 감소시켜주는 메소드
-	public void decreaseProductStock(Order order) {
-		RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
-		try {
-			try {
-				boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
-				if (isLocked) {
-					Product product = productRepository.findByOrder(order);
-					Long newStock = product.getQuantity() - order.getQuantity();
-					if (newStock < 0) {
-						throw new InsufficientQuantityException(
-							messageSource.getMessage("insufficient.quantity.product", null,
-								Locale.KOREA));
-					}
-					product.quatityUpdate(newStock);
-					productRepository.save(product);
-				}
-			} finally {
-				lock.unlock();
-			}
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "products", key = "#pageable")
+    public ProductShowResponse showAllProduct(Pageable pageable) {
+        List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne(
+            pageable);
 
-	}
+        return new ProductShowResponse(
+            productList.stream().map(product -> new ProductResultResponse(product)).toList());
+    }
 
-	@Transactional(readOnly = true)
-	public ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue) {
-		List<Product> productList;
-		if (searchValue == null) {
-			log.info("없을때");
-			productList = productRepository.findProductsWithQuantityGreaterThanOne(pageable);
-		} else {
-			log.info("있을때");
-			productList = productRepository.findProductsWithQuantityGreaterThanOneAndSearchValue(
-				pageable, searchValue);
-		}
-		return new ProductShowResponse(
-			productList.stream().map(product -> new ProductResultResponse(product)).toList());
-	}
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = "products", key = "#productId")
+    public ProductResponse deleteProduct(Long productId, User user) {
+        validateSeller(user);
+
+        Product product = foundProduct(productId);
+        product.delete();
+
+        return new ProductResponse(product);
+    }
+
+    private Product foundProduct(Long productId) {
+        return productRepository.findById(productId)
+            .orElseThrow(() -> new NoSuchElementException(
+                messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
+    }
+
+    private void validateSeller(User user) {
+        if (!RoleEnum.SELLER.equals(user.getRole())) {
+            throw new NoPermissionException(
+                messageSource.getMessage("noPermission.role.seller", null, Locale.KOREA));
+        }
+    }
+
+
+    //재고 감소시켜주는 메소드
+    public void decreaseProductStock(Order order) {
+        RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
+        try {
+            try {
+                boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
+                if (isLocked) {
+                    Product product = productRepository.findByOrder(order);
+                    Long newStock = product.getQuantity() - order.getQuantity();
+                    if (newStock < 0) {
+                        throw new InsufficientQuantityException(
+                            messageSource.getMessage("insufficient.quantity.product", null,
+                                Locale.KOREA));
+                    }
+                    product.quatityUpdate(newStock);
+                    productRepository.save(product);
+                }
+            } finally {
+                lock.unlock();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+    }
+
+    @Transactional(readOnly = true)
+    public ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue) {
+        List<Product> productList;
+        if (searchValue == null) {
+            log.info("없을때");
+            productList = productRepository.findProductsWithQuantityGreaterThanOne(pageable);
+        } else {
+            log.info("있을때");
+            productList = productRepository.findProductsWithQuantityGreaterThanOneAndSearchValue(
+                pageable, searchValue);
+        }
+        return new ProductShowResponse(
+            productList.stream().map(product -> new ProductResultResponse(product)).toList());
+    }
 }
