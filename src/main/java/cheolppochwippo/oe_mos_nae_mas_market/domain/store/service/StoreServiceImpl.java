@@ -55,6 +55,16 @@ public class StoreServiceImpl implements StoreService {
 
     }
 
+    @Override
+    public StoreResponse showStore(User user) {
+        User seller = getUser(user);
+        checkUserRole(user);
+        Store store = storeRepository.findByUser_Id(seller.getId())
+            .orElseThrow(() -> new NoSuchElementException(messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
+
+        return new StoreResponse(store);
+    }
+
     private User getUser(User user) {
         return userRepository.findById(user.getId())
             .orElseThrow(() -> new NoEntityException(messageSource.getMessage("noEntity.user", null, Locale.KOREA)));

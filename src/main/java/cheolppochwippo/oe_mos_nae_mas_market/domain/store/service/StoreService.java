@@ -9,4 +9,6 @@ public interface StoreService {
     StoreResponse createStore(StoreRequest storeRequest, User user);
 
     StoreResponse updateStore(StoreRequest storeRequest, User user);
+
+    StoreResponse showStore(User user);
 }
