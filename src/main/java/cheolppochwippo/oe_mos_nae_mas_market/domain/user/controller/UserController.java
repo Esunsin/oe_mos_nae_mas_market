@@ -2,11 +2,10 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.user.controller;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.service.UserService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails.UserDetailsImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.global.util.JwtUtil;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
@@ -30,26 +29,40 @@ public class UserController {
         throws ExecutionException, InterruptedException {
         UserResponse signupedUser = userService.signup(userRequest).get();
         return ResponseEntity.status(HttpStatus.OK.value())
-                .body(CommonResponse.<UserResponse>builder()
-                        .msg("signup complete!")
-                        .data(signupedUser)
-                        .build());
+            .body(CommonResponse.<UserResponse>builder()
+                .msg("signup complete!")
+                .data(signupedUser)
+                .build());
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<CommonResponse<UserResponse>> login(@RequestBody UserRequest userRequest, HttpServletResponse response)
+    public ResponseEntity<CommonResponse<UserResponse>> login(@RequestBody UserRequest userRequest,
+        HttpServletResponse response)
         throws ExecutionException, InterruptedException {
         UserResponse loginedUser = userService.login(userRequest).get();
-        response.setHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(loginedUser.getUserId(), loginedUser.getUsername(),loginedUser.getRole()));
+        response.setHeader(JwtUtil.AUTHORIZATION_HEADER,
+            jwtUtil.createToken(loginedUser.getUserId(), loginedUser.getUsername(),
+                loginedUser.getRole()));
         return ResponseEntity.status(HttpStatus.OK.value())
-                .body(CommonResponse.<UserResponse>builder()
-                        .msg("login complete!")
-                        .data(loginedUser)
-                        .build());
+            .body(CommonResponse.<UserResponse>builder()
+                .msg("login complete!")
+                .data(loginedUser)
+                .build());
+    }
+
+    @GetMapping("/auth/mypage")
+    public ResponseEntity<CommonResponse<UserResponse>> mypage(
+        @AuthenticationPrincipal UserDetailsImpl userDetailse) {
+        UserResponse mypage = userService.showMypage(userDetailse.getUser());
+        return ResponseEntity.status(HttpStatus.OK.value())
+            .body(CommonResponse.<UserResponse>builder()
+                .msg("get mypage complete!")
+                .data(mypage)
+                .build());
     }
 
     @GetMapping("/test")
-    public String test(@AuthenticationPrincipal UserDetailsImpl userDetails){
+    public String test(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return userDetails.getUser().getUsername();
     }
