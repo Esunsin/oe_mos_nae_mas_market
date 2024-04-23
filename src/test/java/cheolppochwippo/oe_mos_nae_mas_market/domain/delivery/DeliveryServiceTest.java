@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.dto.DeliveryRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.dto.DeliveryResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.entity.Delivery;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.entity.DeliveryStatementEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.repository.DeliveryRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.service.DeliveryService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.service.DeliveryServiceImpl;
@@ -64,7 +65,8 @@ public class DeliveryServiceTest {
         Long deliveryId = 100L;
         User user = new User(100L, "customer", "CONSUMER");
         DeliveryRequest deliveryRequest = new DeliveryRequest("주소지 생성 테스트");
-        Delivery existingDelivery = new Delivery(100L, "주소지 수정 테스트", Deleted.UNDELETE, "testId",user);
+        Delivery existingDelivery = new Delivery(100L, "주소지 수정 테스트", Deleted.UNDELETE, "testId",user,
+            DeliveryStatementEnum.WAIT);
         given(deliveryRepository.save(any(Delivery.class))).willReturn(existingDelivery);
         given(deliveryRepository.findById(100L)).willReturn(Optional.of(existingDelivery));
 

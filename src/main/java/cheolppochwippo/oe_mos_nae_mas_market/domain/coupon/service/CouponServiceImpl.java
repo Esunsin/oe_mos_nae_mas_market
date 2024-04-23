@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class CouponServiceImpl implements CouponService {
 
 	@Transactional
 	@Override
+	@CacheEvict(value = "coupons", cacheManager = "cacheManager")
 	public CouponResponse createCoupon(CouponRequest couponRequest) {
 		Coupon coupon = new Coupon(couponRequest);
 		Coupon savedCoupon = couponRepository.save(coupon);
@@ -56,6 +58,7 @@ public class CouponServiceImpl implements CouponService {
 
 	@Transactional
 	@Override
+	@CacheEvict(value = "coupons", cacheManager = "cacheManager")
 	public CouponResponse updateCoupon(Long couponId, CouponRequest couponRequest) {
 		Coupon coupon = findCoupon(couponId);
 		coupon.update(couponRequest);
@@ -66,6 +69,7 @@ public class CouponServiceImpl implements CouponService {
 
 	@Transactional
 	@Override
+	@CacheEvict(value = "coupons", cacheManager = "cacheManager")
 	public CouponResponse deleteCoupon(Long couponId) {
 		Coupon coupon = findCoupon(couponId);
 		coupon.delete();
