@@ -4,7 +4,6 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.store.dto.StoreRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -32,6 +31,8 @@ public class Store extends TimeStamped {
 
     private String info;
 
+    private boolean isApproved;
+
     @Enumerated(EnumType.STRING)
     private Deleted deleted;
 
@@ -44,6 +45,7 @@ public class Store extends TimeStamped {
         this.info = storeRequest.getInfo();
         this.user = user;
         this.deleted = Deleted.UNDELETE;
+        this.isApproved = false;
     }
 
     public void update(StoreRequest storeRequest) {
@@ -56,5 +58,8 @@ public class Store extends TimeStamped {
         this.info = info;
         this.user = user;
         this.deleted = Deleted.UNDELETE;
+    }
+    public void approve(){
+        this.isApproved = true;
     }
 }

@@ -11,7 +11,6 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.JpaConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
-import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import jakarta.persistence.EntityManager;
@@ -51,7 +50,7 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 		TotalOrderNameDto query = jpaConfig.jpaQueryFactory()
 			.select(Projections.constructor(
 				TotalOrderNameDto.class,
-				QOrder.order.price.sum(),
+				QOrder.order.price.multiply(QOrder.order.quantity).sum(),
 				QOrder.order.count(),
 				QOrder.order.product.productName,
 				QOrder.order.quantity
