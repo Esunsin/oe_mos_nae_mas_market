@@ -34,7 +34,7 @@ public class CouponServiceImpl implements CouponService {
 
 	@Transactional
 	@Override
-	@CacheEvict(value = "coupons", cacheManager = "cacheManager")
+	@CacheEvict(value = "coupons", cacheManager = "cacheManager", key = "'allCoupons'")
 	public CouponResponse createCoupon(CouponRequest couponRequest) {
 		if (couponRequest.getDiscount() < 0.01) {
 			throw new InvalidCouponDataException(
@@ -64,7 +64,7 @@ public class CouponServiceImpl implements CouponService {
 
 	@Transactional(readOnly = true)
 	@Override
-	@Cacheable(value = "coupons", cacheManager = "cacheManager")
+	@Cacheable(value = "coupons", cacheManager = "cacheManager", key = "'allCoupons'")
 	public List<CouponResponse> getCoupons() {
 		List<Coupon> coupons = couponRepository.findAll();
 		return coupons.stream()
@@ -74,7 +74,7 @@ public class CouponServiceImpl implements CouponService {
 
 	@Transactional
 	@Override
-	@CacheEvict(value = "coupons", cacheManager = "cacheManager")
+	@CacheEvict(value = "coupons", cacheManager = "cacheManager", key = "'allCoupons'")
 	public CouponResponse updateCoupon(Long couponId, CouponRequest couponRequest) {
 		Coupon coupon = findCoupon(couponId);
 		coupon.update(couponRequest);
@@ -85,7 +85,7 @@ public class CouponServiceImpl implements CouponService {
 
 	@Transactional
 	@Override
-	@CacheEvict(value = "coupons", cacheManager = "cacheManager")
+	@CacheEvict(value = "coupons", cacheManager = "cacheManager", key = "'allCoupons'")
 	public CouponResponse deleteCoupon(Long couponId) {
 		Coupon coupon = findCoupon(couponId);
 		coupon.delete();
