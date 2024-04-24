@@ -16,4 +16,6 @@ public interface StoreService {
     StoreResponse approveStore(Long requestId, User user);
 
     List<StoreResponse> showFalseStore(User user);
+
+    List<StoreResponse> showTrueStore(User user);
 }

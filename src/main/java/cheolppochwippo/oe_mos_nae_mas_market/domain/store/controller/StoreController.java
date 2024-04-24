@@ -84,5 +84,17 @@ public class StoreController {
                 .build());
     }
 
+    //상점 승인 전 상점 목록
+    @GetMapping("/stores/true")
+    public ResponseEntity<CommonResponse<List<StoreResponse>>> showTrueStore(
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        List<StoreResponse> approveStore = storeService.showTrueStore(userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.OK.value())
+            .body(CommonResponse.< List<StoreResponse>>builder()
+                .msg("show true stores complete!")
+                .data(approveStore)
+                .build());
+    }
+
 
 }

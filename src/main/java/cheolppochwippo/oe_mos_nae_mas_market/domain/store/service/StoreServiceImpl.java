@@ -87,6 +87,16 @@ public class StoreServiceImpl implements StoreService {
             .collect(Collectors.toList());
     }
 
+    @Override
+    public List<StoreResponse> showTrueStore(User user) {
+        validateAdmin(user);
+        List<Store> trueStoreList = storeRepository.findAllByIsApprovedTrueOrderByCreatedAt();
+
+        return trueStoreList.stream()
+            .map(StoreResponse::new)
+            .collect(Collectors.toList());
+    }
+
 
     private void validateAdmin(User user) {
         if (!RoleEnum.ADMIN.equals(user.getRole())) {

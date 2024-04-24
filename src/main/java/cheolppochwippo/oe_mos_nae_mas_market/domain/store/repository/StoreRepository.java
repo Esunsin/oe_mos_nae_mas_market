@@ -14,4 +14,5 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
     boolean existsByUserId(Long id);
 
     List<Store> findAllByIsApprovedFalseOrderByCreatedAt();
+    List<Store> findAllByIsApprovedTrueOrderByCreatedAt();
 }
