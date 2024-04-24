@@ -1,5 +1,8 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product.service;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.Image;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.ProductImage;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.image.repository.ProductImageRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
@@ -13,10 +16,8 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.InsufficientQuantityException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
-import java.util.List;
-import java.util.Locale;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ public class ProductServiceImpl implements ProductService {
 
 	private final ProductRepository productRepository;
 	private final StoreRepository storeRepository;
+	private final ProductImageRepository productImageRepository;
 	private final RedissonClient redissonClient;
 	private final MessageSource messageSource;
 	private final CacheManager cacheManager;
@@ -57,11 +59,13 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public ProductShowResponse showStoreProduct(Pageable pageable,User user) {
 		validateSeller(user);
-		List<Product> productList = productRepository.findByStore_User_Id(pageable,user.getId());
-
-		return new ProductShowResponse(
-			productList.stream().map(product -> new ProductResultResponse(product)).toList());
-
+		List<Product> productList = productRepository.findByStoreUserId(pageable,user.getId());
+		List<ProductResultResponse> productResultResponseList = new ArrayList<>();
+		for (Product product : productList) {
+			List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(product.getId());
+			productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
+		}
+		return new ProductShowResponse(productResultResponseList);
 	}
 
 	@Override
@@ -72,8 +76,8 @@ public class ProductServiceImpl implements ProductService {
 
 		Product product = foundProduct(productId);
 		product.update(productRequest);
-
-		ProductResultResponse response = new ProductResultResponse(product);
+		List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
+		ProductResultResponse response = new ProductResultResponse(product, imageByProductId);
 		Objects.requireNonNull(cacheManager.getCache("product")).put(productId,response);
 
 		return new ProductResponse(product);
@@ -85,8 +89,8 @@ public class ProductServiceImpl implements ProductService {
 	@Cacheable(cacheNames = "product", key = "#productId")
 	public ProductResultResponse showProduct(long productId) {
 		Product product = foundProduct(productId);
-
-		return new ProductResultResponse(product);
+		List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
+		return new ProductResultResponse(product,imageByProductId);
 	}
 
 
@@ -97,8 +101,14 @@ public class ProductServiceImpl implements ProductService {
 		List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne(
 			pageable);
 
-		return new ProductShowResponse(
-			productList.stream().map(product -> new ProductResultResponse(product)).toList());
+		List<ProductResultResponse> productResultResponseList = new ArrayList<>();
+
+		for (Product product : productList) {
+			List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(product.getId());
+			productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
+		}
+
+		return new ProductShowResponse(productResultResponseList);
 	}
 
 	@Override
@@ -134,25 +144,30 @@ public class ProductServiceImpl implements ProductService {
 			try {
 				boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
 				if (isLocked) {
-					Product product = productRepository.findByOrder(order);
-					Long newStock = product.getQuantity() - order.getQuantity();
-					if (newStock < 0) {
-						throw new InsufficientQuantityException(
-							messageSource.getMessage("insufficient.quantity.product", null,
-								Locale.KOREA));
-					}
-					product.quatityUpdate(newStock);
-					productRepository.save(product);
+					decreaseProductStockTransaction(order);
 				}
 			} finally {
 				lock.unlock();
 			}
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			Thread.currentThread().interrupt();
+			System.out.println(e.getMessage());
 		}
 
 	}
 
+	@Transactional
+	public void decreaseProductStockTransaction(Order order) {
+		Product product = productRepository.findByOrder(order);
+		Long newStock = product.getQuantity() - order.getQuantity();
+		if (newStock < 0) {
+			throw new InsufficientQuantityException(
+				messageSource.getMessage("insufficient.quantity.product", null,
+					Locale.KOREA));
+		}
+		product.quatityUpdate(newStock);
+		productRepository.save(product);
+	}
 	@Transactional(readOnly = true)
 	public ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue) {
 		List<Product> productList;
@@ -162,9 +177,16 @@ public class ProductServiceImpl implements ProductService {
 		} else {
 			log.info("있을때");
 			productList = productRepository.findProductsWithQuantityGreaterThanOneAndSearchValue(
-				pageable, searchValue);
+					pageable, searchValue);
 		}
-		return new ProductShowResponse(
-			productList.stream().map(product -> new ProductResultResponse(product)).toList());
+
+		List<ProductResultResponse> productResultResponseList = new ArrayList<>();
+
+		for (Product product : productList) {
+			List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(product.getId());
+			productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
+		}
+
+		return new ProductShowResponse(productResultResponseList);
 	}
 }

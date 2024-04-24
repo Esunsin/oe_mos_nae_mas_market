@@ -7,7 +7,9 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.coupon.repository.CouponRepo
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.repository.UserRepository;
 //import cheolppochwippo.oe_mos_nae_mas_market.global.config.SQSConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.SQSConfig;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.InvalidCouponDataException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -34,15 +36,31 @@ public class CouponServiceImpl implements CouponService {
 	@Override
 	@CacheEvict(value = "coupons", cacheManager = "cacheManager")
 	public CouponResponse createCoupon(CouponRequest couponRequest) {
+		if (couponRequest.getDiscount() < 0.01) {
+			throw new InvalidCouponDataException(
+				messageSource.getMessage("invalid.coupon.discount", null, Locale.KOREA));
+		}
+		if (couponRequest.getEffectiveDate().isBefore(LocalDateTime.now())) {
+			throw new InvalidCouponDataException(
+				messageSource.getMessage("invalid.coupon.effectiveDate", null, Locale.KOREA));
+		}
+		if (couponRequest.getAmount() == 0) {
+			throw new InvalidCouponDataException(
+				messageSource.getMessage("invalid.coupon.amount", null, Locale.KOREA));
+		}
+
+		// 쿠폰 생성 및 저장 로직
 		Coupon coupon = new Coupon(couponRequest);
 		Coupon savedCoupon = couponRepository.save(coupon);
+
+		// 발행 대상 사용자들에게 쿠폰 발행 알림 전송
 		List<String> phoneNumbers = userRepository.getPhoneNumberFindByConsentTrue();
 		if (!phoneNumbers.isEmpty()) {
 			sqsConfig.sendCouponMessages(phoneNumbers,
-				messageSource.getMessage("logo", null, Locale.KOREA) + "\n" + coupon.getCouponInfo()
-					+
+				messageSource.getMessage("logo", null, Locale.KOREA) + "\n" + coupon.getCouponInfo() +
 					messageSource.getMessage("publish.coupon", null, Locale.KOREA));
 		}
+
 		return new CouponResponse(savedCoupon);
 	}
 
