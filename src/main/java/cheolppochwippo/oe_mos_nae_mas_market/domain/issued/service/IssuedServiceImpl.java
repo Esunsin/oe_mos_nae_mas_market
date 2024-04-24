@@ -41,7 +41,7 @@ public class IssuedServiceImpl implements IssuedService {
         List<Issued> issuedCoupons = issuedRepository.findByCouponIdAndUser(couponId, user);
         if (!issuedCoupons.isEmpty()) {
             throw new CouponAlreadyIssuedException(
-                (messageSource.getMessage("coupon.alreadyIssued", null, Locale.KOREA)));
+                (messageSource.getMessage("already.issued.coupon", null, Locale.KOREA)));
         }
         Coupon coupon = getCouponById(couponId);
         Issued issuedCoupon = saveIssuedCoupon(coupon, user);
