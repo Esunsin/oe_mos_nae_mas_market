@@ -44,19 +44,18 @@ public class StoreServiceImpl implements StoreService {
 
         User seller = getUser(user);
         checkUserRole(user);
-        Store store = storeRepository.findByUser_Id(seller.getId())
+        Store store = storeRepository.findByUserId(seller.getId())
             .orElseThrow(() -> new NoSuchElementException(
                 messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
 
         store.update(storeRequest);
 
         return new StoreResponse(store);
-
     }
 
     @Override
     public StoreResponse showStore(User user) {
-        Store store = storeRepository.findByUser_Id(user.getId())
+        Store store = storeRepository.findByUserId(user.getId())
             .orElseThrow(() -> new NoSuchElementException(
                 messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
 

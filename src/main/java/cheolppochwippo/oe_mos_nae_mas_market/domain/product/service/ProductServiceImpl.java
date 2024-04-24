@@ -1,5 +1,7 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product.service;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.ProductImage;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.image.repository.ProductImageRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
@@ -44,7 +46,7 @@ public class ProductServiceImpl implements ProductService {
 	@CacheEvict(cacheNames = "products", allEntries = true)
 	public ProductResponse createProduct(ProductRequest productRequest, User user) {
 		validateSeller(user);
-		Store store = storeRepository.findByUser_Id(user.getId())
+		Store store = storeRepository.findByUserId(user.getId())
 			.orElseThrow(() -> new NoSuchElementException(
 				messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
 

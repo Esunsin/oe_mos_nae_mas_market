@@ -53,7 +53,7 @@ public class StoreServiceTest {
 
         seller = new User("seller", "password", SELLER);
         customer = new User("customer", "password", CONSUMER);
-        store = new Store(1L, "Test Store", "Test Store Info", Deleted.UNDELETE, seller);
+        store = new Store(1L, "Test Store", "Test Store Info", true, Deleted.UNDELETE, seller);
 
         storeRequest = new StoreRequest("Test Store", "Test Store Info");
     }
@@ -105,7 +105,7 @@ public class StoreServiceTest {
     void updateStore_Success() {
         // Given
         when(userRepository.findById(seller.getId())).thenReturn(Optional.of(seller));
-        when(storeRepository.findByUser_Id(seller.getId())).thenReturn(Optional.of(store));
+        when(storeRepository.findByUserId(seller.getId())).thenReturn(Optional.of(store));
 
         // When
         StoreResponse result = storeService.updateStore(
@@ -121,7 +121,7 @@ public class StoreServiceTest {
     void updateStore_StoreNotFound_ThrowsNoSuchElementException() {
         // Given
         when(userRepository.findById(seller.getId())).thenReturn(Optional.of(seller));
-        when(storeRepository.findByUser_Id(seller.getId())).thenReturn(Optional.empty());
+        when(storeRepository.findByUserId(seller.getId())).thenReturn(Optional.empty());
 
         // When, Then
         assertThrows(NoSuchElementException.class,

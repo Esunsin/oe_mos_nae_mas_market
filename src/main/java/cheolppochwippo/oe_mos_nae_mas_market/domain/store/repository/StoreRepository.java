@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
-    Optional<Store> findByUser_Id(Long id);
+    Optional<Store> findByUserId(Long id);
 
     boolean existsByUserId(Long id);
 }
