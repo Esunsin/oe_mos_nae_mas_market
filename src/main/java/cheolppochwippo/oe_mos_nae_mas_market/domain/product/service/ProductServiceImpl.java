@@ -136,22 +136,22 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 
-    //재고 감소시켜주는 메소드
-    public void decreaseProductStock(Order order) {
-        RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
-        try {
-            try {
-                boolean isLocked = lock.tryLock(1000, 3000, TimeUnit.SECONDS);
-                if (isLocked) {
-                    decreaseProductStockTransaction(order);
-                }
-            } finally {
-                lock.unlock();
-            }
-        } catch (Exception e) {
-            Thread.currentThread().interrupt();
-            System.out.println(e.getMessage());
-        }
+	//재고 감소시켜주는 메소드
+	public void decreaseProductStock(Order order) {
+		RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
+		try {
+			try {
+				boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
+				if (isLocked) {
+					decreaseProductStockTransaction(order);
+				}
+			} finally {
+				lock.unlock();
+			}
+		} catch (Exception e) {
+			Thread.currentThread().interrupt();
+			System.out.println(e.getMessage());
+		}
 
 	}
 
