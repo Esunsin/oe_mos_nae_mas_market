@@ -11,11 +11,15 @@ public class UserResponse {
 
     private Long userId;
     private RoleEnum role;
+    private String phoneNumber;
+    private boolean consent;
 
     public UserResponse(User user) {
         this.username = user.getUsername();
         this.userId = user.getId();
         this.role = user.getRole();
+        this.phoneNumber = user.getPhoneNumber();
+        this.consent = user.isConsent();
     }
 }
 
