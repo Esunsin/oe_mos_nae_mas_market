@@ -2,6 +2,7 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.user.controller;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.service.UserService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails.UserDetailsImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,6 +59,17 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK.value())
             .body(CommonResponse.<UserResponse>builder()
                 .msg("get mypage complete!")
+                .data(mypage)
+                .build());
+    }
+
+    @PatchMapping("/auth/mypage")
+    public ResponseEntity<CommonResponse<UserResponse>> updateMypage(@RequestBody UserUpdateRequest userRequest,
+        @AuthenticationPrincipal UserDetailsImpl userDetailse) {
+        UserResponse mypage = userService.updateMypage(userRequest, userDetailse.getUser());
+        return ResponseEntity.status(HttpStatus.OK.value())
+            .body(CommonResponse.<UserResponse>builder()
+                .msg("update mypage complete!")
                 .data(mypage)
                 .build());
     }

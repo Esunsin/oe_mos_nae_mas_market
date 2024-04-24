@@ -2,6 +2,7 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.user.service;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.repository.UserRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.DuplicateUsernameException;
@@ -64,5 +65,17 @@ public class UserServiceImpl implements UserService {
 
         return new UserResponse(findUser);
 
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateMypage(UserUpdateRequest userRequest, User user) {
+        User findUser = userRepository.findByUsername(user.getUsername()).orElseThrow(
+            () -> new InvalidCredentialsException(
+                messageSource.getMessage("invalid.credentials.username", null, Locale.KOREA))
+        );
+
+        findUser.update(userRequest);
+        return new UserResponse(findUser);
     }
 }

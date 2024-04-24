@@ -1,6 +1,7 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserRequest;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -58,6 +59,11 @@ public class User extends TimeStamped {
         this.username = username;
         this.password = password;
         this.role = role;
+    }
+
+    public void update(UserUpdateRequest userUpdateRequest){
+        this.phoneNumber = userUpdateRequest.getPhoneNumber();
+        this.consent = userUpdateRequest.isConsent();
     }
 
     public void changeRoleToSeller() {
