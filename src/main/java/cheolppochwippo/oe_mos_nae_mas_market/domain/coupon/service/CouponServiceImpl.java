@@ -49,11 +49,9 @@ public class CouponServiceImpl implements CouponService {
 				messageSource.getMessage("invalid.coupon.amount", null, Locale.KOREA));
 		}
 
-		// 쿠폰 생성 및 저장 로직
 		Coupon coupon = new Coupon(couponRequest);
 		Coupon savedCoupon = couponRepository.save(coupon);
 
-		// 발행 대상 사용자들에게 쿠폰 발행 알림 전송
 		List<String> phoneNumbers = userRepository.getPhoneNumberFindByConsentTrue();
 		if (!phoneNumbers.isEmpty()) {
 			sqsConfig.sendCouponMessages(phoneNumbers,
