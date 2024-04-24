@@ -76,7 +76,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     }
 
     @Override
-    public List<Product> findByStore_User_Id(Pageable pageable, Long userId) {
+    public List<Product> findByStoreUserId(Pageable pageable, Long userId) {
         return jpaConfig.jpaQueryFactory()
             .selectFrom(product)
             .innerJoin(product.store, store)

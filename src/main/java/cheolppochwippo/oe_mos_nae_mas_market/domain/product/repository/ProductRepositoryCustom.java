@@ -13,5 +13,5 @@ public interface ProductRepositoryCustom {
 
     List<Product> findProductsWithQuantityGreaterThanOneAndSearchValue(Pageable pageable,String searchValue);
 
-    List<Product> findByStore_User_Id(Pageable pageable,Long userId);
+    List<Product> findByStoreUserId(Pageable pageable,Long userId);
 }
