@@ -27,7 +27,7 @@ public class Issued extends TimeStamped {
     @Column
     @Enumerated(EnumType.STRING)
     private Deleted deleted;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_id", nullable = false)
     private Coupon coupon;
     @ManyToOne(fetch = FetchType.LAZY)

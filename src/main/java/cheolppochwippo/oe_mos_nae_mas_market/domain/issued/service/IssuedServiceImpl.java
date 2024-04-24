@@ -37,12 +37,11 @@ public class IssuedServiceImpl implements IssuedService {
     private final RedissonClient redissonClient;
 
     @Override
-    @CacheEvict(value = "issuedCoupons", key = "#user.id", cacheManager = "cacheManager")
     public IssuedResponse issueCoupon(Long couponId, User user) {
         List<Issued> issuedCoupons = issuedRepository.findByCouponIdAndUser(couponId, user);
         if (!issuedCoupons.isEmpty()) {
             throw new CouponAlreadyIssuedException(
-                (messageSource.getMessage("coupon.alreadyIssued", null, Locale.KOREA)));
+                (messageSource.getMessage("already.issued.coupon", null, Locale.KOREA)));
         }
         Coupon coupon = getCouponById(couponId);
         Issued issuedCoupon = saveIssuedCoupon(coupon, user);
@@ -51,11 +50,20 @@ public class IssuedServiceImpl implements IssuedService {
     }
 
 
-    private Coupon getCouponById(Long couponId) {
-        return couponRepository.findById(couponId)
+    public Coupon getCouponById(Long couponId) {
+        Coupon coupon = couponRepository.findById(couponId)
             .orElseThrow(() -> new NoEntityException(
-                (messageSource.getMessage("noEntity.coupon", null, Locale.KOREA))));
+                messageSource.getMessage("coupon.notFound", null, Locale.KOREA)));
+
+        if (coupon.getAmount() <= 0) {
+            throw new InsufficientQuantityException(
+                messageSource.getMessage("insufficient.quantity.coupon",
+                    null, Locale.KOREA));
+        }
+
+        return coupon;
     }
+
 
 
     public void decreaseCouponAmount(Long issuedId) {
@@ -67,7 +75,7 @@ public class IssuedServiceImpl implements IssuedService {
         RLock couponLock = redissonClient.getFairLock("coupon:" + couponId);
         try {
             try {
-                boolean isCouponLocked = couponLock.tryLock(1000, 3000, TimeUnit.SECONDS);
+                boolean isCouponLocked = couponLock.tryLock(10, 60, TimeUnit.SECONDS);
                 if (isCouponLocked) {
                     decreaseCouponAmountTransaction(issuedId);
                 }
@@ -114,7 +122,6 @@ public class IssuedServiceImpl implements IssuedService {
 
     @Override
     @Transactional(readOnly = true)
-    //@Cacheable(value = "issuedCoupons", key = "#user.id", cacheManager = "cacheManager")
     public List<IssuedResponse> getIssuedCoupons(User user) {
         return issuedRepository.findCouponByUser(user);
     }

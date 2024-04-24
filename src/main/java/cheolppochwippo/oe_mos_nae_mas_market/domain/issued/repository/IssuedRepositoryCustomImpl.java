@@ -55,8 +55,7 @@ public class IssuedRepositoryCustomImpl implements IssuedRepositoryCustom {
         return jpaConfig.jpaQueryFactory()
             .selectFrom(issued)
             .leftJoin(issued.coupon).fetchJoin()
-            .where(issued.deleted.eq(Deleted.UNDELETE)
-                .and(issued.user.eq(user))
+            .where(issued.user.eq(user)
                 .and(issued.coupon.id.eq(couponId)))
             .fetch();
     }

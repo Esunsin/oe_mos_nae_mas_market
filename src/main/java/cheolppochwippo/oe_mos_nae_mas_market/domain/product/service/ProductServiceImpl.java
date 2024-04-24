@@ -142,7 +142,7 @@ public class ProductServiceImpl implements ProductService {
 		RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
 		try {
 			try {
-				boolean isLocked = lock.tryLock(1000, 3000, TimeUnit.SECONDS);
+				boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
 				if (isLocked) {
 					decreaseProductStockTransaction(order);
 				}
