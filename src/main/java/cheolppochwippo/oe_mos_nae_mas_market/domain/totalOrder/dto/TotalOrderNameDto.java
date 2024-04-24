@@ -20,12 +20,4 @@ public class TotalOrderNameDto {
 	private Long quantity;
 
 
-	public static TotalOrderNameDto fromTuple(Tuple tuple) {
-		Long sum = tuple.get(QOrder.order.price.sum());
-		Long count = tuple.get(QOrder.order.count());
-		String productName = tuple.get(QOrder.order.product.productName);
-		Long quantity = tuple.get(QOrder.order.quantity);
-		return new TotalOrderNameDto(sum, count, productName, quantity);
-	}
-
 }
