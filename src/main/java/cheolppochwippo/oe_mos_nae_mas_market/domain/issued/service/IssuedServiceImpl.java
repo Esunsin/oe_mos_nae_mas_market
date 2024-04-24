@@ -50,11 +50,20 @@ public class IssuedServiceImpl implements IssuedService {
     }
 
 
-    private Coupon getCouponById(Long couponId) {
-        return couponRepository.findById(couponId)
+    public Coupon getCouponById(Long couponId) {
+        Coupon coupon = couponRepository.findById(couponId)
             .orElseThrow(() -> new NoEntityException(
-                (messageSource.getMessage("noEntity.coupon", null, Locale.KOREA))));
+                messageSource.getMessage("coupon.notFound", null, Locale.KOREA)));
+
+        if (coupon.getAmount() <= 0) {
+            throw new InsufficientQuantityException(
+                messageSource.getMessage("insufficient.quantity.coupon",
+                    null, Locale.KOREA));
+        }
+
+        return coupon;
     }
+
 
 
     public void decreaseCouponAmount(Long issuedId) {
