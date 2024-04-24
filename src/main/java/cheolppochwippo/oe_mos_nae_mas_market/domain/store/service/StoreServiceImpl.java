@@ -11,8 +11,10 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.Cr
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -74,6 +76,17 @@ public class StoreServiceImpl implements StoreService {
         seller.changeRoleToSeller();
         return new StoreResponse(store);
     }
+
+    @Override
+    public List<StoreResponse> showFalseStore(User user) {
+        validateAdmin(user);
+        List<Store> falseStoreList = storeRepository.findAllByIsApprovedFalseOrderByCreatedAt();
+
+        return falseStoreList.stream()
+            .map(StoreResponse::new)
+            .collect(Collectors.toList());
+    }
+
 
     private void validateAdmin(User user) {
         if (!RoleEnum.ADMIN.equals(user.getRole())) {
