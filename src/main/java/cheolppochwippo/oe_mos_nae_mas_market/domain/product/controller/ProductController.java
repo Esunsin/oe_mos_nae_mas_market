@@ -56,14 +56,16 @@ public class ProductController {
                 .data(updateProduct) //productId
                 .build());
     }
+
     //상점상품조회
     @GetMapping("/stores/products")
     public ResponseEntity<CommonResponse<ProductShowResponse>> showStoreProduct(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
-    @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
         Pageable pageable = PageRequest.of(page, size);
-        ProductShowResponse showProduct = productService.showStoreProduct(pageable,userDetails.getUser());
+        ProductShowResponse showProduct = productService.showStoreProduct(pageable,
+            userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK.value())
             .body(CommonResponse.<ProductShowResponse>builder()
                 .msg("get store products complete!")
@@ -96,18 +98,20 @@ public class ProductController {
                 .data(productShowResponses)
                 .build());
     }
+
     @GetMapping("/products/search")
     public ResponseEntity<CommonResponse<ProductShowResponse>> showAllProductTest(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String searchValue) {
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String searchValue) {
         Pageable pageable = PageRequest.of(page, size);
-        ProductShowResponse productShowResponses = productService.showAllProductWithValue(pageable,searchValue);
+        ProductShowResponse productShowResponses = productService.showAllProductWithValue(pageable,
+            searchValue);
         return ResponseEntity.status(HttpStatus.OK.value())
-                .body(CommonResponse.<ProductShowResponse>builder()
-                        .msg("get all products complete!")
-                        .data(productShowResponses)
-                        .build());
+            .body(CommonResponse.<ProductShowResponse>builder()
+                .msg("get all products complete!")
+                .data(productShowResponses)
+                .build());
     }
 
     //상품 삭제

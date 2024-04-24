@@ -12,7 +12,6 @@ public class ProductRequest {
     private String productName;
     private String info;
     private long realPrice;
-    private long price;
     private long discount;
     private long quantity;
 

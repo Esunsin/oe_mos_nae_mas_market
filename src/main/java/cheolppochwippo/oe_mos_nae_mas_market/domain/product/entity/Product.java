@@ -53,7 +53,7 @@ public class Product extends TimeStamped {
         this.productName = product.getProductName();
         this.info = product.getInfo();
         this.realPrice = product.getRealPrice();
-        this.price = product.getPrice();
+        this.price = product.getRealPrice()- product.getDiscount();
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();
         this.deleted = Deleted.UNDELETE;
@@ -64,7 +64,7 @@ public class Product extends TimeStamped {
         this.productName = product.getProductName();
         this.info = product.getInfo();
         this.realPrice = product.getRealPrice();
-        this.price = product.getPrice();
+        this.price = product.getRealPrice()- product.getDiscount();
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();
     }
