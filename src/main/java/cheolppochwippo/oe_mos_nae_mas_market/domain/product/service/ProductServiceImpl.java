@@ -113,7 +113,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = "products", key = "#productId")
+	@CacheEvict(cacheNames = "products", allEntries = true)
 	public ProductResponse deleteProduct(Long productId, User user) {
 		validateSeller(user);
 
