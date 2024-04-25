@@ -1,5 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product.service;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductMyResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
@@ -27,4 +28,6 @@ public interface ProductService {
     ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue);
 
     ProductShowResponse showStoreProduct(Pageable pageable, User user);
+
+    ProductMyResultResponse showMyProduct(Long userId, long productId);
 }

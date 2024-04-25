@@ -1,5 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product.controller;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductMyResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
@@ -125,6 +126,18 @@ public class ProductController {
             .body(CommonResponse.<ProductResponse>builder()
                 .msg("delete products complete!")
                 .data(deleteProduct)
+                .build());
+    }
+
+    @GetMapping("/product/{productId}")
+    public ResponseEntity<CommonResponse<ProductMyResultResponse>> showMyProduct(
+        @PathVariable Long productId,@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        ProductMyResultResponse showProduct = productService.showMyProduct(userDetails.getUser()
+            .getId(), productId);
+        return ResponseEntity.status(HttpStatus.OK.value())
+            .body(CommonResponse.<ProductMyResultResponse>builder()
+                .msg("get products complete!")
+                .data(showProduct)
                 .build());
     }
 }
