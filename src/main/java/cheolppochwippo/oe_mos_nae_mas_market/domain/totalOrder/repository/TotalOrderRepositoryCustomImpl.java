@@ -142,14 +142,14 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 		Long updatedQuantity = jpaConfig.jpaQueryFactory()
 			.select(QOrder.order.id.count())
 			.from(QOrder.order)
-			.leftJoin(QOrder.order.product,QProduct.product)
+			.leftJoin(QOrder.order.product, QProduct.product)
 			.where(
 				QOrder.order.totalOrder.id.eq(totalOrderId),
 				QOrder.order.product.quantity.subtract(QOrder.order.quantity).lt(0L)
 			)
 			.fetchOne();
 		updatedQuantity = updatedQuantity != null ? updatedQuantity : 0L;
-		if(updatedQuantity>0){
+		if (updatedQuantity > 0) {
 			throw new InsufficientQuantityException("");
 		}
 		jpaConfig.jpaQueryFactory()
@@ -161,6 +161,13 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 					.where(QOrder.order.product.id.eq(QProduct.product.id)
 						.and(QOrder.order.totalOrder.id.eq(totalOrderId)))
 			))
+			.where(QProduct.product.id.in(
+					JPAExpressions
+						.select(QOrder.order.product.id)
+						.from(QOrder.order)
+						.where(QOrder.order.totalOrder.id.eq(totalOrderId))
+				)
+			)
 			.execute();
 
 		entityManager.flush();
