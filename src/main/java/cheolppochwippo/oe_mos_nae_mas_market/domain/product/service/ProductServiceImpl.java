@@ -7,6 +7,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository.ProductRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
@@ -71,7 +72,7 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	@Transactional
 	@CacheEvict(cacheNames = "products", allEntries = true)
-	public ProductResponse updateProduct(ProductRequest productRequest, Long productId, User user) {
+	public ProductResponse updateProduct(ProductUpdateRequest productRequest, Long productId, User user) {
 		validateSeller(user);
 
 		Product product = foundProduct(productId);

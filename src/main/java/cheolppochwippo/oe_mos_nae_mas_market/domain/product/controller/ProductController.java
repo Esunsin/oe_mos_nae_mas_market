@@ -4,6 +4,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails.UserDetailsImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
@@ -46,7 +47,7 @@ public class ProductController {
     //상품수정
     @PatchMapping("/stores/products/{productId}")
     public ResponseEntity<CommonResponse<ProductResponse>> updateProduct(
-        @PathVariable Long productId, @RequestBody ProductRequest productRequest,
+        @PathVariable Long productId, @RequestBody ProductUpdateRequest productRequest,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         ProductResponse updateProduct = productService.updateProduct(productRequest, productId,
             userDetails.getUser());
