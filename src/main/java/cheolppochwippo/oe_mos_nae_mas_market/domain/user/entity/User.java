@@ -69,4 +69,8 @@ public class User extends TimeStamped {
     public void changeRoleToSeller() {
         this.role = RoleEnum.SELLER;
     }
+
+    public void changeRoleToConsumer() {
+        this.role = RoleEnum.CONSUMER;
+    }
 }
