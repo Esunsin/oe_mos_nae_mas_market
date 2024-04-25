@@ -72,6 +72,5 @@ public class Product extends TimeStamped {
     public void delete() {
         this.deleted = Deleted.DELETE;
     }
-    public void quatityUpdate(Long amount){this.quantity = amount;}
 
 }

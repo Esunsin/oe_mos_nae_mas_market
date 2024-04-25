@@ -11,6 +11,8 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository.ProductRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository.TotalOrderRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository.TotalOrderRepositoryCustomImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.InsufficientQuantityException;
@@ -38,7 +40,6 @@ public class ProductServiceImpl implements ProductService {
 	private final ProductRepository productRepository;
 	private final StoreRepository storeRepository;
 	private final ProductImageRepository productImageRepository;
-	private final RedissonClient redissonClient;
 	private final MessageSource messageSource;
 	private final CacheManager cacheManager;
 
@@ -135,38 +136,6 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
-
-	//재고 감소시켜주는 메소드
-	public void decreaseProductStock(Order order) {
-		RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
-		try {
-			try {
-				boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
-				if (isLocked) {
-					decreaseProductStockTransaction(order);
-				}
-			} finally {
-				lock.unlock();
-			}
-		} catch (Exception e) {
-			Thread.currentThread().interrupt();
-			System.out.println(e.getMessage());
-		}
-
-	}
-
-	@Transactional
-	public void decreaseProductStockTransaction(Order order) {
-		Product product = productRepository.findByOrder(order);
-		Long newStock = product.getQuantity() - order.getQuantity();
-		if (newStock < 0) {
-			throw new InsufficientQuantityException(
-				messageSource.getMessage("insufficient.quantity.product", null,
-					Locale.KOREA));
-		}
-		product.quatityUpdate(newStock);
-		productRepository.save(product);
-	}
 	@Transactional(readOnly = true)
 	public ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue) {
 		List<Product> productList;
@@ -188,4 +157,5 @@ public class ProductServiceImpl implements ProductService {
 
 		return new ProductShowResponse(productResultResponseList);
 	}
+
 }
