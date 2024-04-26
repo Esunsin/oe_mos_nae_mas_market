@@ -13,6 +13,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.No
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NotFoundException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.ParsedException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.PriceMismatchException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.QueueFullException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
@@ -86,6 +87,14 @@ public class GlobalControllerAdvice {
 		log.error(">>>" + ex.getClass().getName() + "<<< \n msg: {}, code: {}, url: {}",
 			ex.getMessage(), HttpStatus.CONFLICT, request.getRequestURI(), ex);
 		return createResponse(HttpStatus.CONFLICT, ex.getMessage());
+	}
+
+	@ExceptionHandler({QueueFullException.class})
+	public ResponseEntity<CommonResponse<ErrorResponse>> handleToManyRequestsException(Exception ex,
+		HttpServletRequest request) {
+		log.error(">>>" + ex.getClass().getName() + "<<< \n msg: {}, code: {}, url: {}",
+			ex.getMessage(), HttpStatus.TOO_MANY_REQUESTS, request.getRequestURI(), ex);
+		return createResponse(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
 	}
 
 
