@@ -32,8 +32,9 @@ public class ProductImageRepositoryCustomImpl implements ProductImageRepositoryC
                         .and(product.deleted.eq(Deleted.UNDELETE)))
                 .fetch();
     }
+
     public List<ProductImage> getAllImage(Pageable pageable) {
-        QueryResults<ProductImage> productImageQueryResults = jpaConfig.jpaQueryFactory()
+        return jpaConfig.jpaQueryFactory()
                 .selectFrom(productImage)
                 .leftJoin(productImage.product, product).fetchJoin()
                 .leftJoin(product.store, store).fetchJoin()
@@ -42,9 +43,6 @@ public class ProductImageRepositoryCustomImpl implements ProductImageRepositoryC
                         .and(productImage.product.deleted.eq(Deleted.UNDELETE)))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .fetchResults();
-
-        return productImageQueryResults.getResults();
+                .fetch();
     }
-
 }

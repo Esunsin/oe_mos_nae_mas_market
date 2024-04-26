@@ -95,20 +95,8 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	@Transactional(readOnly = true)
-	//@Cacheable(cacheNames = "products", key = "#pageable")
+	@Cacheable(cacheNames = "products", key = "#pageable")
 	public ProductShowResponse showAllProduct(Pageable pageable) {
-//		List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne(pageable);
-//		log.info(String.valueOf(productList.size()));
-//		List<ProductResultResponse> productResultResponseList = new ArrayList<>();
-//
-//		for (Product product : productList) {
-//			List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(product.getId());
-//			productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
-//		}
-//
-//		return new ProductShowResponse(productResultResponseList);
-
-
 		List<ProductImage> allImage = productImageRepository.getAllImage(pageable);
 		List<ProductResultResponse> productResultResponseList = new ArrayList<>();
 		List<Product> checkDuplicatedProducts = new ArrayList<>();
