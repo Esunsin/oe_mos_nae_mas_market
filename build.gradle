@@ -71,6 +71,8 @@ dependencies {
 	implementation 'com.amazonaws:aws-java-sdk-sqs:1.12.160'
 	//jdbc
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	//스케줄러
+	implementation 'org.springframework.boot:spring-boot-starter-quartz'
 
 }
 
