@@ -6,6 +6,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductUpdateRequest;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.QuantityUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails.UserDetailsImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
@@ -55,6 +56,19 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK.value())
             .body(CommonResponse.<ProductResponse>builder()
                 .msg("update products complete!")
+                .data(updateProduct) //productId
+                .build());
+    }
+    //상품 재고 수정
+    @PatchMapping("/stores/products/{productId}/quantity")
+    public ResponseEntity<CommonResponse<ProductResponse>> updateQuantity(
+        @PathVariable Long productId, @RequestBody QuantityUpdateRequest productRequest,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        ProductResponse updateProduct = productService.updateQuantity(productRequest, productId,
+            userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.OK.value())
+            .body(CommonResponse.<ProductResponse>builder()
+                .msg("update quantity complete!")
                 .data(updateProduct) //productId
                 .build());
     }
