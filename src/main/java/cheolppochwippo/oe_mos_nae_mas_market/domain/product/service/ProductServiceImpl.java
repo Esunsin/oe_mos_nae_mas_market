@@ -15,8 +15,11 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.InsufficientQuantityException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,157 +38,162 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 
-	private final ProductRepository productRepository;
-	private final StoreRepository storeRepository;
-	private final ProductImageRepository productImageRepository;
-	private final RedissonClient redissonClient;
-	private final MessageSource messageSource;
-	private final CacheManager cacheManager;
+    private final ProductRepository productRepository;
+    private final StoreRepository storeRepository;
+    private final ProductImageRepository productImageRepository;
+    private final RedissonClient redissonClient;
+    private final MessageSource messageSource;
+    private final CacheManager cacheManager;
 
-	@Transactional
-	@CacheEvict(cacheNames = "products", allEntries = true)
-	public ProductResponse createProduct(ProductRequest productRequest, User user) {
-		validateSeller(user);
-		Store store = storeRepository.findByUserId(user.getId())
-			.orElseThrow(() -> new NoSuchElementException(
-				messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
+    @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
+    public ProductResponse createProduct(ProductRequest productRequest, User user) {
+        validateSeller(user);
+        Store store = storeRepository.findByUserId(user.getId())
+            .orElseThrow(() -> new NoSuchElementException(
+                messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
 
-		Product product = new Product(productRequest, store);
-		productRepository.save(product);
+        Product product = new Product(productRequest, store);
+        productRepository.save(product);
 
-		return new ProductResponse(product);
-	}
-	@Override
-	public ProductShowResponse showStoreProduct(Pageable pageable,User user) {
-		validateSeller(user);
-		List<Product> productList = productRepository.findByStoreUserId(pageable,user.getId());
-		List<ProductResultResponse> productResultResponseList = new ArrayList<>();
-		for (Product product : productList) {
-			List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(product.getId());
-			productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
-		}
-		return new ProductShowResponse(productResultResponseList);
-	}
+        return new ProductResponse(product);
+    }
 
-	@Override
-	@Transactional
-	@CacheEvict(cacheNames = "products", allEntries = true)
-	public ProductResponse updateProduct(ProductRequest productRequest, Long productId, User user) {
-		validateSeller(user);
+    @Override
+    public ProductShowResponse showStoreProduct(Pageable pageable, User user) {
+        validateSeller(user);
+        List<Product> productList = productRepository.findByStoreUserId(pageable, user.getId());
+        List<ProductResultResponse> productResultResponseList = new ArrayList<>();
+        for (Product product : productList) {
+            List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(
+                product.getId());
+            productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
+        }
+        return new ProductShowResponse(productResultResponseList);
+    }
 
-		Product product = foundProduct(productId);
-		product.update(productRequest);
-		List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
-		ProductResultResponse response = new ProductResultResponse(product, imageByProductId);
-		Objects.requireNonNull(cacheManager.getCache("product")).put(productId,response);
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
+    public ProductResponse updateProduct(ProductRequest productRequest, Long productId, User user) {
+        validateSeller(user);
 
-		return new ProductResponse(product);
-	}
+        Product product = foundProduct(productId);
+        product.update(productRequest);
+        List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
+        ProductResultResponse response = new ProductResultResponse(product, imageByProductId);
+        Objects.requireNonNull(cacheManager.getCache("product")).put(productId, response);
 
-
-	@Override
-	@Transactional(readOnly = true)
-	@Cacheable(cacheNames = "product", key = "#productId")
-	public ProductResultResponse showProduct(long productId) {
-		Product product = foundProduct(productId);
-		List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
-		return new ProductResultResponse(product,imageByProductId);
-	}
+        return new ProductResponse(product);
+    }
 
 
-	@Override
-	@Transactional(readOnly = true)
-	@Cacheable(cacheNames = "products", key = "#pageable")
-	public ProductShowResponse showAllProduct(Pageable pageable) {
-		List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne(
-			pageable);
-
-		List<ProductResultResponse> productResultResponseList = new ArrayList<>();
-
-		for (Product product : productList) {
-			List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(product.getId());
-			productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
-		}
-
-		return new ProductShowResponse(productResultResponseList);
-	}
-
-	@Override
-	@Transactional
-	@CacheEvict(cacheNames = "products", key = "#productId")
-	public ProductResponse deleteProduct(Long productId, User user) {
-		validateSeller(user);
-
-		Product product = foundProduct(productId);
-		product.delete();
-
-		return new ProductResponse(product);
-	}
-
-	private Product foundProduct(Long productId) {
-		return productRepository.findById(productId)
-			.orElseThrow(() -> new NoSuchElementException(
-				messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
-	}
-
-	private void validateSeller(User user) {
-		if (!RoleEnum.SELLER.equals(user.getRole())) {
-			throw new NoPermissionException(
-				messageSource.getMessage("noPermission.role.seller", null, Locale.KOREA));
-		}
-	}
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "product", key = "#productId")
+    public ProductResultResponse showProduct(long productId) {
+        Product product = foundProduct(productId);
+        List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
+        return new ProductResultResponse(product, imageByProductId);
+    }
 
 
-	//재고 감소시켜주는 메소드
-	public void decreaseProductStock(Order order) {
-		RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
-		try {
-			try {
-				boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
-				if (isLocked) {
-					decreaseProductStockTransaction(order);
-				}
-			} finally {
-				lock.unlock();
-			}
-		} catch (Exception e) {
-			Thread.currentThread().interrupt();
-			System.out.println(e.getMessage());
-		}
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "products", key = "#pageable")
+    public ProductShowResponse showAllProduct(Pageable pageable) {
+        List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne(
+            pageable);
 
-	}
+        List<ProductResultResponse> productResultResponseList = new ArrayList<>();
 
-	@Transactional
-	public void decreaseProductStockTransaction(Order order) {
-		Product product = productRepository.findByOrder(order);
-		Long newStock = product.getQuantity() - order.getQuantity();
-		if (newStock < 0) {
-			throw new InsufficientQuantityException(
-				messageSource.getMessage("insufficient.quantity.product", null,
-					Locale.KOREA));
-		}
-		product.quatityUpdate(newStock);
-		productRepository.save(product);
-	}
-	@Transactional(readOnly = true)
-	public ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue) {
-		List<Product> productList;
-		if (searchValue == null) {
-			log.info("없을때");
-			productList = productRepository.findProductsWithQuantityGreaterThanOne(pageable);
-		} else {
-			log.info("있을때");
-			productList = productRepository.findProductsWithQuantityGreaterThanOneAndSearchValue(
-					pageable, searchValue);
-		}
+        for (Product product : productList) {
+            List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(
+                product.getId());
+            productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
+        }
 
-		List<ProductResultResponse> productResultResponseList = new ArrayList<>();
+        return new ProductShowResponse(productResultResponseList);
+    }
 
-		for (Product product : productList) {
-			List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(product.getId());
-			productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
-		}
+    @Override
+    @Transactional
+    @CacheEvict(cacheNames = "products", key = "#productId")
+    public ProductResponse deleteProduct(Long productId, User user) {
+        validateSeller(user);
 
-		return new ProductShowResponse(productResultResponseList);
-	}
+        Product product = foundProduct(productId);
+        product.delete();
+
+        return new ProductResponse(product);
+    }
+
+    private Product foundProduct(Long productId) {
+        return productRepository.findById(productId)
+            .orElseThrow(() -> new NoSuchElementException(
+                messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
+    }
+
+    private void validateSeller(User user) {
+        if (!RoleEnum.SELLER.equals(user.getRole())) {
+            throw new NoPermissionException(
+                messageSource.getMessage("noPermission.role.seller", null, Locale.KOREA));
+        }
+    }
+
+
+    //재고 감소시켜주는 메소드
+    public void decreaseProductStock(Order order) {
+        RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
+        try {
+            try {
+                boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
+                if (isLocked) {
+                    decreaseProductStockTransaction(order);
+                }
+            } finally {
+                lock.unlock();
+            }
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    @Transactional
+    public void decreaseProductStockTransaction(Order order) {
+        Product product = productRepository.findByOrder(order);
+        Long newStock = product.getQuantity() - order.getQuantity();
+        if (newStock < 0) {
+            throw new InsufficientQuantityException(
+                messageSource.getMessage("insufficient.quantity.product", null,
+                    Locale.KOREA));
+        }
+        product.quatityUpdate(newStock);
+        productRepository.save(product);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue) {
+        List<Product> productList;
+        if (searchValue == null) {
+            log.info("없을때");
+            productList = productRepository.findProductsWithQuantityGreaterThanOne(pageable);
+        } else {
+            log.info("있을때");
+            productList = productRepository.findProductsWithQuantityGreaterThanOneAndSearchValue(
+                pageable, searchValue);
+        }
+
+        List<ProductResultResponse> productResultResponseList = new ArrayList<>();
+
+        for (Product product : productList) {
+            List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(
+                product.getId());
+            productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
+        }
+
+        return new ProductShowResponse(productResultResponseList);
+    }
 }

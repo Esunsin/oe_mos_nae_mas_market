@@ -1,6 +1,5 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.user.controller;
 
-import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.RoleUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserUpdateRequest;
@@ -65,7 +64,8 @@ public class UserController {
     }
 
     @PatchMapping("/auth/mypage")
-    public ResponseEntity<CommonResponse<UserResponse>> updateMypage(@RequestBody UserUpdateRequest userRequest,
+    public ResponseEntity<CommonResponse<UserResponse>> updateMypage(
+        @RequestBody UserUpdateRequest userRequest,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         UserResponse mypage = userService.updateMypage(userRequest, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK.value())
@@ -74,6 +74,7 @@ public class UserController {
                 .data(mypage)
                 .build());
     }
+
     //유저 역할 변경
     @PatchMapping("/auth/role")
     public ResponseEntity<CommonResponse<UserResponse>> updateRole(
