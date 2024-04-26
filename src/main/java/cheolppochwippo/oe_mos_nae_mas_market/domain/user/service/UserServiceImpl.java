@@ -1,12 +1,15 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.user.service;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.RoleUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserUpdateRequest;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.repository.UserRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.DuplicateUsernameException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.InvalidCredentialsException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
@@ -58,10 +61,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse showMypage(User user) {
-        User findUser = userRepository.findByUsername(user.getUsername()).orElseThrow(
-            () -> new InvalidCredentialsException(
-                messageSource.getMessage("invalid.credentials.username", null, Locale.KOREA))
-        );
+        User findUser = userRepository.findById(user.getId())
+            .orElseThrow(() -> new NoEntityException(
+                messageSource.getMessage("noEntity.user", null, Locale.KOREA)));
+
 
         return new UserResponse(findUser);
 
@@ -70,12 +73,23 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse updateMypage(UserUpdateRequest userRequest, User user) {
-        User findUser = userRepository.findByUsername(user.getUsername()).orElseThrow(
-            () -> new InvalidCredentialsException(
-                messageSource.getMessage("invalid.credentials.username", null, Locale.KOREA))
-        );
+        User findUser = userRepository.findById(user.getId())
+            .orElseThrow(() -> new NoEntityException(
+                messageSource.getMessage("noEntity.user", null, Locale.KOREA)));
+
 
         findUser.update(userRequest);
         return new UserResponse(findUser);
+    }
+
+    @Override
+    public UserResponse roleUpdate( User user) {
+        if (user.getRole() == RoleEnum.CONSUMER) {
+            user.changeRoleToSeller();
+            User updatedUser = userRepository.save(user);
+            return new UserResponse(updatedUser);
+        } else {
+            throw new IllegalArgumentException("역할 변경이 불가능한 유저입니다.");
+        }
     }
 }
