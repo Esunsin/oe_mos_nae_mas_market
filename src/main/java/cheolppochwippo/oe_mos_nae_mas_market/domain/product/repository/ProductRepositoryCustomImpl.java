@@ -87,4 +87,14 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
             .limit(pageable.getPageSize())
             .fetch();
     }
+
+    @Override
+    public Optional<Product> findByproductIdAndUserId(Long userId, Long productId) {
+        return Optional.ofNullable(jpaConfig.jpaQueryFactory()
+			.selectFrom(product)
+			.where(
+				product.store.user.id.eq(userId),
+				product.id.eq(productId)
+			).fetchOne());
+    }
 }

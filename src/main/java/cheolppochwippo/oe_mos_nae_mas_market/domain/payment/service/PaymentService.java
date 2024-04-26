@@ -5,6 +5,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentJsonRespo
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponses;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentSuccessResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.Payment;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
@@ -14,7 +15,7 @@ import org.springframework.data.domain.Page;
 
 public interface PaymentService {
 
-	PaymentJsonResponse confirmPayment(User user, PaymentRequest request);
+	PaymentSuccessResponse confirmPayment(User user, PaymentRequest request);
 
 	void successPayment(TotalOrder totalOrder, PaymentRequest paymentRequest);
 

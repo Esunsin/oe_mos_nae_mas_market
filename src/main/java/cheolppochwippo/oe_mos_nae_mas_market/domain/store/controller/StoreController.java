@@ -37,7 +37,7 @@ public class StoreController {
                 .build());
     }
 
-    @PatchMapping("/stores/{storeId}")
+    @PatchMapping("/stores")
     public ResponseEntity<CommonResponse<StoreResponse>> updateStore(
         @RequestBody StoreRequest storeRequest,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
