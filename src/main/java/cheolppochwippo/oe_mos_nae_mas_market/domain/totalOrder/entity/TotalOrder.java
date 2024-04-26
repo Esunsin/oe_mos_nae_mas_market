@@ -73,8 +73,8 @@ public class TotalOrder extends TimeStamped {
 		paymentStatementEnum = PaymentStatementEnum.WAIT;
 		deleted = Deleted.UNDELETE;
 		deliveryCost = price >= 40000 ? 0L : 3000L;
-		this.discount = discount < 1 ? (long) (price * (1 - discount)) : (long) (price - discount);
-		this.priceAmount = discount < 1 ? (long) (price * (1 - discount) + deliveryCost) : (long) (price-discount-deliveryCost);
+		this.discount = discount < 1 ? (long) (price * discount) : (long) (discount);
+		this.priceAmount = discount < 1 ? (this.price - this.discount + deliveryCost) :  (this.price-this.discount-deliveryCost);
 		this.user = user;
 	}
 

@@ -3,6 +3,7 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.user.controller;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.dto.UserUpdateRequest;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.service.UserService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails.UserDetailsImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
@@ -87,10 +88,26 @@ public class UserController {
                 .build());
     }
 
-    @GetMapping("/test")
-    public String test(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    @PostMapping("/auth/signup/userTest")
+    public ResponseEntity<CommonResponse<UserResponse>> signupByUserTest(@RequestBody UserRequest userRequest)
+        throws ExecutionException, InterruptedException {
+        UserResponse signupedUser = userService.signupByUserTest(userRequest).get();
+        return ResponseEntity.status(HttpStatus.OK.value())
+            .body(CommonResponse.<UserResponse>builder()
+                .msg("signupByUserTest complete!")
+                .data(signupedUser)
+                .build());
+    }
 
-        return userDetails.getUser().getUsername();
+    @PostMapping("/auth/changeRole")
+    public ResponseEntity<CommonResponse<String>> changeRole(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User user = userService.changeRole(userDetails.getUser().getId());
+        String jwt = jwtUtil.createToken(user.getId(),user.getUsername(),user.getRole());
+        return ResponseEntity.status(HttpStatus.OK.value())
+            .body(CommonResponse.<String>builder()
+                .msg("changeRol complete!")
+                .data(jwt)
+                .build());
     }
 
 }

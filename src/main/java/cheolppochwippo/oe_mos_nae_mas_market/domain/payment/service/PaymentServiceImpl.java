@@ -3,14 +3,12 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.payment.service;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.entity.Delivery;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.repository.DeliveryRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.repository.IssuedRepository;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.issued.service.IssuedServiceImpl;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.order.repository.OrderRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentCancelRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentJsonResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponses;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentSuccessResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.Payment;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.repository.PaymentRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductServiceImpl;
@@ -24,6 +22,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.No
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.ParsedException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.PriceMismatchException;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.QueueFullException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,9 +32,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -61,8 +60,6 @@ public class PaymentServiceImpl implements PaymentService {
 
 	private final IssuedRepository issuedRepository;
 
-	private final OrderRepository orderRepository;
-
 	private final TossPaymentConfig tossPaymentConfig;
 
 	private final ProductServiceImpl productService;
@@ -71,10 +68,8 @@ public class PaymentServiceImpl implements PaymentService {
 
 	private final MessageSource messageSource;
 
-	private final IssuedServiceImpl issuedService;
-
 	@Override
-	public PaymentJsonResponse confirmPayment(User user, PaymentRequest request) {
+	public PaymentSuccessResponse confirmPayment(User user, PaymentRequest request) {
 		TotalOrder totalOrder = checkPayment(user, request);
 		JSONObject obj = new JSONObject();
 		obj.put("orderId", request.getOrderId());
@@ -96,7 +91,7 @@ public class PaymentServiceImpl implements PaymentService {
 
 		JSONObject jsonObject = getJSONObject(connection, isSuccess);
 
-		return new PaymentJsonResponse(jsonObject, code);
+		return new PaymentSuccessResponse(jsonObject, code,totalOrder.getAddress());
 	}
 
 	@Override
@@ -158,20 +153,35 @@ public class PaymentServiceImpl implements PaymentService {
 			() -> new NoEntityException(
 				messageSource.getMessage("noEntity.totalOrder", null, Locale.KOREA))
 		);
-		if (!Objects.equals(totalOrder.getPriceAmount(), paymentRequest.getAmount())
-			|| !Objects.equals(totalOrder.getMerchantUid(), paymentRequest.getOrderId())) {
-			throw new PriceMismatchException(
-				messageSource.getMessage("price.mismatch", null, Locale.KOREA));
-		}
-		List<Order> orders = orderRepository.getOrdersFindTotalOrder(totalOrder);
+		RLock couponLock = redissonClient.getFairLock("payment");
 		try {
-			orders.parallelStream().forEach(productService::decreaseProductStock);
-		} catch (InsufficientQuantityException e) {
-			failPayment(totalOrder, paymentRequest);
-			throw new InsufficientQuantityException(
-				messageSource.getMessage("insufficient.quantity.product", null, Locale.KOREA));
+			try {
+				boolean isCouponLocked = couponLock.tryLock(10, 60, TimeUnit.SECONDS);
+				if (isCouponLocked) {
+					if (!Objects.equals(totalOrder.getPriceAmount(), paymentRequest.getAmount())
+						|| !Objects.equals(totalOrder.getMerchantUid(),
+						paymentRequest.getOrderId())) {
+						throw new PriceMismatchException(
+							messageSource.getMessage("price.mismatch", null, Locale.KOREA));
+					}
+					try {
+						totalOrderRepository.decreaseQuantity(totalOrder.getId());
+						return totalOrder;
+					} catch (InsufficientQuantityException e) {
+						failPayment(totalOrder, paymentRequest);
+						throw new InsufficientQuantityException(
+							messageSource.getMessage("insufficient.quantity.product", null,
+								Locale.KOREA));
+					}
+				}
+			} finally {
+				couponLock.unlock();
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
-		return totalOrder;
+		throw new QueueFullException(messageSource.getMessage("payment.pull.queue", null,
+			Locale.KOREA));
 	}
 
 
@@ -261,9 +271,10 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	public Page<PaymentResponses> getPayments(User user, int page) {
-		Pageable pageable = PageRequest.of(page-1, 10);
+		Pageable pageable = PageRequest.of(page - 1, 10);
 		return paymentRepository.getPaymentPageFindByUserId(user.getId(), pageable);
 	}
+
 
 }
 
