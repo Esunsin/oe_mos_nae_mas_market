@@ -87,7 +87,7 @@ public class productServiceTest {
     void createProduct_SellerRole_Success() {
         //given
         ProductRequest productRequest = new ProductRequest("Test Product", "Test Product Info",
-            10000L, 8000L, 2000L, 10L);
+            10000L, 2000L, 10L);
         given(storeRepository.findByUserId(seller.getId())).willReturn(Optional.of(store));
 
         //when
@@ -102,7 +102,7 @@ public class productServiceTest {
     @DisplayName("상품 생성_seller 아닐때_실패")
     void createProduct_CustomerRole_ThrowsIllegalArgumentException() {
         ProductRequest productRequest = new ProductRequest("Test Product", "Test Product Info",
-            10000L, 8000L, 2000L, 10L);
+            10000L, 2000L, 10L);
 
         assertThrows(NoPermissionException.class,
             () -> productService.createProduct(productRequest, customer));
@@ -126,7 +126,7 @@ public class productServiceTest {
     void updateProduct_CustomerRole_ThrowsIllegalArgumentException() {
         assertThrows(NoPermissionException.class, () -> {
             ProductRequest updatedProductRequest = new ProductRequest("Updated Product",
-                "Updated Product Info", 12000L, 10000L, 2000L, 15L);
+                "Updated Product Info", 12000L, 2000L, 15L);
             productService.updateProduct(updatedProductRequest, 1L, customer);
         });
     }
@@ -136,7 +136,7 @@ public class productServiceTest {
     void updateProduct_ProductNotFound_ThrowsNoSuchElementException() {
 
         ProductRequest updatedProductRequest = new ProductRequest("Updated Product",
-            "Updated Product Info", 12000L, 10000L, 2000L, 15L);
+            "Updated Product Info", 12000L, 2000L, 15L);
 
         assertThrows(NoPermissionException.class,
             () -> productService.updateProduct(updatedProductRequest, 2L, customer));
