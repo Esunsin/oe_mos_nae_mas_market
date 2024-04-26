@@ -29,15 +29,6 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom{
                 .fetch();
     }
 
-    public Order findOrderByUserBeforeBuyDirect(User user){
-        return jpaConfig.jpaQueryFactory()
-                .selectFrom(order)
-                .leftJoin(product).fetchJoin()
-                .where(order.deleted.eq(Deleted.DIRECT)
-                        .and(order.user.eq(user)))
-                .fetchOne();
-    }
-
     public Optional<Order> findOrderByProductIdAndUserBeforeBuy(User user, Long productId){
         return Optional.ofNullable(
                 jpaConfig.jpaQueryFactory()
@@ -47,15 +38,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom{
                         .and(order.product.id.eq(productId)))
                 .fetchOne());
     }
-    public Optional<Order> findOrderByProductIdAndUserBeforeBuyDirect(User user, Long productId){
-        return Optional.ofNullable(
-                jpaConfig.jpaQueryFactory()
-                        .selectFrom(order)
-                        .where(order.deleted.eq(Deleted.DIRECT)
-                                .and(order.user.eq(user))
-                                .and(order.product.id.eq(productId)))
-                        .fetchOne());
-    }
+
     @Override
     public List<Order> getOrdersFindTotalOrder(TotalOrder totalOrder) {
         List<Order> query = jpaConfig.jpaQueryFactory()
