@@ -17,6 +17,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository.ProductRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductServiceImpl;
@@ -46,8 +47,6 @@ public class productServiceTest {
     @Mock
     ProductRepository productRepository;
     @Mock
-    RedissonClient redissonClient;
-    @Mock
     StoreRepository storeRepository;
     @Mock
     CacheManager cacheManager;
@@ -65,7 +64,7 @@ public class productServiceTest {
     @BeforeEach
     void setUp() {
         productService = new ProductServiceImpl(productRepository, storeRepository,
-            productImageRepository, redissonClient, messageSource, cacheManager);
+            productImageRepository, messageSource, cacheManager);
 
         seller = new User("seller", "password", SELLER);
         customer = new User("customer", "password", CONSUMER);
@@ -125,8 +124,8 @@ public class productServiceTest {
     @DisplayName("상품 수정_SELLER 아닐때_실패")
     void updateProduct_CustomerRole_ThrowsIllegalArgumentException() {
         assertThrows(NoPermissionException.class, () -> {
-            ProductRequest updatedProductRequest = new ProductRequest("Updated Product",
-                "Updated Product Info", 12000L, 2000L, 15L);
+            ProductUpdateRequest updatedProductRequest = new ProductUpdateRequest("Updated Product",
+                "Updated Product Info", 12000L, 2000L);
             productService.updateProduct(updatedProductRequest, 1L, customer);
         });
     }
@@ -135,8 +134,8 @@ public class productServiceTest {
     @DisplayName("상품 수정_존재하지않는 상품_실패")
     void updateProduct_ProductNotFound_ThrowsNoSuchElementException() {
 
-        ProductRequest updatedProductRequest = new ProductRequest("Updated Product",
-            "Updated Product Info", 12000L, 2000L, 15L);
+        ProductUpdateRequest updatedProductRequest = new ProductUpdateRequest("Updated Product",
+            "Updated Product Info", 12000L, 2000L);
 
         assertThrows(NoPermissionException.class,
             () -> productService.updateProduct(updatedProductRequest, 2L, customer));
