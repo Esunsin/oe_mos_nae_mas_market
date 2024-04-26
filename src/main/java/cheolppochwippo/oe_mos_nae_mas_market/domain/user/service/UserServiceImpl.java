@@ -83,11 +83,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserResponse roleUpdate( User user) {
-        if (user.getRole() == RoleEnum.CONSUMER) {
-            user.changeRoleToSeller();
-            User updatedUser = userRepository.save(user);
-            return new UserResponse(updatedUser);
+        User findUser = userRepository.findById(user.getId())
+            .orElseThrow(() -> new NoEntityException(
+                messageSource.getMessage("noEntity.user", null, Locale.KOREA)));
+
+        if (findUser.getRole() == RoleEnum.CONSUMER) {
+            findUser.changeRoleToSeller();
+
+            return new UserResponse(findUser);
         } else {
             throw new IllegalArgumentException("역할 변경이 불가능한 유저입니다.");
         }
