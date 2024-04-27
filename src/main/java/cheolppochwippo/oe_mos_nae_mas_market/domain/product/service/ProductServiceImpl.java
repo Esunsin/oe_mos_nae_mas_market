@@ -8,6 +8,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductUpdateRequest;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.QuantityUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository.ProductRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.search.document.ProductDocument;
@@ -126,6 +127,17 @@ public class ProductServiceImpl implements ProductService {
         List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
         return new ProductMyResultResponse(product, imageByProductId);
     }
+
+	@Override
+	@Transactional
+	public ProductResponse updateQuantity(QuantityUpdateRequest productRequest, Long productId,
+		User user) {
+		Product product = productRepository.findByproductIdAndUserId(user.getId(), productId)
+			.orElseThrow(() -> new NoSuchElementException(
+				messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
+		product.quantity(productRequest);
+		return new ProductResponse(product);
+	}
 
 
     @Override
