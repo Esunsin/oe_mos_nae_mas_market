@@ -3,17 +3,13 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.product.service;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.ProductImage;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.repository.ProductImageRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.*;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository.ProductRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
-import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.InsufficientQuantityException;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 
 import java.util.*;
@@ -70,7 +66,7 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	@Transactional
 	@CacheEvict(cacheNames = "products", allEntries = true)
-	public ProductResponse updateProduct(ProductRequest productRequest, Long productId, User user) {
+	public ProductResponse updateProduct(ProductUpdateRequest productRequest, Long productId, User user) {
 		validateSeller(user);
 
 		Product product = foundProduct(productId);
@@ -90,6 +86,16 @@ public class ProductServiceImpl implements ProductService {
 		Product product = foundProduct(productId);
 		List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
 		return new ProductResultResponse(product,imageByProductId);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public ProductMyResultResponse showMyProduct(Long userId, long productId) {
+		Product product = productRepository.findByproductIdAndUserId(userId, productId)
+			.orElseThrow(() -> new NoSuchElementException(
+				messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
+		List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
+		return new ProductMyResultResponse(product, imageByProductId);
 	}
 
 
@@ -117,12 +123,13 @@ public class ProductServiceImpl implements ProductService {
 				}
 			}
 		}
+
 		return new ProductShowResponse(productResultResponseList);
 	}
 
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = "products", key = "#productId")
+	@CacheEvict(cacheNames = "products", allEntries = true)
 	public ProductResponse deleteProduct(Long productId, User user) {
 		validateSeller(user);
 
@@ -145,38 +152,6 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
-
-	//재고 감소시켜주는 메소드
-	public void decreaseProductStock(Order order) {
-		RLock lock = redissonClient.getFairLock("product" + order.getProduct().getId());
-		try {
-			try {
-				boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
-				if (isLocked) {
-					decreaseProductStockTransaction(order);
-				}
-			} finally {
-				lock.unlock();
-			}
-		} catch (Exception e) {
-			Thread.currentThread().interrupt();
-			System.out.println(e.getMessage());
-		}
-
-	}
-
-	@Transactional
-	public void decreaseProductStockTransaction(Order order) {
-		Product product = productRepository.findByOrder(order);
-		Long newStock = product.getQuantity() - order.getQuantity();
-		if (newStock < 0) {
-			throw new InsufficientQuantityException(
-				messageSource.getMessage("insufficient.quantity.product", null,
-					Locale.KOREA));
-		}
-		product.quatityUpdate(newStock);
-		productRepository.save(product);
-	}
 	@Transactional(readOnly = true)
 	public ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue) {
 		List<Product> productList;
@@ -186,13 +161,14 @@ public class ProductServiceImpl implements ProductService {
 		} else {
 			log.info("있을때");
 			productList = productRepository.findProductsWithQuantityGreaterThanOneAndSearchValue(
-					pageable, searchValue);
+				pageable, searchValue);
 		}
 
 		List<ProductResultResponse> productResultResponseList = new ArrayList<>();
 
 		for (Product product : productList) {
-			List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(product.getId());
+			List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(
+				product.getId());
 			productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
 		}
 

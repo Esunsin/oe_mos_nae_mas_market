@@ -5,6 +5,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentJsonRespo
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentResponses;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.dto.PaymentSuccessResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.Payment;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.service.PaymentServiceImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
@@ -29,13 +30,13 @@ public class PaymentController {
 	private final PaymentServiceImpl paymentService;
 
 	@RequestMapping(value = "/payments/confirm")
-	public ResponseEntity<CommonResponse<JSONObject>> confirmPayment(
+	public ResponseEntity<CommonResponse<PaymentSuccessResponse>> confirmPayment(
 		@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody PaymentRequest request) {
-		PaymentJsonResponse response = paymentService.confirmPayment(userDetails.getUser(),
+		PaymentSuccessResponse response = paymentService.confirmPayment(userDetails.getUser(),
 			request);
-		return ResponseEntity.status(response.getCode()).body(CommonResponse.<JSONObject>builder()
+		return ResponseEntity.status(response.getCode()).body(CommonResponse.<PaymentSuccessResponse>builder()
 			.msg("confirm payment complete!")
-			.data(response.getJsonObject())
+			.data(response)
 			.build());
 	}
 

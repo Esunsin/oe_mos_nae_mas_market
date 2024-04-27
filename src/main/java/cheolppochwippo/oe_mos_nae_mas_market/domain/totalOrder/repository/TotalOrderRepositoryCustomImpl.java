@@ -4,6 +4,7 @@ import static cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.QTo
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.QOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.PaymentStatementEnum;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.QProduct;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrderNameDto;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.dto.TotalOrdersGetResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.QTotalOrder;
@@ -11,8 +12,10 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.config.JpaConfig;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
+import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.InsufficientQuantityException;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Objects;
@@ -58,7 +61,7 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 			.from(QOrder.order)
 			.where(userIdEq(userId),
 				QOrder.order.deleted.eq(Deleted.UNDELETE)
-				)
+			)
 			.groupBy(QOrder.order.user.id)
 			.fetchOne();
 		return Optional.ofNullable(query);
@@ -97,7 +100,7 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 		return new PageImpl<>(totalOrdersGetResponses, pageable, getTotalOrderCount(userId));
 	}
 
-	private Long getTotalOrderCount(Long userId){
+	private Long getTotalOrderCount(Long userId) {
 		return jpaConfig.jpaQueryFactory()
 			.select(totalOrder.count())
 			.from(totalOrder)
@@ -131,6 +134,44 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 		entityManager.flush();
 		entityManager.clear();
 		return Optional.ofNullable(count);
+	}
+
+	@Override
+	@Transactional
+	public void decreaseQuantity(Long totalOrderId) {
+		Long updatedQuantity = jpaConfig.jpaQueryFactory()
+			.select(QOrder.order.id.count())
+			.from(QOrder.order)
+			.leftJoin(QOrder.order.product, QProduct.product)
+			.where(
+				QOrder.order.totalOrder.id.eq(totalOrderId),
+				QOrder.order.product.quantity.subtract(QOrder.order.quantity).lt(0L)
+			)
+			.fetchOne();
+		updatedQuantity = updatedQuantity != null ? updatedQuantity : 0L;
+		if (updatedQuantity > 0) {
+			throw new InsufficientQuantityException("");
+		}
+		jpaConfig.jpaQueryFactory()
+			.update(QProduct.product)
+			.set(QProduct.product.quantity, QProduct.product.quantity.subtract(
+				JPAExpressions
+					.select(QOrder.order.quantity)
+					.from(QOrder.order)
+					.where(QOrder.order.product.id.eq(QProduct.product.id)
+						.and(QOrder.order.totalOrder.id.eq(totalOrderId)))
+			))
+			.where(QProduct.product.id.in(
+					JPAExpressions
+						.select(QOrder.order.product.id)
+						.from(QOrder.order)
+						.where(QOrder.order.totalOrder.id.eq(totalOrderId))
+				)
+			)
+			.execute();
+
+		entityManager.flush();
+		entityManager.clear();
 	}
 
 	@Override

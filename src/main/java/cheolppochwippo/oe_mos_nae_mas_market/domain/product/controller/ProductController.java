@@ -1,9 +1,11 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product.controller;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductMyResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails.UserDetailsImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
@@ -46,7 +48,7 @@ public class ProductController {
     //상품수정
     @PatchMapping("/stores/products/{productId}")
     public ResponseEntity<CommonResponse<ProductResponse>> updateProduct(
-        @PathVariable Long productId, @RequestBody ProductRequest productRequest,
+        @PathVariable Long productId, @RequestBody ProductUpdateRequest productRequest,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         ProductResponse updateProduct = productService.updateProduct(productRequest, productId,
             userDetails.getUser());
@@ -124,6 +126,18 @@ public class ProductController {
             .body(CommonResponse.<ProductResponse>builder()
                 .msg("delete products complete!")
                 .data(deleteProduct)
+                .build());
+    }
+
+    @GetMapping("/product/{productId}")
+    public ResponseEntity<CommonResponse<ProductMyResultResponse>> showMyProduct(
+        @PathVariable Long productId,@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        ProductMyResultResponse showProduct = productService.showMyProduct(userDetails.getUser()
+            .getId(), productId);
+        return ResponseEntity.status(HttpStatus.OK.value())
+            .body(CommonResponse.<ProductMyResultResponse>builder()
+                .msg("get products complete!")
+                .data(showProduct)
                 .build());
     }
 }
