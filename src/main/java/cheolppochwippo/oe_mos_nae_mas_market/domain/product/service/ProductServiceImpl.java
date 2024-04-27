@@ -17,6 +17,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
+import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +46,6 @@ public class ProductServiceImpl implements ProductService {
     private final MessageSource messageSource;
     private final CacheManager cacheManager;
     private final ProductSearchRepository productSearchRepository;
-    private final ElasticsearchOperations elasticsearchOperations;
 
     @Transactional
     @CacheEvict(cacheNames = "products", allEntries = true)
@@ -61,7 +61,7 @@ public class ProductServiceImpl implements ProductService {
         ProductDocument productDocument = new ProductDocument(store.getStoreName(),
             saveProduct.getId(), productRequest.getProductName(), productRequest.getInfo(),
             productRequest.getRealPrice(), productRequest.getDiscount(),
-            productRequest.getQuantity());
+            productRequest.getQuantity(), Deleted.UNDELETE);
         productSearchRepository.save(productDocument);
 
         return new ProductResponse(product);

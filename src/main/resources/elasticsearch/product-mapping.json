@@ -1,7 +1,7 @@
 {
   "properties": {
     "productName": {
-      "type": "text",
+      "type": "keyword",
       "analyzer": "standard",
       "fields": {
         "ngram": {
