@@ -36,7 +36,7 @@ public class ProductDocument {
     private Deleted deleted;
 
     public ProductDocument(String id, Long productId, String productName, String info,
-        Long realPrice, Long discount, Long quantity) {
+        Long realPrice, Long discount, Long quantity, Deleted deleted) {
         this.id = UUID.randomUUID().toString();
         this.productId = productId;
         this.productName = productName;
