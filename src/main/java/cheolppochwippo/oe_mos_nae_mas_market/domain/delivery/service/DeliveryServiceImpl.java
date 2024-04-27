@@ -3,12 +3,12 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.service;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.dto.DeliveryRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.dto.DeliveryResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.entity.Delivery;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.entity.DeliveryStatementEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.delivery.repository.DeliveryRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoEntityException;
 import java.util.List;
 import java.util.Locale;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -33,7 +33,8 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional
-    public DeliveryResponse updateDelivery(Long deliveryId, DeliveryRequest deliveryRequest, User user) {
+    public DeliveryResponse updateDelivery(Long deliveryId, DeliveryRequest deliveryRequest,
+        User user) {
         Delivery delivery = findDelivery(deliveryId);
         delivery.update(deliveryRequest);
         Delivery savedDelivery = deliveryRepository.save(delivery);
@@ -58,7 +59,34 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     private Delivery findDelivery(Long deliveryId) {
         return deliveryRepository.findById(deliveryId)
-            .orElseThrow(() -> new NoEntityException(messageSource.getMessage("noEntity.delivery", null, Locale.KOREA)));
+            .orElseThrow(() -> new NoEntityException(
+                messageSource.getMessage("noEntity.delivery", null, Locale.KOREA)));
     }
 
+    @Transactional
+    public void updateWaitToReady() {
+        List<Delivery> waitingDeliveries = deliveryRepository.findByDeliveryStatementEnum(
+            DeliveryStatementEnum.WAIT);
+        for (Delivery delivery : waitingDeliveries) {
+            delivery.deliveryStatement(DeliveryStatementEnum.READY);
+        }
+    }
+
+    @Transactional
+    public void updateReadyToGoing() {
+        List<Delivery> readyDeliveries = deliveryRepository.findByDeliveryStatementEnum(
+            DeliveryStatementEnum.READY);
+        for (Delivery delivery : readyDeliveries) {
+            delivery.deliveryStatement(DeliveryStatementEnum.GOING);
+        }
+    }
+
+    @Transactional
+    public void updateGoingToComplete() {
+        List<Delivery> goingDeliveries = deliveryRepository.findByDeliveryStatementEnum(
+            DeliveryStatementEnum.GOING);
+        for (Delivery delivery : goingDeliveries) {
+            delivery.deliveryStatement(DeliveryStatementEnum.COMPLETE);
+        }
+    }
 }

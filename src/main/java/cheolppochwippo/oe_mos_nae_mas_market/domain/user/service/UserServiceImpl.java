@@ -99,24 +99,37 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse showMypage(User user) {
-        User findUser = userRepository.findByUsername(user.getUsername()).orElseThrow(
-            () -> new InvalidCredentialsException(
-                messageSource.getMessage("invalid.credentials.username", null, Locale.KOREA))
-        );
+        User findUser = foundUser(user);
 
         return new UserResponse(findUser);
-
     }
 
     @Override
     @Transactional
     public UserResponse updateMypage(UserUpdateRequest userRequest, User user) {
-        User findUser = userRepository.findByUsername(user.getUsername()).orElseThrow(
-            () -> new InvalidCredentialsException(
-                messageSource.getMessage("invalid.credentials.username", null, Locale.KOREA))
-        );
+        User findUser = foundUser(user);
 
         findUser.update(userRequest);
         return new UserResponse(findUser);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse roleUpdate(User user) {
+        User findUser = foundUser(user);
+
+        if (findUser.getRole() == RoleEnum.CONSUMER) {
+            findUser.changeRoleToSeller();
+
+            return new UserResponse(findUser);
+        } else {
+            throw new IllegalArgumentException("역할 변경이 불가능한 유저입니다.");
+        }
+    }
+
+    private User foundUser(User user) {
+        return userRepository.findById(user.getId())
+            .orElseThrow(() -> new NoEntityException(
+                messageSource.getMessage("noEntity.user", null, Locale.KOREA)));
     }
 }
