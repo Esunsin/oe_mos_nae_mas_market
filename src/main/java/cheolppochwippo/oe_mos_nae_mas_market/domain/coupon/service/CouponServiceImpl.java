@@ -67,7 +67,7 @@ public class CouponServiceImpl implements CouponService {
     @Override
     @Cacheable(value = "coupons", cacheManager = "cacheManager", key = "'allCoupons'")
     public List<CouponResponse> getCoupons() {
-        List<Coupon> coupons = couponRepository.findAll();
+        List<Coupon> coupons = couponRepository.findAllUndeletedCoupons();
         return coupons.stream()
             .map(CouponResponse::new)
             .collect(Collectors.toList());
