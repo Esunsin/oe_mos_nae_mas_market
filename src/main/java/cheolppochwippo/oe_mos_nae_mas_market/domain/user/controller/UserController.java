@@ -55,8 +55,8 @@ public class UserController {
 
     @GetMapping("/auth/mypage")
     public ResponseEntity<CommonResponse<UserResponse>> mypage(
-        @AuthenticationPrincipal UserDetailsImpl userDetailse) {
-        UserResponse mypage = userService.showMypage(userDetailse.getUser());
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        UserResponse mypage = userService.showMypage(userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK.value())
             .body(CommonResponse.<UserResponse>builder()
                 .msg("get mypage complete!")
@@ -65,13 +65,26 @@ public class UserController {
     }
 
     @PatchMapping("/auth/mypage")
-    public ResponseEntity<CommonResponse<UserResponse>> updateMypage(@RequestBody UserUpdateRequest userRequest,
-        @AuthenticationPrincipal UserDetailsImpl userDetailse) {
-        UserResponse mypage = userService.updateMypage(userRequest, userDetailse.getUser());
+    public ResponseEntity<CommonResponse<UserResponse>> updateMypage(
+        @RequestBody UserUpdateRequest userRequest,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        UserResponse mypage = userService.updateMypage(userRequest, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK.value())
             .body(CommonResponse.<UserResponse>builder()
                 .msg("update mypage complete!")
                 .data(mypage)
+                .build());
+    }
+
+    //유저 역할 변경
+    @PatchMapping("/auth/role")
+    public ResponseEntity<CommonResponse<UserResponse>> updateRole(
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        UserResponse userRole = userService.roleUpdate(userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.OK.value())
+            .body(CommonResponse.<UserResponse>builder()
+                .msg("update role complete!")
+                .data(userRole)
                 .build());
     }
 

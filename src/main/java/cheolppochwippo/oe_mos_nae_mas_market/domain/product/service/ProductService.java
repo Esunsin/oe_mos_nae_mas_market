@@ -6,6 +6,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductUpdateRequest;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.QuantityUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,4 +31,6 @@ public interface ProductService {
     ProductShowResponse showStoreProduct(Pageable pageable, User user);
 
     ProductMyResultResponse showMyProduct(Long userId, long productId);
+
+    ProductResponse updateQuantity(QuantityUpdateRequest productRequest, Long productId, User user);
 }

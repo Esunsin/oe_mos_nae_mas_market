@@ -18,4 +18,6 @@ public interface UserService {
 
     CompletableFuture<UserResponse> signupByUserTest(UserRequest userRequest);
 
+
+    UserResponse roleUpdate(User user);
 }

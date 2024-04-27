@@ -5,12 +5,19 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 
 @Entity
@@ -51,11 +58,21 @@ public class Delivery extends TimeStamped {
         this.deleted = Deleted.DELETE;
     }
 
-    public Delivery(TotalOrder totalOrder){
+    public Delivery(TotalOrder totalOrder) {
         orderId = totalOrder.getMerchantUid();
         address = totalOrder.getAddress();
         deleted = Deleted.UNDELETE;
         user = totalOrder.getUser();
         deliveryStatementEnum = DeliveryStatementEnum.WAIT;
     }
+
+    public Delivery(DeliveryStatementEnum deliveryStatementEnum) {
+        this.deliveryStatementEnum = deliveryStatementEnum;
+
+    }
+
+    public void deliveryStatement(DeliveryStatementEnum deliveryStatementEnum) {
+        this.deliveryStatementEnum = deliveryStatementEnum;
+    }
+
 }
