@@ -24,79 +24,78 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CouponServiceImpl implements CouponService {
 
-	private final CouponRepository couponRepository;
+    private final CouponRepository couponRepository;
 
-	private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-	private final SQSConfig sqsConfig;
+    private final SQSConfig sqsConfig;
 
-	private final MessageSource messageSource;
+    private final MessageSource messageSource;
 
-	@Transactional
-	@Override
-	@CacheEvict(value = "coupons", cacheManager = "cacheManager")
-	public CouponResponse createCoupon(CouponRequest couponRequest) {
-		if (couponRequest.getDiscount() < 0.01) {
-			throw new InvalidCouponDataException(
-				messageSource.getMessage("invalid.coupon.discount", null, Locale.KOREA));
-		}
-		if (couponRequest.getEffectiveDate().isBefore(LocalDateTime.now())) {
-			throw new InvalidCouponDataException(
-				messageSource.getMessage("invalid.coupon.effectiveDate", null, Locale.KOREA));
-		}
-		if (couponRequest.getAmount() == 0) {
-			throw new InvalidCouponDataException(
-				messageSource.getMessage("invalid.coupon.amount", null, Locale.KOREA));
-		}
+    @Transactional
+    @Override
+    @CacheEvict(value = "coupons", cacheManager = "cacheManager", key = "'allCoupons'")
+    public CouponResponse createCoupon(CouponRequest couponRequest) {
+        if (couponRequest.getDiscount() < 0.01) {
+            throw new InvalidCouponDataException(
+                messageSource.getMessage("invalid.coupon.discount", null, Locale.KOREA));
+        }
+        if (couponRequest.getEffectiveDate().isBefore(LocalDateTime.now())) {
+            throw new InvalidCouponDataException(
+                messageSource.getMessage("invalid.coupon.effectiveDate", null, Locale.KOREA));
+        }
+        if (couponRequest.getAmount() == 0) {
+            throw new InvalidCouponDataException(
+                messageSource.getMessage("invalid.coupon.amount", null, Locale.KOREA));
+        }
 
-		// 쿠폰 생성 및 저장 로직
-		Coupon coupon = new Coupon(couponRequest);
-		Coupon savedCoupon = couponRepository.save(coupon);
+        Coupon coupon = new Coupon(couponRequest);
+        Coupon savedCoupon = couponRepository.save(coupon);
 
-		// 발행 대상 사용자들에게 쿠폰 발행 알림 전송
-		List<String> phoneNumbers = userRepository.getPhoneNumberFindByConsentTrue();
-		if (!phoneNumbers.isEmpty()) {
-			sqsConfig.sendCouponMessages(phoneNumbers,
-				messageSource.getMessage("logo", null, Locale.KOREA) + "\n" + coupon.getCouponInfo() +
-					messageSource.getMessage("publish.coupon", null, Locale.KOREA));
-		}
+        List<String> phoneNumbers = userRepository.getPhoneNumberFindByConsentTrue();
+        if (!phoneNumbers.isEmpty()) {
+            sqsConfig.sendCouponMessages(phoneNumbers,
+                messageSource.getMessage("logo", null, Locale.KOREA) + "\n" + coupon.getCouponInfo()
+                    +
+                    messageSource.getMessage("publish.coupon", null, Locale.KOREA));
+        }
 
-		return new CouponResponse(savedCoupon);
-	}
+        return new CouponResponse(savedCoupon);
+    }
 
-	@Transactional(readOnly = true)
-	@Override
-	@Cacheable(value = "coupons", cacheManager = "cacheManager")
-	public List<CouponResponse> getCoupons() {
-		List<Coupon> coupons = couponRepository.findAll();
-		return coupons.stream()
-			.map(CouponResponse::new)
-			.collect(Collectors.toList());
-	}
+    @Transactional(readOnly = true)
+    @Override
+    @Cacheable(value = "coupons", cacheManager = "cacheManager", key = "'allCoupons'")
+    public List<CouponResponse> getCoupons() {
+        List<Coupon> coupons = couponRepository.findAllUndeletedCoupons();
+        return coupons.stream()
+            .map(CouponResponse::new)
+            .collect(Collectors.toList());
+    }
 
-	@Transactional
-	@Override
-	@CacheEvict(value = "coupons", cacheManager = "cacheManager")
-	public CouponResponse updateCoupon(Long couponId, CouponRequest couponRequest) {
-		Coupon coupon = findCoupon(couponId);
-		coupon.update(couponRequest);
+    @Transactional
+    @Override
+    @CacheEvict(value = "coupons", cacheManager = "cacheManager", key = "'allCoupons'")
+    public CouponResponse updateCoupon(Long couponId, CouponRequest couponRequest) {
+        Coupon coupon = findCoupon(couponId);
+        coupon.update(couponRequest);
 
-		Coupon updatedCoupon = couponRepository.save(coupon);
-		return new CouponResponse(updatedCoupon);
-	}
+        Coupon updatedCoupon = couponRepository.save(coupon);
+        return new CouponResponse(updatedCoupon);
+    }
 
-	@Transactional
-	@Override
-	@CacheEvict(value = "coupons", cacheManager = "cacheManager")
-	public CouponResponse deleteCoupon(Long couponId) {
-		Coupon coupon = findCoupon(couponId);
-		coupon.delete();
-		return new CouponResponse(coupon);
-	}
+    @Transactional
+    @Override
+    @CacheEvict(value = "coupons", cacheManager = "cacheManager", key = "'allCoupons'")
+    public CouponResponse deleteCoupon(Long couponId) {
+        Coupon coupon = findCoupon(couponId);
+        coupon.delete();
+        return new CouponResponse(coupon);
+    }
 
-	private Coupon findCoupon(Long couponId) {
-		return couponRepository.findById(couponId)
-			.orElseThrow(() -> new NoEntityException(
-				messageSource.getMessage("noEntity.coupon", null, Locale.KOREA)));
-	}
+    private Coupon findCoupon(Long couponId) {
+        return couponRepository.findById(couponId)
+            .orElseThrow(() -> new NoEntityException(
+                messageSource.getMessage("noEntity.coupon", null, Locale.KOREA)));
+    }
 }
