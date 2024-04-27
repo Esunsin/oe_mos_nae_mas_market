@@ -45,7 +45,7 @@ public class IssuedServiceImpl implements IssuedService {
         }
         Coupon coupon = getCouponById(couponId);
         Issued issuedCoupon = saveIssuedCoupon(coupon, user);
-        decreaseCouponAmount(issuedCoupon.getId());
+        decreaseCouponAmount(coupon);
         return createIssuedResponse(couponId, coupon, issuedCoupon);
     }
 
@@ -66,18 +66,14 @@ public class IssuedServiceImpl implements IssuedService {
 
 
 
-    public void decreaseCouponAmount(Long issuedId) {
-        Issued issuedCoupon = issuedRepository.findById(issuedId)
-            .orElseThrow(() -> new InsufficientQuantityException(
-                messageSource.getMessage("insufficient.quantity.coupon",
-                    null, Locale.KOREA)));
-        Long couponId = issuedCoupon.getCoupon().getId();
+    public void decreaseCouponAmount(Coupon coupon) {
+        Long couponId = coupon.getId();
         RLock couponLock = redissonClient.getFairLock("coupon:" + couponId);
         try {
             try {
                 boolean isCouponLocked = couponLock.tryLock(10, 60, TimeUnit.SECONDS);
                 if (isCouponLocked) {
-                    decreaseCouponAmountTransaction(issuedId);
+                    decreaseCouponAmountTransaction(coupon.getId());
                 }
             } finally {
                 couponLock.unlock();
