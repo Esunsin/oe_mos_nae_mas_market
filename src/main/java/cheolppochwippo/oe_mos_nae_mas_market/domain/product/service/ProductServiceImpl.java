@@ -95,6 +95,7 @@ public class ProductServiceImpl implements ProductService {
         ProductResultResponse response = new ProductResultResponse(product, imageByProductId);
         Objects.requireNonNull(cacheManager.getCache("product")).put(productId, response);
 
+        List<String> imageUrls = getProductImageUrls(productId);
         ProductDocument productDocument = new ProductDocument();
         productDocument.setId(productId.toString());
         productDocument.setProductId(productId);
@@ -103,7 +104,9 @@ public class ProductServiceImpl implements ProductService {
         productDocument.setRealPrice(productRequest.getRealPrice());
         productDocument.setDiscount(productRequest.getDiscount());
         productDocument.setQuantity(product.getQuantity());
+        productDocument.setUrl(imageUrls);
         productDocument.setDeleted(product.getDeleted());
+
 
         productSearchRepository.save(productDocument);
 
