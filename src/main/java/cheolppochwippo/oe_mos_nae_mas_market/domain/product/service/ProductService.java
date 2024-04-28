@@ -32,5 +32,5 @@ public interface ProductService {
 
     ProductMyResultResponse showMyProduct(Long userId, long productId);
 
-    ProductResponse updateQuantity(QuantityUpdateRequest productRequest, Long productId, User user);
+    ProductResponse updateQuantity(QuantityUpdateRequest productRequest, User user);
 }

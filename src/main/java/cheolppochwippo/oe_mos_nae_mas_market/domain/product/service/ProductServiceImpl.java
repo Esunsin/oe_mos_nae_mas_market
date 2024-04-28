@@ -130,9 +130,9 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	@Transactional
-	public ProductResponse updateQuantity(QuantityUpdateRequest productRequest, Long productId,
+	public ProductResponse updateQuantity(QuantityUpdateRequest productRequest,
 		User user) {
-		Product product = productRepository.findByproductIdAndUserId(user.getId(), productId)
+		Product product = productRepository.findByproductIdAndUserId(user.getId(), productRequest.getProductId())
 			.orElseThrow(() -> new NoSuchElementException(
 				messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
 		product.quantity(productRequest);
