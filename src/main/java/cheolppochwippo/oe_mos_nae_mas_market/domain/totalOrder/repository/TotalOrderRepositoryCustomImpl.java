@@ -2,6 +2,7 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.repository;
 
 import static cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.QTotalOrder.totalOrder;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.OrderStatementEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.QOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.PaymentStatementEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.QProduct;
@@ -60,7 +61,8 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 			))
 			.from(QOrder.order)
 			.where(userIdEq(userId),
-				QOrder.order.deleted.eq(Deleted.UNDELETE)
+				QOrder.order.deleted.eq(Deleted.UNDELETE),
+				QOrder.order.statement.eq(OrderStatementEnum.ORDER)
 			)
 			.groupBy(QOrder.order.user.id)
 			.fetchOne();
@@ -70,9 +72,24 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 	@Override
 	@Transactional
 	public void completeOrder(TotalOrder totalOrder) {
-		Long count = jpaConfig.jpaQueryFactory()
+		jpaConfig.jpaQueryFactory()
 			.update(QOrder.order)
 			.set(QOrder.order.deleted, Deleted.DELETE)
+			.set(QOrder.order.statement, OrderStatementEnum.COMPLETE)
+			.where(
+				QOrder.order.totalOrder.id.eq(totalOrder.getId())
+			)
+			.execute();
+		entityManager.flush();
+		entityManager.clear();
+	}
+
+	@Override
+	@Transactional
+	public void refundOrders(TotalOrder totalOrder) {
+		jpaConfig.jpaQueryFactory()
+			.update(QOrder.order)
+			.set(QOrder.order.statement, OrderStatementEnum.REFUND)
 			.where(
 				QOrder.order.totalOrder.id.eq(totalOrder.getId())
 			)
@@ -129,7 +146,8 @@ public class TotalOrderRepositoryCustomImpl implements TotalOrderRepositoryCusto
 			.set(QOrder.order.totalOrder, totalOrder)
 			.where(
 				userIdEq(userId),
-				QOrder.order.deleted.eq(Deleted.UNDELETE)
+				QOrder.order.deleted.eq(Deleted.UNDELETE),
+				QOrder.order.statement.eq(OrderStatementEnum.ORDER)
 			).execute();
 		entityManager.flush();
 		entityManager.clear();
