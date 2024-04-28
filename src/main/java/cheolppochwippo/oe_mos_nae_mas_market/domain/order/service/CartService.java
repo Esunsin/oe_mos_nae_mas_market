@@ -17,5 +17,9 @@ public interface CartService {
 
     SingleOrderInCartResponse updateQuantity(Long quantity, Long orderId);
 
+    SingleOrderInCartResponse createOrderByDirect(User user,Long quantity,Long productId);
+
+    Long createOrderByCart(User user);
+
 
 }

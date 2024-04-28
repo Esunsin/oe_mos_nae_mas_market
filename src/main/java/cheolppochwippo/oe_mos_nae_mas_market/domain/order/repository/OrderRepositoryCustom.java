@@ -13,6 +13,10 @@ public interface OrderRepositoryCustom {
 
     Optional<Order> findOrderByProductIdAndUserBeforeBuy(User user, Long productId);
 
+    Long updateCartToOrder(Long userId);
+
     List<Order> getOrdersFindTotalOrder(TotalOrder totalOrder);
+
+    void deleteOrders(Long userId);
 
 }

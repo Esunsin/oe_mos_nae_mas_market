@@ -51,6 +51,32 @@ public class CartServiceImpl implements CartService {
 		return new SingleOrderInCartResponse(order);
 	}
 
+	@Override
+	@Transactional
+	public Long createOrderByCart(User user){
+		orderRepository.deleteOrders(user.getId());
+		Long count = orderRepository.updateCartToOrder(user.getId());
+		if(count==0){
+			throw new NoEntityException(messageSource.getMessage("noEntity.cart", null, Locale.KOREA));
+		}
+		return count;
+	}
+
+	@Override
+	@Transactional
+	public SingleOrderInCartResponse createOrderByDirect(User user,Long quantity,Long productId){
+		orderRepository.deleteOrders(user.getId());
+		Product findProduct = productRepository.findById(productId).orElseThrow(
+			() -> new NoEntityException(
+				messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
+		if (quantity > findProduct.getQuantity()) {
+			throw new InsufficientQuantityException(messageSource.getMessage("insufficient.quantity.product", null, Locale.KOREA));
+		}
+		Order order = new Order(quantity, findProduct, user,false);
+		orderRepository.save(order);
+		return new SingleOrderInCartResponse(order);
+	}
+
 	@Transactional
 	public SingleOrderInCartResponse updateQuantity(Long quantity, Long orderId) {
 		if (quantity < 1) {
