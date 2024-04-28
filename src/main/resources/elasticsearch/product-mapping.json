@@ -42,6 +42,9 @@
           "type": "text",
           "analyzer": "standard"
         }
+      },
+      "imageUrl": {
+        "type": "text"
       }
     }
   }
