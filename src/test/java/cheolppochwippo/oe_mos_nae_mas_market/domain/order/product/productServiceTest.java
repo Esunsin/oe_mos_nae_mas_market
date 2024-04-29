@@ -176,78 +176,17 @@
 //        when(productRepository.findProductsWithQuantityGreaterThanOne(pageable)).thenReturn(
 //            productList);
 //
-//        ProductShowResponse result = productService.showAllProduct(pageable);
-//
-//        assertEquals(1, result.getProductList().size());
-//
-//    }
-//
-//    @Test
-//    @DisplayName("상품 삭제_성공")
-//    void deleteProduct_SellerRole_Success() {
-//        // Given
-//        given(productRepository.findById(product.getId())).willReturn(Optional.of(product));
-//
-//        // When
-//        ProductResponse result = productService.deleteProduct(1L, seller);
-//
-//        // Then
-//        assertEquals(product.getId(), result.getProductId());
-//
-//    }
-//
-//    @Test
-//    @DisplayName("상품 삭제_실패")
-//    void deleteProduct_CustomerRole_ThrowsIllegalArgumentException() {
-//        assertThrows(NoPermissionException.class, () -> {
-//            productService.deleteProduct(1L, customer);
-//        });
-//    }
-//
-//    @Test
-//    @DisplayName("캐싱_성공")
-//    void testCaching() {
-//
-//        Pageable pageable = PageRequest.of(0, 10);
-//        List<Product> productList = Collections.singletonList(product);
-//        when(productRepository.findProductsWithQuantityGreaterThanOne(pageable)).thenReturn(
-//            productList);
-//
-//        // 캐시에 저장되지 않은 상태에서 showAllProduct() 호출
+//        long startTime = System.nanoTime();
 //        ProductShowResponse result1 = productService.showAllProduct(pageable);
-//        assertNotNull(result1);
+//        long duration1 = System.nanoTime() - startTime;
 //
-//        // 캐시에 저장된 상태에서 showAllProduct() 호출
+//        startTime = System.nanoTime();
 //        ProductShowResponse result2 = productService.showAllProduct(pageable);
-//        assertNotNull(result2);
+//        long duration2 = System.nanoTime() - startTime;
 //
-//        for (int i = 0; i < result1.getProductList().size(); i++) {
-//            ProductResultResponse product1 = result1.getProductList().get(i);
-//            ProductResultResponse product2 = result2.getProductList().get(i);
-//            assertEquals(product1.getId(), product2.getId());
-//            assertEquals(product1.getProductName(), product2.getProductName());
-//        }
+//        // 캐싱으로 인한 성능 향상 확인
+//        System.out.println("캐싱 전 " + duration1);
+//        System.out.println("캐싱 후 " + duration2);
+//        assertTrue(duration2 < duration1);
 //    }
-////
-////    @Test
-////    @DisplayName("캐싱 성능 비교")
-////    void testCachingEfficiency() {
-////        Pageable pageable = PageRequest.of(0, 10);
-////        List<Product> productList = Collections.singletonList(product);
-////        when(productRepository.findProductsWithQuantityGreaterThanOne(pageable)).thenReturn(
-////            productList);
-////
-////        long startTime = System.nanoTime();
-////        ProductShowResponse result1 = productService.showAllProduct(pageable);
-////        long duration1 = System.nanoTime() - startTime;
-////
-////        startTime = System.nanoTime();
-////        ProductShowResponse result2 = productService.showAllProduct(pageable);
-////        long duration2 = System.nanoTime() - startTime;
-////
-////        // 캐싱으로 인한 성능 향상 확인
-////        System.out.println("캐싱 전 " + duration1);
-////        System.out.println("캐싱 후 " + duration2);
-////        assertTrue(duration2 < duration1);
-////    }
 //}

@@ -60,10 +60,6 @@ public class TotalOrder extends TimeStamped {
 
 	private String paymentKey;
 
-	@OneToOne()
-	@JoinColumn(name = "total_order_id", nullable = false)
-	private Delivery delivery;
-
 	public TotalOrder(TotalOrderRequest request, User user, TotalOrderNameDto totalInfo,
 		double discount) {
 		price = totalInfo.getSum();
@@ -77,8 +73,8 @@ public class TotalOrder extends TimeStamped {
 		paymentStatementEnum = PaymentStatementEnum.WAIT;
 		deleted = Deleted.UNDELETE;
 		deliveryCost = price >= 40000 ? 0L : 3000L;
-		this.discount = discount < 1 ? (long) (price * (1 - discount)) : (long) (price - discount);
-		this.priceAmount = discount < 1 ? (long) (price * (1 - discount) + deliveryCost) : (long) (price-discount-deliveryCost);
+		this.discount = discount < 1 ? (long) (price * discount) : (long) (discount);
+		this.priceAmount = discount < 1 ? (this.price - this.discount + deliveryCost) :  (this.price-this.discount-deliveryCost);
 		this.user = user;
 	}
 

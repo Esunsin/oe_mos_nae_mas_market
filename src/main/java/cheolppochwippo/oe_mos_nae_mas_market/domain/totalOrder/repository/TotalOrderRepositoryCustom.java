@@ -23,6 +23,7 @@ public interface TotalOrderRepositoryCustom {
 	void completeOrder(TotalOrder totalOrder);
 
 	Page<TotalOrdersGetResponse> getTotalOrderPageFindByUserId(Long userId, Pageable pageable);
+	void decreaseQuantity(Long totalOrderId);
 
 
 }

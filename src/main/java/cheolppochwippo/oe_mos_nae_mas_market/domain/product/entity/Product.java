@@ -1,6 +1,8 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductUpdateRequest;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.QuantityUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
@@ -26,6 +28,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Product extends TimeStamped {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -53,25 +56,27 @@ public class Product extends TimeStamped {
         this.productName = product.getProductName();
         this.info = product.getInfo();
         this.realPrice = product.getRealPrice();
-        this.price = product.getPrice();
+        this.price = product.getRealPrice() - product.getDiscount();
         this.discount = product.getDiscount();
         this.quantity = product.getQuantity();
         this.deleted = Deleted.UNDELETE;
         this.store = store;
     }
 
-    public void update(ProductRequest product) {
+    public void update(ProductUpdateRequest product) {
         this.productName = product.getProductName();
         this.info = product.getInfo();
         this.realPrice = product.getRealPrice();
-        this.price = product.getPrice();
+        this.price = product.getRealPrice() - product.getDiscount();
         this.discount = product.getDiscount();
-        this.quantity = product.getQuantity();
     }
 
     public void delete() {
         this.deleted = Deleted.DELETE;
     }
-    public void quatityUpdate(Long amount){this.quantity = amount;}
+
+    public void quantity(QuantityUpdateRequest productRequest) {
+        this.quantity = productRequest.getQuantity();
+    }
 
 }
