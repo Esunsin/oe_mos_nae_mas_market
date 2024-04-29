@@ -125,4 +125,15 @@ public class OrderInCartController {
 				.build());
 	}
 
+	@GetMapping("/orders/total")
+	public ResponseEntity<CommonResponse<List<SingleOrderInCartResponse>>> showOrderState(
+		@AuthenticationPrincipal UserDetailsImpl userDetails){
+		List<SingleOrderInCartResponse> responses = cartService.getStateOrder(userDetails.getUser());
+		return ResponseEntity.status(HttpStatus.OK.value())
+			.body(CommonResponse.<List<SingleOrderInCartResponse>>builder()
+				.msg("view order in store")
+				.data(responses)
+				.build());
+	}
+
 }

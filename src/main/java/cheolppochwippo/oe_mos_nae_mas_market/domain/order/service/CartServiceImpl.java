@@ -136,4 +136,11 @@ public class CartServiceImpl implements CartService {
 		return orderRepository.findOrderByUserStore(user.getId(), request);
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public List<SingleOrderInCartResponse> getStateOrder(User user){
+		List<Order> orders = orderRepository.getStateOrders(user.getId());
+		return orders.stream().map(SingleOrderInCartResponse::new).toList();
+	}
+
 }

@@ -22,4 +22,6 @@ public interface OrderRepositoryCustom {
 
 	List<AllOrderInStoreResponse> findOrderByUserStore(Long userId, AllOrderInStoreRequest request);
 
+	List<Order> getStateOrders(Long userId);
+
 }

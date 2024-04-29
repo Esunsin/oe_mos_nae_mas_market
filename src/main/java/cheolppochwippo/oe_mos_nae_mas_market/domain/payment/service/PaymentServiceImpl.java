@@ -152,11 +152,11 @@ public class PaymentServiceImpl implements PaymentService {
 			() -> new NoEntityException(
 				messageSource.getMessage("noEntity.totalOrder", null, Locale.KOREA))
 		);
-		RLock couponLock = redissonClient.getFairLock("payment");
+		RLock paymentLock = redissonClient.getFairLock("payment");
 		try {
 			try {
-				boolean isCouponLocked = couponLock.tryLock(10, 60, TimeUnit.SECONDS);
-				if (isCouponLocked) {
+				boolean isPaymentLocked = paymentLock.tryLock(10, 60, TimeUnit.SECONDS);
+				if (isPaymentLocked) {
 					if (!Objects.equals(totalOrder.getPriceAmount(), paymentRequest.getAmount())
 						|| !Objects.equals(totalOrder.getMerchantUid(),
 						paymentRequest.getOrderId())) {
@@ -174,7 +174,7 @@ public class PaymentServiceImpl implements PaymentService {
 					}
 				}
 			} finally {
-				couponLock.unlock();
+				paymentLock.unlock();
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
