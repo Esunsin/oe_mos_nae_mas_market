@@ -154,17 +154,27 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = "products", key = "#pageable")
     public ProductShowResponse showAllProduct(Pageable pageable) {
-        List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne(
-            pageable);
-
+        List<ProductImage> image = productImageRepository.getAllImage(pageable);
         List<ProductResultResponse> productResultResponseList = new ArrayList<>();
+        List<Long> productIds = new ArrayList<>();
+        for (ProductImage productImage : image) {
+            ProductResultResponse productResultResponse = new ProductResultResponse();
+            if(productIds.contains(productImage.getProduct().getId())){
+                for (ProductResultResponse resultResponse :productResultResponseList) {
+                    if(resultResponse.getId().equals(productImage.getProduct().getId())){
+                        resultResponse.addImageUrl(productImage.getUrl());
+                        break;
+                    }
 
-        for (Product product : productList) {
-            List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(
-                product.getId());
-            productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
+                }
+            }
+            else {
+                productIds.add(productImage.getProduct().getId());
+                productResultResponse.setProductResultResponse(productImage);
+                productResultResponse.addImageUrl(productImage.getUrl());
+                productResultResponseList.add(productResultResponse);
+            }
         }
-
         return new ProductShowResponse(productResultResponseList);
     }
 
@@ -200,24 +210,35 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     public ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue) {
-        List<Product> productList;
+        List<ProductImage> image;
         if (searchValue == null) {
             log.info("없을때");
-            productList = productRepository.findProductsWithQuantityGreaterThanOne(pageable);
+            image = productImageRepository.getAllImage(pageable);
         } else {
             log.info("있을때");
-            productList = productRepository.findProductsWithQuantityGreaterThanOneAndSearchValue(
-                pageable, searchValue);
+            image = productImageRepository.getAllImageWithSearchValue(pageable,searchValue);
         }
 
         List<ProductResultResponse> productResultResponseList = new ArrayList<>();
+        List<Long> productIds = new ArrayList<>();
+        for (ProductImage productImage : image) {
+            ProductResultResponse productResultResponse = new ProductResultResponse();
+            if(productIds.contains(productImage.getProduct().getId())){
+                for (ProductResultResponse resultResponse :productResultResponseList) {
+                    if(resultResponse.getId().equals(productImage.getProduct().getId())){
+                        resultResponse.addImageUrl(productImage.getUrl());
+                        break;
+                    }
 
-        for (Product product : productList) {
-            List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(
-                product.getId());
-            productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
+                }
+            }
+            else {
+                productIds.add(productImage.getProduct().getId());
+                productResultResponse.setProductResultResponse(productImage);
+                productResultResponse.addImageUrl(productImage.getUrl());
+                productResultResponseList.add(productResultResponse);
+            }
         }
-
         return new ProductShowResponse(productResultResponseList);
     }
 

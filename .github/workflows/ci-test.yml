@@ -8,7 +8,7 @@ name: omnmm project CICD
 # ex) branches: [ "브랜치 이름" ] 부분을 수정해주면 된다.
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" , "dev" ]
   pull_request:
     branches: [ "main", "dev" ]
 #------------------------------------------------

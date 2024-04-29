@@ -11,4 +11,6 @@ public interface ProductImageRepositoryCustom {
     List<ProductImage> getImageByProductId(Long productId);
 
     List<ProductImage> getAllImage(Pageable pageable);
+
+    List<ProductImage> getAllImageWithSearchValue(Pageable pageable, String searchValue);
 }
