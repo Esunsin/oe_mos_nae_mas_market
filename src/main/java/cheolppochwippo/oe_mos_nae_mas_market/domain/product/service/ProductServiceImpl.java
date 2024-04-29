@@ -4,6 +4,8 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.ProductImage;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.repository.ProductImageRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.inventory.entity.Inventory;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.inventory.repoditory.InventoryRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.*;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductMyResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
@@ -19,20 +21,23 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
+import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,10 +66,12 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product(productRequest, store);
         Product saveProduct = productRepository.save(product);
 
+        List<String> imageUrls = getProductImageUrls(saveProduct.getId());
+
         ProductDocument productDocument = new ProductDocument(store.getStoreName(),
             saveProduct.getId(), productRequest.getProductName(), productRequest.getInfo(),
             productRequest.getRealPrice(), productRequest.getDiscount(),
-            productRequest.getQuantity());
+            productRequest.getQuantity(), imageUrls, Deleted.UNDELETE);
         productSearchRepository.save(productDocument);
 
         return new ProductResponse(product);
@@ -96,6 +103,7 @@ public class ProductServiceImpl implements ProductService {
         ProductResultResponse response = new ProductResultResponse(product, imageByProductId);
         Objects.requireNonNull(cacheManager.getCache("product")).put(productId, response);
 
+        List<String> imageUrls = getProductImageUrls(productId);
         ProductDocument productDocument = new ProductDocument();
         productDocument.setId(productId.toString());
         productDocument.setProductId(productId);
@@ -104,7 +112,9 @@ public class ProductServiceImpl implements ProductService {
         productDocument.setRealPrice(productRequest.getRealPrice());
         productDocument.setDiscount(productRequest.getDiscount());
         productDocument.setQuantity(product.getQuantity());
+        productDocument.setImageUrls(imageUrls);
         productDocument.setDeleted(product.getDeleted());
+
 
         productSearchRepository.save(productDocument);
 
@@ -149,17 +159,27 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = "products", key = "#pageable")
     public ProductShowResponse showAllProduct(Pageable pageable) {
-        List<Product> productList = productRepository.findProductsWithQuantityGreaterThanOne(
-            pageable);
-
+        List<ProductImage> image = productImageRepository.getAllImage(pageable);
         List<ProductResultResponse> productResultResponseList = new ArrayList<>();
+        List<Long> productIds = new ArrayList<>();
+        for (ProductImage productImage : image) {
+            ProductResultResponse productResultResponse = new ProductResultResponse();
+            if(productIds.contains(productImage.getProduct().getId())){
+                for (ProductResultResponse resultResponse :productResultResponseList) {
+                    if(resultResponse.getId().equals(productImage.getProduct().getId())){
+                        resultResponse.addImageUrl(productImage.getUrl());
+                        break;
+                    }
 
-        for (Product product : productList) {
-            List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(
-                product.getId());
-            productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
+                }
+            }
+            else {
+                productIds.add(productImage.getProduct().getId());
+                productResultResponse.setProductResultResponse(productImage);
+                productResultResponse.addImageUrl(productImage.getUrl());
+                productResultResponseList.add(productResultResponse);
+            }
         }
-
         return new ProductShowResponse(productResultResponseList);
     }
 
@@ -195,25 +215,43 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     public ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue) {
-        List<Product> productList;
+        List<ProductImage> image;
         if (searchValue == null) {
             log.info("없을때");
-            productList = productRepository.findProductsWithQuantityGreaterThanOne(pageable);
+            image = productImageRepository.getAllImage(pageable);
         } else {
             log.info("있을때");
-            productList = productRepository.findProductsWithQuantityGreaterThanOneAndSearchValue(
-                pageable, searchValue);
+            image = productImageRepository.getAllImageWithSearchValue(pageable,searchValue);
         }
 
         List<ProductResultResponse> productResultResponseList = new ArrayList<>();
+        List<Long> productIds = new ArrayList<>();
+        for (ProductImage productImage : image) {
+            ProductResultResponse productResultResponse = new ProductResultResponse();
+            if(productIds.contains(productImage.getProduct().getId())){
+                for (ProductResultResponse resultResponse :productResultResponseList) {
+                    if(resultResponse.getId().equals(productImage.getProduct().getId())){
+                        resultResponse.addImageUrl(productImage.getUrl());
+                        break;
+                    }
 
-        for (Product product : productList) {
-            List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(
-                product.getId());
-            productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
+                }
+            }
+            else {
+                productIds.add(productImage.getProduct().getId());
+                productResultResponse.setProductResultResponse(productImage);
+                productResultResponse.addImageUrl(productImage.getUrl());
+                productResultResponseList.add(productResultResponse);
+            }
         }
-
         return new ProductShowResponse(productResultResponseList);
+    }
+
+    private List<String> getProductImageUrls(Long productId) {
+        List<ProductImage> productImages = productImageRepository.getImageByProductId(productId);
+        return productImages.stream()
+            .map(ProductImage::getUrl)
+            .collect(Collectors.toList());
     }
 
 }

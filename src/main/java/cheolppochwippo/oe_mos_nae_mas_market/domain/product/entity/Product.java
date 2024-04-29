@@ -6,15 +6,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.QuantityUpdateRe
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.TimeStamped;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +19,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Table(indexes = {@Index(name = "idx_product_id",columnList = "id")})
 public class Product extends TimeStamped {
 
     @Id

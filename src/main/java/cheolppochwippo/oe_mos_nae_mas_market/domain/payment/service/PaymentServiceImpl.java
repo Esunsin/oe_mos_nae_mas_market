@@ -62,8 +62,6 @@ public class PaymentServiceImpl implements PaymentService {
 
 	private final TossPaymentConfig tossPaymentConfig;
 
-	private final ProductServiceImpl productService;
-
 	private final RedissonClient redissonClient;
 
 	private final MessageSource messageSource;
@@ -138,6 +136,7 @@ public class PaymentServiceImpl implements PaymentService {
 	public void successCancelPayment(Payment payment, PaymentCancelRequest paymentCancelRequest) {
 		Payment cancelPayment = new Payment(payment, paymentCancelRequest);
 		payment.getTotalOrder().refundOrder();
+		totalOrderRepository.refundOrders(payment.getTotalOrder());
 		paymentRepository.save(cancelPayment);
 	}
 
@@ -153,11 +152,11 @@ public class PaymentServiceImpl implements PaymentService {
 			() -> new NoEntityException(
 				messageSource.getMessage("noEntity.totalOrder", null, Locale.KOREA))
 		);
-		RLock couponLock = redissonClient.getFairLock("payment");
+		RLock paymentLock = redissonClient.getFairLock("payment");
 		try {
 			try {
-				boolean isCouponLocked = couponLock.tryLock(10, 60, TimeUnit.SECONDS);
-				if (isCouponLocked) {
+				boolean isPaymentLocked = paymentLock.tryLock(10, 60, TimeUnit.SECONDS);
+				if (isPaymentLocked) {
 					if (!Objects.equals(totalOrder.getPriceAmount(), paymentRequest.getAmount())
 						|| !Objects.equals(totalOrder.getMerchantUid(),
 						paymentRequest.getOrderId())) {
@@ -175,7 +174,7 @@ public class PaymentServiceImpl implements PaymentService {
 					}
 				}
 			} finally {
-				couponLock.unlock();
+				paymentLock.unlock();
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();

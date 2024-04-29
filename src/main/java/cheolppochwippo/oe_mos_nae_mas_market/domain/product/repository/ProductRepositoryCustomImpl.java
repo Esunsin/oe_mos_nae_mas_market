@@ -26,7 +26,6 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     @Override
     public List<Product> findProductsWithQuantityGreaterThanOne(Pageable pageable) {
         QueryResults<Product> queryResults = jpaConfig.jpaQueryFactory()
-
                 .selectFrom(product)
                 .innerJoin(product.store,store).fetchJoin()
                 .innerJoin(store.user, user).fetchJoin()
