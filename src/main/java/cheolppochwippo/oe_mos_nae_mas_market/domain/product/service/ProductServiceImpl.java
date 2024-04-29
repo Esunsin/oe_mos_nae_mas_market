@@ -2,6 +2,8 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.product.service;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.ProductImage;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.repository.ProductImageRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.*;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductMyResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
@@ -27,6 +29,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -132,6 +136,7 @@ public class ProductServiceImpl implements ProductService {
         List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
         return new ProductMyResultResponse(product, imageByProductId);
     }
+
 
 	@Override
 	@Transactional

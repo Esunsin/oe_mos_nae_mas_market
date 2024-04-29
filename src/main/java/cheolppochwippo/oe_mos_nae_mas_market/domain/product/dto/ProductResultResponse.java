@@ -37,4 +37,19 @@ public class ProductResultResponse {
             this.imageUrls.add(productImage.getUrl());
         }
     }
+
+    public void setProductResultResponse(ProductImage image) {
+        this.id = image.getProduct().getId();
+        this.productName = image.getProduct().getProductName();
+        this.info = image.getProduct().getInfo();
+        this.realPrice = image.getProduct().getRealPrice();
+        this.price = image.getProduct().getPrice();
+        this.discount = image.getProduct().getDiscount();
+        this.storeName = image.getProduct().getStore().getStoreName();
+        this.storeInfo = image.getProduct().getStore().getInfo();
+    }
+
+    public void addImageUrl(String imageUrl) {
+        this.imageUrls.add(imageUrl);
+    }
 }
