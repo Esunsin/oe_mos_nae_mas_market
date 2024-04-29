@@ -62,8 +62,6 @@ public class PaymentServiceImpl implements PaymentService {
 
 	private final TossPaymentConfig tossPaymentConfig;
 
-	private final ProductServiceImpl productService;
-
 	private final RedissonClient redissonClient;
 
 	private final MessageSource messageSource;
@@ -138,6 +136,7 @@ public class PaymentServiceImpl implements PaymentService {
 	public void successCancelPayment(Payment payment, PaymentCancelRequest paymentCancelRequest) {
 		Payment cancelPayment = new Payment(payment, paymentCancelRequest);
 		payment.getTotalOrder().refundOrder();
+		totalOrderRepository.refundOrders(payment.getTotalOrder());
 		paymentRepository.save(cancelPayment);
 	}
 

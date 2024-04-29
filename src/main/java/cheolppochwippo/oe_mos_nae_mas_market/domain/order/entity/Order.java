@@ -1,5 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.payment.entity.PaymentStatementEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
@@ -25,6 +26,8 @@ public class Order extends TimeStamped {
 
     private Long price;
 
+    private boolean cartYN;
+
     @Column
     @Enumerated(EnumType.STRING)
     private Deleted deleted;
@@ -41,12 +44,27 @@ public class Order extends TimeStamped {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    private OrderStatementEnum statement;
+
     public Order(Long quantity, Product product, User user) {
+        this.cartYN = true;
         this.quantity = quantity;
         this.price = product.getPrice();
         this.deleted = Deleted.UNDELETE;
         this.product = product;
         this.user = user;
+        this.statement = OrderStatementEnum.WAIT;
+    }
+
+    public Order(Long quantity, Product product, User user,boolean cartYN) {
+        this.cartYN = cartYN;
+        this.quantity = quantity;
+        this.price = product.getPrice();
+        this.deleted = Deleted.UNDELETE;
+        this.product = product;
+        this.user = user;
+        this.statement = OrderStatementEnum.ORDER;
     }
 
 

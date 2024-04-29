@@ -25,5 +25,7 @@ public interface TotalOrderRepositoryCustom {
 	Page<TotalOrdersGetResponse> getTotalOrderPageFindByUserId(Long userId, Pageable pageable);
 	void decreaseQuantity(Long totalOrderId);
 
+	void refundOrders(TotalOrder totalOrder);
+
 
 }
