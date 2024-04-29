@@ -45,4 +45,18 @@ public class ProductImageRepositoryCustomImpl implements ProductImageRepositoryC
                 .limit(pageable.getPageSize())
                 .fetch();
     }
+
+    public List<ProductImage> getAllImageWithSearchValue(Pageable pageable, String searchValue) {
+        return jpaConfig.jpaQueryFactory()
+                .selectFrom(productImage)
+                .leftJoin(productImage.product, product).fetchJoin()
+                .leftJoin(product.store, store).fetchJoin()
+                .innerJoin(store.user, user).fetchJoin()
+                .where(productImage.product.quantity.gt(1)
+                        .and(productImage.product.deleted.eq(Deleted.UNDELETE))
+                        .and(product.productName.contains(searchValue)))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+    }
 }
