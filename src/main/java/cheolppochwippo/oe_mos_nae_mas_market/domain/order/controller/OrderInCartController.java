@@ -1,6 +1,8 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.order.controller;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.AllOrderInCartResponse;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.AllOrderInStoreRequest;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.AllOrderInStoreResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.CartResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.SingleOrderInCartResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.service.CartService;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -99,12 +102,26 @@ public class OrderInCartController {
 	public ResponseEntity<CommonResponse<SingleOrderInCartResponse>> createOrderByDirect(
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 		, @RequestParam Long quantity
-		, @PathVariable("productId") Long productId){
-		SingleOrderInCartResponse response = cartService.createOrderByDirect(userDetails.getUser(),quantity,productId);
+		, @PathVariable("productId") Long productId) {
+		SingleOrderInCartResponse response = cartService.createOrderByDirect(userDetails.getUser(),
+			quantity, productId);
 		return ResponseEntity.status(HttpStatus.OK.value())
 			.body(CommonResponse.<SingleOrderInCartResponse>builder()
 				.msg("create order in product")
 				.data(response)
+				.build());
+	}
+
+	@GetMapping("/store/orders")
+	public ResponseEntity<CommonResponse<List<AllOrderInStoreResponse>>> showOrderInStore(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@RequestBody AllOrderInStoreRequest request) {
+		List<AllOrderInStoreResponse> responses = cartService.showOrdersInStore(
+			userDetails.getUser(), request);
+		return ResponseEntity.status(HttpStatus.OK.value())
+			.body(CommonResponse.<List<AllOrderInStoreResponse>>builder()
+				.msg("view order in store")
+				.data(responses)
 				.build());
 	}
 
