@@ -171,6 +171,7 @@ public class ProductServiceImpl implements ProductService {
             else {
                 productIds.add(productImage.getProduct().getId());
                 productResultResponse.setProductResultResponse(productImage);
+                productResultResponse.addImageUrl(productImage.getUrl());
                 productResultResponseList.add(productResultResponse);
             }
         }
@@ -234,6 +235,7 @@ public class ProductServiceImpl implements ProductService {
             else {
                 productIds.add(productImage.getProduct().getId());
                 productResultResponse.setProductResultResponse(productImage);
+                productResultResponse.addImageUrl(productImage.getUrl());
                 productResultResponseList.add(productResultResponse);
             }
         }
