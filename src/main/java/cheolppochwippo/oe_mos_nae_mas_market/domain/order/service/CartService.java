@@ -24,4 +24,6 @@ public interface CartService {
 
 	List<AllOrderInStoreResponse> showOrdersInStore(User user, AllOrderInStoreRequest request);
 
+	List<SingleOrderInCartResponse> getStateOrder(User user);
+
 }

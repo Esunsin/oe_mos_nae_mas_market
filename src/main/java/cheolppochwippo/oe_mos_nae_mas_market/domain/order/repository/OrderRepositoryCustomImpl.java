@@ -68,6 +68,18 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
 	}
 
 	@Override
+	public List<Order> getStateOrders(Long userId){
+		return jpaConfig.jpaQueryFactory()
+			.select(QOrder.order)
+			.from(QOrder.order)
+			.where(
+				order.user.id.eq(userId),
+				order.statement.eq(OrderStatementEnum.ORDER),
+				order.deleted.eq(Deleted.UNDELETE)
+			).fetch();
+	}
+
+	@Override
 	public List<Order> getOrdersFindTotalOrder(TotalOrder totalOrder) {
 		List<Order> query = jpaConfig.jpaQueryFactory()
 			.select(QOrder.order)

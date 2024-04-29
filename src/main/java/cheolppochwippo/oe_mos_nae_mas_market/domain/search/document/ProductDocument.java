@@ -33,7 +33,7 @@ public class ProductDocument {
     private Long discount;
     private Long quantity;
     @Enumerated(EnumType.STRING)
-    private List<String> url;
+    private List<String> imageUrls;
     private Deleted deleted;
 
     public ProductDocument(String id, Long productId, String productName, String info,
@@ -46,7 +46,7 @@ public class ProductDocument {
         this.discount = discount;
         this.quantity = quantity;
         this.price = calculatePrice(realPrice, discount);
-        this.url = url;
+        this.imageUrls = url;
         this.deleted = Deleted.UNDELETE;
     }
 
