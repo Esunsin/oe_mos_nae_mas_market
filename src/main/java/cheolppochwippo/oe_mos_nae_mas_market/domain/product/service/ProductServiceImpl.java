@@ -52,7 +52,6 @@ public class ProductServiceImpl implements ProductService {
     private final MessageSource messageSource;
     private final CacheManager cacheManager;
     private final ProductSearchRepository productSearchRepository;
-    private final ElasticsearchOperations elasticsearchOperations;
     private final InventoryRepository inventoryRepository;
 
     @Transactional

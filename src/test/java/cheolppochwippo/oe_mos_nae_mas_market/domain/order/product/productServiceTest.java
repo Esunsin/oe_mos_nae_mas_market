@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.repository.ProductImageRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.inventory.repoditory.InventoryRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
@@ -53,6 +54,10 @@ public class productServiceTest {
     MessageSource messageSource;
     @Mock
     ProductImageRepository productImageRepository;
+
+    @Mock
+    InventoryRepository inventoryRepository;
+
     ProductServiceImpl productService;
     ProductSearchRepository productSearchRepository;
 
@@ -64,7 +69,7 @@ public class productServiceTest {
     @BeforeEach
     void setUp() {
         productService = new ProductServiceImpl(productRepository, storeRepository,
-            productImageRepository, messageSource, cacheManager, productSearchRepository);
+            productImageRepository, messageSource, cacheManager, productSearchRepository,inventoryRepository);
 
         seller = new User("seller", "password", SELLER);
         customer = new User("customer", "password", CONSUMER);
