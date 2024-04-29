@@ -108,7 +108,7 @@ public class ProductServiceImpl implements ProductService {
         productDocument.setRealPrice(productRequest.getRealPrice());
         productDocument.setDiscount(productRequest.getDiscount());
         productDocument.setQuantity(product.getQuantity());
-        productDocument.setUrl(imageUrls);
+        productDocument.setImageUrls(imageUrls);
         productDocument.setDeleted(product.getDeleted());
 
 
