@@ -5,7 +5,6 @@ import static cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum.
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -21,6 +20,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductUpdateReq
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository.ProductRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductServiceImpl;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.search.repository.ProductSearchRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.redisson.api.RedissonClient;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.PageRequest;
@@ -55,6 +54,7 @@ public class productServiceTest {
     @Mock
     ProductImageRepository productImageRepository;
     ProductServiceImpl productService;
+    ProductSearchRepository productSearchRepository;
 
     User seller;
     User customer;
@@ -64,7 +64,7 @@ public class productServiceTest {
     @BeforeEach
     void setUp() {
         productService = new ProductServiceImpl(productRepository, storeRepository,
-            productImageRepository, messageSource, cacheManager);
+            productImageRepository, messageSource, cacheManager, productSearchRepository);
 
         seller = new User("seller", "password", SELLER);
         customer = new User("customer", "password", CONSUMER);

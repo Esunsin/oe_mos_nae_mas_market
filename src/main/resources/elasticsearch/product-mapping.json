@@ -1,7 +1,7 @@
 {
   "properties": {
     "productName": {
-      "type": "keyword",
+      "type": "text",
       "analyzer": "standard",
       "fields": {
         "ngram": {
@@ -42,6 +42,9 @@
           "type": "text",
           "analyzer": "standard"
         }
+      },
+      "imageUrl": {
+        "type": "text"
       }
     }
   }

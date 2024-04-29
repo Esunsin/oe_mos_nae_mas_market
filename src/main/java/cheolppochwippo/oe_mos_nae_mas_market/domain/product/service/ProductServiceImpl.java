@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -35,7 +36,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,10 +62,12 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product(productRequest, store);
         Product saveProduct = productRepository.save(product);
 
+        List<String> imageUrls = getProductImageUrls(saveProduct.getId());
+
         ProductDocument productDocument = new ProductDocument(store.getStoreName(),
             saveProduct.getId(), productRequest.getProductName(), productRequest.getInfo(),
             productRequest.getRealPrice(), productRequest.getDiscount(),
-            productRequest.getQuantity(), Deleted.UNDELETE);
+            productRequest.getQuantity(), imageUrls, Deleted.UNDELETE);
         productSearchRepository.save(productDocument);
 
         return new ProductResponse(product);
@@ -97,6 +99,7 @@ public class ProductServiceImpl implements ProductService {
         ProductResultResponse response = new ProductResultResponse(product, imageByProductId);
         Objects.requireNonNull(cacheManager.getCache("product")).put(productId, response);
 
+        List<String> imageUrls = getProductImageUrls(productId);
         ProductDocument productDocument = new ProductDocument();
         productDocument.setId(productId.toString());
         productDocument.setProductId(productId);
@@ -105,7 +108,9 @@ public class ProductServiceImpl implements ProductService {
         productDocument.setRealPrice(productRequest.getRealPrice());
         productDocument.setDiscount(productRequest.getDiscount());
         productDocument.setQuantity(product.getQuantity());
+        productDocument.setUrl(imageUrls);
         productDocument.setDeleted(product.getDeleted());
+
 
         productSearchRepository.save(productDocument);
 
@@ -214,6 +219,13 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return new ProductShowResponse(productResultResponseList);
+    }
+
+    private List<String> getProductImageUrls(Long productId) {
+        List<ProductImage> productImages = productImageRepository.getImageByProductId(productId);
+        return productImages.stream()
+            .map(ProductImage::getUrl)
+            .collect(Collectors.toList());
     }
 
 }
