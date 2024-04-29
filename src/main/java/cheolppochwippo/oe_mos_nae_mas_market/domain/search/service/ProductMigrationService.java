@@ -1,5 +1,7 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.search.service;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.ProductImage;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.image.repository.ProductImageRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository.ProductRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.search.document.ProductDocument;
@@ -16,13 +18,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ProductMigrationService {
     private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
     private final ElasticsearchTemplate elasticsearchTemplate;
 
     public void migrateProductsToElasticsearch() {
         List<Product> products = productRepository.findAll();
         List<ProductDocument> productDocuments = products.stream()
             .map(this::convertToProductDocument)
-            .collect(Collectors.toList());
+            .toList();
 
         IndexCoordinates indexCoordinates = IndexCoordinates.of("products");
 
@@ -35,6 +38,8 @@ public class ProductMigrationService {
     }
 
     private ProductDocument convertToProductDocument(Product product) {
+        List<String> imageUrls = getProductImageUrls(product.getId());
+
         return new ProductDocument(
             UUID.randomUUID().toString(),
             product.getId(),
@@ -43,7 +48,15 @@ public class ProductMigrationService {
             product.getRealPrice(),
             product.getDiscount(),
             product.getQuantity(),
+            imageUrls,
             product.getDeleted()
         );
+    }
+
+    private List<String> getProductImageUrls(Long productId) {
+        List<ProductImage> productImages = productImageRepository.getImageByProductId(productId);
+        return productImages.stream()
+            .map(ProductImage::getUrl)
+            .collect(Collectors.toList());
     }
 }

@@ -1,10 +1,10 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.search.document;
 
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,10 +33,11 @@ public class ProductDocument {
     private Long discount;
     private Long quantity;
     @Enumerated(EnumType.STRING)
+    private List<String> url;
     private Deleted deleted;
 
     public ProductDocument(String id, Long productId, String productName, String info,
-        Long realPrice, Long discount, Long quantity, Deleted deleted) {
+        Long realPrice, Long discount, Long quantity, List<String> url, Deleted deleted) {
         this.id = UUID.randomUUID().toString();
         this.productId = productId;
         this.productName = productName;
@@ -45,6 +46,7 @@ public class ProductDocument {
         this.discount = discount;
         this.quantity = quantity;
         this.price = calculatePrice(realPrice, discount);
+        this.url = url;
         this.deleted = Deleted.UNDELETE;
     }
 
