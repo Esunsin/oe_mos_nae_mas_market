@@ -16,7 +16,6 @@ public class CouponResponse {
     private Long couponId;
     private String couponInfo;
     private Double discount;
-    private Long amount;
     private LocalDateTime effectiveDate;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
@@ -26,7 +25,6 @@ public class CouponResponse {
         this.couponId = coupon.getId();
         this.couponInfo = coupon.getCouponInfo();
         this.discount = coupon.getDiscount();
-        this.amount = coupon.getAmount();
         this.effectiveDate = coupon.getEffective_date();
         this.createdAt = coupon.getCreatedAt();
         this.modifiedAt = coupon.getModifiedAt();

@@ -1,7 +1,5 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.order.repository;
 
-import static cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.QOrder.order;
-
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.AllOrderInStoreRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.dto.AllOrderInStoreResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
@@ -9,6 +7,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.OrderStatementE
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.QOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.QProduct;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.QStore;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.QProduct;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.totalOrder.entity.TotalOrder;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.QUser;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
@@ -20,6 +19,9 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
+
+import static cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.QOrder.order;
+import static cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.QProduct.product;
 
 @RequiredArgsConstructor
 public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
