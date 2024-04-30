@@ -112,7 +112,7 @@ public class OrderInCartController {
 				.build());
 	}
 
-	@GetMapping("/store/orders")
+	@PostMapping("/store/orders")
 	public ResponseEntity<CommonResponse<List<AllOrderInStoreResponse>>> showOrderInStore(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestBody AllOrderInStoreRequest request) {
