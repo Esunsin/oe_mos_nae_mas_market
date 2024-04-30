@@ -104,7 +104,7 @@ public class JwtUtil {
     public String createAccessToken(Long userId, String username, RoleEnum role) {
         Date date = new Date();
 
-        long TOKEN_TIME = 60 * 60 * 1000;
+        long TOKEN_TIME = 60 * 60 * 10000;
         return BEARER_PREFIX +
             Jwts.builder()
                 .claim("userId", userId)
