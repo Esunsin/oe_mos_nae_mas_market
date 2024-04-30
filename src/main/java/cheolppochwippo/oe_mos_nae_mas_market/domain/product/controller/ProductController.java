@@ -60,11 +60,11 @@ public class ProductController {
                 .build());
     }
     //상품 재고 수정
-    @PatchMapping("/stores/products/{productId}/quantity")
+    @PatchMapping("/stores/products/quantity")
     public ResponseEntity<CommonResponse<ProductResponse>> updateQuantity(
-        @PathVariable Long productId, @RequestBody QuantityUpdateRequest productRequest,
+         @RequestBody QuantityUpdateRequest productRequest,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        ProductResponse updateProduct = productService.updateQuantity(productRequest, productId,
+        ProductResponse updateProduct = productService.updateQuantity(productRequest,
             userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK.value())
             .body(CommonResponse.<ProductResponse>builder()

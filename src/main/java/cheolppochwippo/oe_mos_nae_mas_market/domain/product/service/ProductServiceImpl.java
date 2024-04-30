@@ -2,6 +2,8 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.product.service;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.ProductImage;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.repository.ProductImageRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.inventory.entity.Inventory;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.inventory.repoditory.InventoryRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.*;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductMyResultResponse;
@@ -50,6 +52,7 @@ public class ProductServiceImpl implements ProductService {
     private final MessageSource messageSource;
     private final CacheManager cacheManager;
     private final ProductSearchRepository productSearchRepository;
+    private final InventoryRepository inventoryRepository;
 
     @Transactional
     @CacheEvict(cacheNames = "products", allEntries = true)
@@ -137,17 +140,18 @@ public class ProductServiceImpl implements ProductService {
         return new ProductMyResultResponse(product, imageByProductId);
     }
 
-
-	@Override
-	@Transactional
-	public ProductResponse updateQuantity(QuantityUpdateRequest productRequest, Long productId,
-		User user) {
-		Product product = productRepository.findByproductIdAndUserId(user.getId(), productId)
-			.orElseThrow(() -> new NoSuchElementException(
-				messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
-		product.quantity(productRequest);
-		return new ProductResponse(product);
-	}
+    @Override
+    @Transactional
+    public ProductResponse updateQuantity(QuantityUpdateRequest productRequest,
+        User user) {
+        Product product = productRepository.findByproductIdAndUserId(user.getId(),
+                productRequest.getProductId())
+            .orElseThrow(() -> new NoSuchElementException(
+                messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
+        Inventory inventory = new Inventory(productRequest, product);
+        inventoryRepository.save(inventory);
+        return new ProductResponse(inventory);
+    }
 
 
     @Override
