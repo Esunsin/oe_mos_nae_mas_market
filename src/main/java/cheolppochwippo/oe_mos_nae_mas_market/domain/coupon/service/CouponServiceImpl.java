@@ -55,9 +55,7 @@ public class CouponServiceImpl implements CouponService {
         List<String> phoneNumbers = userRepository.getPhoneNumberFindByConsentTrue();
         if (!phoneNumbers.isEmpty()) {
             sqsConfig.sendCouponMessages(phoneNumbers,
-                messageSource.getMessage("logo", null, Locale.KOREA) + "\n" + coupon.getCouponInfo()
-                    +
-                    messageSource.getMessage("publish.coupon", null, Locale.KOREA));
+                "[외못내맛]" + "\n" + coupon.getCouponInfo() + "쿠폰이 발행되었습니다!");
         }
 
         return new CouponResponse(savedCoupon);
