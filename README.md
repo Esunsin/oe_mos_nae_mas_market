@@ -3,6 +3,7 @@
 <img width="506" alt="Untitled (1)" src="https://github.com/Cheolppochwippo/oe_mos_nae_mas_market/assets/155534061/82cacd27-2237-4620-8c2b-c75de9933c52">
 
 * **프로젝트 이름** : **외못내맛 마켓 프로젝트**
+* **프로젝트 제작기간** : 2024.03.26 ~ 2024.04.30
 * **프로젝트 설명** : 
 상품 가치가 없는 못난이 야채들만 파는 친환경 마켓 프로젝트입니다!🍊 <br>
 
@@ -48,5 +49,9 @@
 **************
 https://fronts-two.vercel.app
 
+
+### 🎬 발표 자료
+**************
+https://drive.google.com/file/d/1YPY1uagCQKFkiueSb-ZAUiHQfthppW7j/view?usp=sharing
 
 
