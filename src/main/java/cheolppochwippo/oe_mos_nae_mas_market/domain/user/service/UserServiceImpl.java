@@ -83,21 +83,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User changeRole(Long userId){
-        User user = userRepository.findById(userId).orElseThrow(
-            () -> new  NoEntityException(messageSource.getMessage("price.mismatch", null, Locale.KOREA))
-        );
-        if(user.getRole()==RoleEnum.SELLER){
-            user.changeRoleToConsumer();
-        }
-        else if(user.getRole()==RoleEnum.CONSUMER){
-            user.changeRoleToSeller();
-        }
-        userRepository.save(user);
-        return user;
-    }
-
-    @Override
     public UserResponse showMypage(User user) {
         User findUser = foundUser(user);
 
@@ -108,7 +93,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse updateMypage(UserUpdateRequest userRequest, User user) {
         User findUser = foundUser(user);
-
         findUser.update(userRequest);
         return new UserResponse(findUser);
     }
@@ -117,14 +101,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse roleUpdate(User user) {
         User findUser = foundUser(user);
-
-        if (findUser.getRole() == RoleEnum.CONSUMER) {
-            findUser.changeRoleToSeller();
-
-            return new UserResponse(findUser);
-        } else {
-            throw new IllegalArgumentException("역할 변경이 불가능한 유저입니다.");
+        if(user.getRole()==RoleEnum.SELLER){
+            findUser.changeRoleToConsumer();
         }
+        else if(user.getRole()==RoleEnum.CONSUMER){
+            findUser.changeRoleToSeller();
+        }
+        return new UserResponse(findUser);
     }
 
     private User foundUser(User user) {

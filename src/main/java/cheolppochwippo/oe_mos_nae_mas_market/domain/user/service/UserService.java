@@ -14,10 +14,8 @@ public interface UserService {
     UserResponse showMypage(User user);
 
     UserResponse updateMypage(UserUpdateRequest userRequest, User user);
-    User changeRole(Long userId);
 
     CompletableFuture<UserResponse> signupByUserTest(UserRequest userRequest);
-
 
     UserResponse roleUpdate(User user);
 }
