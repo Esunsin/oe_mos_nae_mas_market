@@ -5,7 +5,8 @@
 * **프로젝트 이름** : **외못내맛 마켓 프로젝트**
 * **프로젝트 제작기간** : 2024.03.26 ~ 2024.04.30
 * **프로젝트 설명** : 
-상품 가치가 없는 못난이 야채들만 파는 친환경 마켓 프로젝트입니다!🍊 <br>
+상품 가치가 없는 못난이 야채들만 파는 친환경 마켓 프로젝트입니다!🍊 
+* **추가** : 2024.05.08 ~ <br>
 
 ### 👩🏼‍🤝‍👩🏼멤버 구성
 **************
@@ -28,7 +29,7 @@
 **************
 <img src="https://img.shields.io/badge/spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white"> <img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=java&logoColor=white"> <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white">
 
-<img src="https://img.shields.io/badge/amazonaws-232F3E?style=for-the-badge&logo=amazon aws&logoColor=white"> <img src="https://img.shields.io/badge/redis-DC382D?style=for-the-badge&logo=redis&logoColor=white"> <img src="https://img.shields.io/badge/amazon sqs-FF4F8B?style=for-the-badge&logo=amazonsqs&logoColor=white">
+<img src="https://img.shields.io/badge/amazonaws-232F3E?style=for-the-badge&logo=amazon aws&logoColor=white"> <img src="https://img.shields.io/badge/redis-DC382D?style=for-the-badge&logo=redis&logoColor=white">
 
 <img src="https://img.shields.io/badge/elasticsearch-005571?style=for-the-badge&logo=elasticsearch&logoColor=white"> <img src="https://img.shields.io/badge/kibana-005571?style=for-the-badge&logo=kibana&logoColor=white"> <img src="https://img.shields.io/badge/amazons3-569A31?style=for-the-badge&logo=amazons3&logoColor=white"> 
 
@@ -37,7 +38,6 @@
 <img src="https://img.shields.io/badge/github actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white"> <img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"> <img src="https://img.shields.io/badge/vercel-000000?style=for-the-badge&logo=vercel&logoColor=white"> <img src="https://img.shields.io/badge/google cloud-4285F4?style=for-the-badge&logo=google cloud&logoColor=white">
 
 <img src="https://img.shields.io/badge/apache Jmeter-D22128?style=for-the-badge&logo=apache Jmeter&logoColor=white"> <img src="https://img.shields.io/badge/locust-41AD48?style=for-the-badge&logo=locust&logoColor=white"> <img src="https://img.shields.io/badge/amazon aurora mysql-FF00A0?style=for-the-badge&logo=amazon aurora mysql&logoColor=white">
-<img src="https://img.shields.io/badge/amazon lambda-FF9900?style=for-the-badge&logo=amazon lambda&logoColor=white"> 
 
 ### 🗂️ ERD (Entity Relationship Diagram)
 **************
