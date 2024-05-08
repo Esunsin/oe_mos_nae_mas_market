@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,38 +30,28 @@ public class StoreServiceImpl implements StoreService {
     private final UserRepository userRepository;
     private final MessageSource messageSource;
 
-
     @Transactional
     public StoreResponse createStore(StoreRequest storeRequest, User user) {
-        User seller = getUser(user);
+        User seller = getSeller(user);
         checkExistingStore(seller);
-
         Store store = new Store(storeRequest, seller);
+        store.approve();
         storeRepository.save(store);
-
         return new StoreResponse(store);
     }
 
     @Transactional
     public StoreResponse updateStore(StoreRequest storeRequest, User user) {
-
-        User seller = getUser(user);
-        checkUserRole(user);
-        Store store = storeRepository.findByUserId(seller.getId())
-            .orElseThrow(() -> new NoSuchElementException(
-                messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
-
+        User seller = getSeller(user);
+        Store store = getStore(seller);
         store.update(storeRequest);
-
         return new StoreResponse(store);
     }
 
     @Override
     public StoreResponse showStore(User user) {
-        Store store = storeRepository.findByUserId(user.getId())
-            .orElseThrow(() -> new NoSuchElementException(
-                messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
-
+        User seller = getSeller(user);
+        Store store = getStore(seller);
         return new StoreResponse(store);
     }
 
@@ -68,9 +59,10 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public StoreResponse approveStore(Long requestId, User user) {
         validateAdmin(user);
-        Store store = storeRepository.findById(requestId)
-            .orElseThrow(() -> new NoSuchElementException(
-                messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
+        Store store = storeRepository.findById(requestId).orElseThrow(
+                () -> new NoSuchElementException(
+                        messageSource.getMessage("noSuch.store", null, Locale.KOREA))
+        );
         store.approve();
         User seller = store.getUser();
         seller.changeRoleToSeller();
@@ -96,7 +88,13 @@ public class StoreServiceImpl implements StoreService {
             .map(StoreResponse::new)
             .collect(Collectors.toList());
     }
-
+    private Store getStore(User seller) {
+        Store store = storeRepository.findById(seller.getId()).orElseThrow(
+                () -> new NoSuchElementException(
+                        messageSource.getMessage("noSuch.store", null, Locale.KOREA))
+        );
+        return store;
+    }
 
     private void validateAdmin(User user) {
         if (!RoleEnum.ADMIN.equals(user.getRole())) {
@@ -105,17 +103,16 @@ public class StoreServiceImpl implements StoreService {
         }
     }
 
-    private User getUser(User user) {
-        return userRepository.findById(user.getId())
-            .orElseThrow(() -> new NoEntityException(
-                messageSource.getMessage("noEntity.user", null, Locale.KOREA)));
-    }
-
-    private void checkUserRole(User user) {
-        if (!RoleEnum.SELLER.equals(user.getRole())) {
+    private User getSeller(User user) {
+        User findUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new NoEntityException(
+                        messageSource.getMessage("noEntity.user", null, Locale.KOREA)));
+        if(findUser.getRole() != RoleEnum.SELLER){
             throw new NoPermissionException(
-                messageSource.getMessage("noPermission.role.seller.update", null, Locale.KOREA));
+                    messageSource.getMessage("noPermission.role.seller", null, Locale.KOREA)
+            );
         }
+        return findUser;
     }
 
     private void checkExistingStore(User seller) {

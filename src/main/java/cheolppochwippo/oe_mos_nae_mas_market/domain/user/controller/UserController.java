@@ -76,7 +76,6 @@ public class UserController {
                 .build());
     }
 
-    //유저 역할 변경
     @PatchMapping("/auth/role")
     public ResponseEntity<CommonResponse<UserResponse>> updateRole(
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -96,17 +95,6 @@ public class UserController {
             .body(CommonResponse.<UserResponse>builder()
                 .msg("signupByUserTest complete!")
                 .data(signupedUser)
-                .build());
-    }
-
-    @PostMapping("/auth/changeRole")
-    public ResponseEntity<CommonResponse<String>> changeRole(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        User user = userService.changeRole(userDetails.getUser().getId());
-        String jwt = jwtUtil.createToken(user.getId(),user.getUsername(),user.getRole());
-        return ResponseEntity.status(HttpStatus.OK.value())
-            .body(CommonResponse.<String>builder()
-                .msg("changeRol complete!")
-                .data(jwt)
                 .build());
     }
 

@@ -61,7 +61,7 @@ public class StoreController {
     }
 
 
-    @PutMapping("/stores/{storeId}/approve")
+    @PutMapping("/stores/{storeId}")
     public ResponseEntity<CommonResponse<StoreResponse>> approveStore(
         @PathVariable Long storeId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         StoreResponse approveStore = storeService.approveStore(storeId, userDetails.getUser());
