@@ -43,13 +43,6 @@
 **************
 ![image (1)](https://github.com/Cheolppochwippo/oe_mos_nae_mas_market/assets/155534061/2e735df2-39fb-4ac9-aba1-849067ff35ce)
 
-
-
-### 📐 SERVICE URL
-**************
-https://fronts-two.vercel.app
-
-
 ### 🎬 발표 자료
 **************
 https://drive.google.com/file/d/1YPY1uagCQKFkiueSb-ZAUiHQfthppW7j/view?usp=sharing
