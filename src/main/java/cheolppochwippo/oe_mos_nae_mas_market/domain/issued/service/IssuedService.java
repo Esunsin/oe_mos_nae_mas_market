@@ -10,5 +10,4 @@ public interface IssuedService {
 
     List<IssuedResponse> getIssuedCoupons(User user);
 
-//    void decreaseCouponAmount(Long couponId, User user);
 }
