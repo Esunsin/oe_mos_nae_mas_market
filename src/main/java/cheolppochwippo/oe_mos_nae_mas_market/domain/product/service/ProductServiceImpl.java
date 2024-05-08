@@ -4,8 +4,6 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.ProductImage;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.repository.ProductImageRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.inventory.entity.Inventory;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.inventory.repoditory.InventoryRepository;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.order.entity.Order;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.*;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductMyResultResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
@@ -15,8 +13,6 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductUpdateReq
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.QuantityUpdateRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository.ProductRepository;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.search.document.ProductDocument;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.search.repository.ProductSearchRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
@@ -31,8 +27,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -51,11 +45,10 @@ public class ProductServiceImpl implements ProductService {
     private final ProductImageRepository productImageRepository;
     private final MessageSource messageSource;
     private final CacheManager cacheManager;
-    private final ProductSearchRepository productSearchRepository;
     private final InventoryRepository inventoryRepository;
 
     @Transactional
-    @CacheEvict(cacheNames = "products", allEntries = true)
+    @CacheEvict(cacheNames = "products", allEntries = true) // 기능 만들어야 됨
     public ProductResponse createProduct(ProductRequest productRequest, User user) {
         validateSeller(user);
         Store store = storeRepository.findByUserId(user.getId())
@@ -66,12 +59,6 @@ public class ProductServiceImpl implements ProductService {
         Product saveProduct = productRepository.save(product);
 
         List<String> imageUrls = getProductImageUrls(saveProduct.getId());
-
-        ProductDocument productDocument = new ProductDocument(store.getStoreName(),
-            saveProduct.getId(), productRequest.getProductName(), productRequest.getInfo(),
-            productRequest.getRealPrice(), productRequest.getDiscount(),
-            productRequest.getQuantity(), imageUrls, Deleted.UNDELETE);
-        productSearchRepository.save(productDocument);
 
         return new ProductResponse(product);
     }
@@ -91,31 +78,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = "products", allEntries = true)
+    @CacheEvict(cacheNames = "products", allEntries = true) // 기능
     public ProductResponse updateProduct(ProductUpdateRequest productRequest, Long productId,
         User user) {
         validateSeller(user);
         Product product = foundProduct(productId);
-        deleteProductDocumentFromElasticsearch(productId);
         product.update(productRequest);
         List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
         ProductResultResponse response = new ProductResultResponse(product, imageByProductId);
         Objects.requireNonNull(cacheManager.getCache("product")).put(productId, response);
 
         List<String> imageUrls = getProductImageUrls(productId);
-        ProductDocument productDocument = new ProductDocument();
-        productDocument.setId(productId.toString());
-        productDocument.setProductId(productId);
-        productDocument.setProductName(productRequest.getProductName());
-        productDocument.setInfo(productRequest.getInfo());
-        productDocument.setRealPrice(productRequest.getRealPrice());
-        productDocument.setDiscount(productRequest.getDiscount());
-        productDocument.setQuantity(product.getQuantity());
-        productDocument.setImageUrls(imageUrls);
-        productDocument.setDeleted(product.getDeleted());
-
-
-        productSearchRepository.save(productDocument);
 
         return new ProductResponse(product);
     }
@@ -183,21 +156,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Transactional
-    @CacheEvict(cacheNames = "products", allEntries = true)
+    @CacheEvict(cacheNames = "products", allEntries = true)//기능
     public ProductResponse deleteProduct(Long productId, User user) {
         validateSeller(user);
 
         Product product = foundProduct(productId);
         product.delete();
 
-        deleteProductDocumentFromElasticsearch(productId);
-
         return new ProductResponse(product);
     }
 
-    private void deleteProductDocumentFromElasticsearch(Long productId) {
-        productSearchRepository.deleteByProductId(productId);
-    }
 
     private Product foundProduct(Long productId) {
         return productRepository.findById(productId)
