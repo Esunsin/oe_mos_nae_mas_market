@@ -43,7 +43,7 @@ public class StoreServiceImpl implements StoreService {
     @Transactional
     public StoreResponse updateStore(StoreRequest storeRequest, User user) {
         User seller = getSeller(user);
-        Store store = getStore(seller);
+        Store store = getStoreByUser(seller);
         store.update(storeRequest);
         return new StoreResponse(store);
     }
@@ -51,7 +51,7 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public StoreResponse showStore(User user) {
         User seller = getSeller(user);
-        Store store = getStore(seller);
+        Store store = getStoreByUser(seller);
         return new StoreResponse(store);
     }
 
@@ -88,8 +88,8 @@ public class StoreServiceImpl implements StoreService {
             .map(StoreResponse::new)
             .collect(Collectors.toList());
     }
-    private Store getStore(User seller) {
-        Store store = storeRepository.findById(seller.getId()).orElseThrow(
+    private Store getStoreByUser(User seller) {
+        Store store = storeRepository.findByUserId(seller.getId()).orElseThrow(
                 () -> new NoSuchElementException(
                         messageSource.getMessage("noSuch.store", null, Locale.KOREA))
         );
