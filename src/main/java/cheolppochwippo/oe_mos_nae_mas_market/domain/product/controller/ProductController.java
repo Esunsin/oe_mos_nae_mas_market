@@ -45,7 +45,6 @@ public class ProductController {
                 .build());
     }
 
-
     //상품수정
     @PatchMapping("/stores/products/{productId}")
     public ResponseEntity<CommonResponse<ProductResponse>> updateProduct(
@@ -59,6 +58,7 @@ public class ProductController {
                 .data(updateProduct) //productId
                 .build());
     }
+
     //상품 재고 수정
     @PatchMapping("/stores/products/quantity")
     public ResponseEntity<CommonResponse<ProductResponse>> updateQuantity(
