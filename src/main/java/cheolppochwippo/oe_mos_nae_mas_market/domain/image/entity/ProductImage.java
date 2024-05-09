@@ -15,4 +15,8 @@ public class ProductImage extends Image{
     @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 
+    public ProductImage(String url, Product product) {
+        super(url);
+        this.product = product;
+    }
 }

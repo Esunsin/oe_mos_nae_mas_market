@@ -48,17 +48,23 @@ public class ProductServiceImpl implements ProductService {
     private final InventoryRepository inventoryRepository;
 
     @Transactional
-    @CacheEvict(cacheNames = "products", allEntries = true) // 기능 만들어야 됨
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public ProductResponse createProduct(ProductRequest productRequest, User user) {
-        validateSeller(user);
-        Store store = storeRepository.findByUserId(user.getId())
+        User seller = validateSeller(user);
+
+        Store store = storeRepository.findByUserId(seller.getId())
             .orElseThrow(() -> new NoSuchElementException(
                 messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
 
         Product product = new Product(productRequest, store);
         Product saveProduct = productRepository.save(product);
 
-        List<String> imageUrls = getProductImageUrls(saveProduct.getId());
+        List<ProductImage> productImages = new ArrayList<>();
+        for (String url : productRequest.getImageUrl()) {
+            productImages.add(new ProductImage(url, saveProduct));
+        }
+
+        productImageRepository.saveAll(productImages);
 
         return new ProductResponse(product);
     }
@@ -167,18 +173,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-    private Product foundProduct(Long productId) {
-        return productRepository.findById(productId)
-            .orElseThrow(() -> new NoSuchElementException(
-                messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
-    }
-
-    private void validateSeller(User user) {
-        if (!RoleEnum.SELLER.equals(user.getRole())) {
-            throw new NoPermissionException(
-                messageSource.getMessage("noPermission.role.seller", null, Locale.KOREA));
-        }
-    }
 
     @Transactional(readOnly = true)
     public ProductShowResponse showAllProductWithValue(Pageable pageable, String searchValue) {
@@ -219,6 +213,20 @@ public class ProductServiceImpl implements ProductService {
         return productImages.stream()
             .map(ProductImage::getUrl)
             .collect(Collectors.toList());
+    }
+
+    private Product foundProduct(Long productId) {
+        return productRepository.findById(productId)
+            .orElseThrow(() -> new NoSuchElementException(
+                messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
+    }
+
+    private User validateSeller(User user) {
+        if (!RoleEnum.SELLER.equals(user.getRole())) {
+            throw new NoPermissionException(
+                messageSource.getMessage("noPermission.role.seller", null, Locale.KOREA));
+        }
+        return user;
     }
 
 }
