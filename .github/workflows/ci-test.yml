@@ -8,9 +8,9 @@ name: omnmm project CICD
 # ex) branches: [ "브랜치 이름" ] 부분을 수정해주면 된다.
 on:
   push:
-    branches: [ "main" , "dev" ]
+    branches: []
   pull_request:
-    branches: [ "main", "dev" ]
+    branches: []
 #------------------------------------------------
 #  PROJECT_NAME: 프로젝트 이름 설정. S3경로 설정에 사용.
 #  BUCKET_NAME: 앞에서 생성한 S3 버킷이름
