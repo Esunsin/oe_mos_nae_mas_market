@@ -28,6 +28,7 @@ public class ProductImageRepositoryCustomImpl implements ProductImageRepositoryC
         return jpaConfig.jpaQueryFactory()
                 .selectFrom(productImage)
                 .innerJoin(productImage.product,product)
+                .innerJoin(product.store,store)
                 .where(product.id.eq(productId)
                         .and(product.deleted.eq(Deleted.UNDELETE)))
                 .fetch();
@@ -59,4 +60,5 @@ public class ProductImageRepositoryCustomImpl implements ProductImageRepositoryC
                 .limit(pageable.getPageSize())
                 .fetch();
     }
+
 }

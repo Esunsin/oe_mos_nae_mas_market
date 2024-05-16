@@ -24,7 +24,7 @@ public class ProductResultResponse {
     private String storeInfo;
     private final List<String> imageUrls = new ArrayList<>();
 
-    public ProductResultResponse(Product product, List<ProductImage> productImages) {
+    public ProductResultResponse(Product product) {
         this.id = product.getId();
         this.productName = product.getProductName();
         this.info = product.getInfo();
@@ -33,9 +33,6 @@ public class ProductResultResponse {
         this.discount = product.getDiscount();
         this.storeName = product.getStore().getStoreName();
         this.storeInfo = product.getStore().getInfo();
-        for (ProductImage productImage : productImages) {
-            this.imageUrls.add(productImage.getUrl());
-        }
     }
 
     public void setProductResultResponse(ProductImage image) {

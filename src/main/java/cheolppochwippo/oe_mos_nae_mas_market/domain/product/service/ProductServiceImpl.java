@@ -2,32 +2,21 @@ package cheolppochwippo.oe_mos_nae_mas_market.domain.product.service;
 
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.ProductImage;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.image.repository.ProductImageRepository;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.image.repository.ProductImageRepositoryJdbc;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.inventory.entity.Inventory;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.inventory.repoditory.InventoryRepository;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductMyResultResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductUpdateRequest;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.QuantityUpdateRequest;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.*;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.repository.ProductRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.entity.Store;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.store.repository.StoreRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
-import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.stream.Collectors;
+
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
@@ -44,8 +33,8 @@ public class ProductServiceImpl implements ProductService {
     private final StoreRepository storeRepository;
     private final ProductImageRepository productImageRepository;
     private final MessageSource messageSource;
-    private final CacheManager cacheManager;
     private final InventoryRepository inventoryRepository;
+    private final ProductImageRepositoryJdbc productImageRepositoryJdbc;
 
     @Transactional
     @CacheEvict(cacheNames = "products", allEntries = true)
@@ -69,33 +58,46 @@ public class ProductServiceImpl implements ProductService {
         return new ProductResponse(product);
     }
 
-    @Override
-    public ProductShowResponse showStoreProduct(Pageable pageable, User user) {
-        validateSeller(user);
-        List<Product> productList = productRepository.findByStoreUserId(pageable, user.getId());
-        List<ProductResultResponse> productResultResponseList = new ArrayList<>();
-        for (Product product : productList) {
-            List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(
-                product.getId());
-            productResultResponseList.add(new ProductResultResponse(product, imageByProductId));
+    @Transactional
+    public ProductResponse createProductBulkImage(ProductRequest productRequest, User user) {
+        User seller = validateSeller(user);
+
+        Store store = storeRepository.findByUserId(seller.getId())
+                .orElseThrow(() -> new NoSuchElementException(
+                        messageSource.getMessage("noSuch.store", null, Locale.KOREA)));
+
+        Product product = new Product(productRequest, store);
+        Product saveProduct = productRepository.save(product);
+
+        List<ProductImage> productImages = new ArrayList<>();
+        for (String url : productRequest.getImageUrl()) {
+            productImages.add(new ProductImage(url, saveProduct));
         }
-        return new ProductShowResponse(productResultResponseList);
+
+        productImageRepositoryJdbc.productImageBulkInsert(productImages);
+
+        return new ProductResponse(product);
+    }
+
+    @Override
+    public List<ProductByStoreResponse> showStoreProduct(Pageable pageable, User user) {
+        User seller = validateSeller(user);
+        List<Product> products = productRepository.findByStoreUserId(pageable, seller.getId());
+        List<ProductByStoreResponse> result = new ArrayList<>();
+        for (Product product : products) {
+            result.add(new ProductByStoreResponse(product));
+        }
+        return result;
     }
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = "products", allEntries = true) // 기능
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public ProductResponse updateProduct(ProductUpdateRequest productRequest, Long productId,
         User user) {
         validateSeller(user);
         Product product = foundProduct(productId);
         product.update(productRequest);
-        List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
-        ProductResultResponse response = new ProductResultResponse(product, imageByProductId);
-        Objects.requireNonNull(cacheManager.getCache("product")).put(productId, response);
-
-        List<String> imageUrls = getProductImageUrls(productId);
-
         return new ProductResponse(product);
     }
 
@@ -104,19 +106,13 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = "product", key = "#productId")
     public ProductResultResponse showProduct(long productId) {
-        Product product = foundProduct(productId);
-        List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
-        return new ProductResultResponse(product, imageByProductId);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public ProductMyResultResponse showMyProduct(Long userId, long productId) {
-        Product product = productRepository.findByproductIdAndUserId(userId, productId)
-            .orElseThrow(() -> new NoSuchElementException(
-                messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
-        List<ProductImage> imageByProductId = productImageRepository.getImageByProductId(productId);
-        return new ProductMyResultResponse(product, imageByProductId);
+        List<ProductImage> productImages = productImageRepository.getImageByProductId(productId);
+        ProductResultResponse productResultResponse = new ProductResultResponse();
+        productResultResponse.setProductResultResponse(productImages.get(0));
+        for (ProductImage productImage : productImages) {
+            productResultResponse.addImageUrl(productImage.getUrl());
+        }
+        return productResultResponse;
     }
 
     @Override
@@ -139,30 +135,29 @@ public class ProductServiceImpl implements ProductService {
     public ProductShowResponse showAllProduct(Pageable pageable) {
         List<ProductImage> image = productImageRepository.getAllImage(pageable);
         List<ProductResultResponse> productResultResponseList = new ArrayList<>();
-        List<Long> productIds = new ArrayList<>();
-        for (ProductImage productImage : image) {
-            ProductResultResponse productResultResponse = new ProductResultResponse();
-            if(productIds.contains(productImage.getProduct().getId())){
-                for (ProductResultResponse resultResponse :productResultResponseList) {
-                    if(resultResponse.getId().equals(productImage.getProduct().getId())){
-                        resultResponse.addImageUrl(productImage.getUrl());
-                        break;
-                    }
+        Map<Product, List<String>> productAndUrlMap = new HashMap<>();
 
-                }
+        for (ProductImage productImage : image) {
+            if(!productAndUrlMap.containsKey(productImage.getProduct())) {
+                productAndUrlMap.put(productImage.getProduct()
+                        , productAndUrlMap.getOrDefault(productImage.getProduct(), new ArrayList<>()));
             }
-            else {
-                productIds.add(productImage.getProduct().getId());
-                productResultResponse.setProductResultResponse(productImage);
-                productResultResponse.addImageUrl(productImage.getUrl());
-                productResultResponseList.add(productResultResponse);
-            }
+            productAndUrlMap.get(productImage.getProduct()).add(productImage.getUrl());
         }
+
+        for (Product product : productAndUrlMap.keySet()) {
+            ProductResultResponse productResultResponse = new ProductResultResponse(product);
+            for (String url : productAndUrlMap.get(product)) {
+                productResultResponse.addImageUrl(url);
+            }
+            productResultResponseList.add(productResultResponse);
+        }
+
         return new ProductShowResponse(productResultResponseList);
     }
 
     @Transactional
-    @CacheEvict(cacheNames = "products", allEntries = true)//기능
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public ProductResponse deleteProduct(Long productId, User user) {
         validateSeller(user);
 
@@ -186,33 +181,25 @@ public class ProductServiceImpl implements ProductService {
         }
 
         List<ProductResultResponse> productResultResponseList = new ArrayList<>();
-        List<Long> productIds = new ArrayList<>();
+        Map<Product, List<String>> productAndUrlMap = new HashMap<>();
+
         for (ProductImage productImage : image) {
-            ProductResultResponse productResultResponse = new ProductResultResponse();
-            if(productIds.contains(productImage.getProduct().getId())){
-                for (ProductResultResponse resultResponse :productResultResponseList) {
-                    if(resultResponse.getId().equals(productImage.getProduct().getId())){
-                        resultResponse.addImageUrl(productImage.getUrl());
-                        break;
-                    }
-
-                }
+            if(productAndUrlMap.containsKey(productImage.getProduct())) {
+                productAndUrlMap.put(productImage.getProduct()
+                        , productAndUrlMap.getOrDefault(productImage.getProduct(), new ArrayList<>()));
             }
-            else {
-                productIds.add(productImage.getProduct().getId());
-                productResultResponse.setProductResultResponse(productImage);
-                productResultResponse.addImageUrl(productImage.getUrl());
-                productResultResponseList.add(productResultResponse);
-            }
+            productAndUrlMap.get(productImage.getProduct()).add(productImage.getUrl());
         }
-        return new ProductShowResponse(productResultResponseList);
-    }
 
-    private List<String> getProductImageUrls(Long productId) {
-        List<ProductImage> productImages = productImageRepository.getImageByProductId(productId);
-        return productImages.stream()
-            .map(ProductImage::getUrl)
-            .collect(Collectors.toList());
+        for (Product product : productAndUrlMap.keySet()) {
+            ProductResultResponse productResultResponse = new ProductResultResponse(product);
+            for (String url : productAndUrlMap.get(product)) {
+                productResultResponse.addImageUrl(url);
+            }
+            productResultResponseList.add(productResultResponse);
+        }
+
+        return new ProductShowResponse(productResultResponseList);
     }
 
     private Product foundProduct(Long productId) {

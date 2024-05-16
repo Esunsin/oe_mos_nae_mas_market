@@ -1,12 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product.controller;
 
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductMyResultResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResultResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductShowResponse;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductUpdateRequest;
-import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.QuantityUpdateRequest;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.*;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.service.ProductService;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.userDetails.UserDetailsImpl;
 import cheolppochwippo.oe_mos_nae_mas_market.global.common.CommonResponse;
@@ -24,6 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -75,17 +71,16 @@ public class ProductController {
 
     //상점상품조회
     @GetMapping("/stores/products")
-    public ResponseEntity<CommonResponse<ProductShowResponse>> showStoreProduct(
+    public ResponseEntity<CommonResponse<List<ProductByStoreResponse>>> showStoreProduct(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         Pageable pageable = PageRequest.of(page, size);
-        ProductShowResponse showProduct = productService.showStoreProduct(pageable,
-            userDetails.getUser());
+        List<ProductByStoreResponse> productByStoreResponses = productService.showStoreProduct(pageable, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK.value())
-            .body(CommonResponse.<ProductShowResponse>builder()
+            .body(CommonResponse.<List<ProductByStoreResponse>>builder()
                 .msg("get store products complete!")
-                .data(showProduct)
+                .data(productByStoreResponses)
                 .build());
     }
 
@@ -143,15 +138,4 @@ public class ProductController {
                 .build());
     }
 
-    @GetMapping("/product/{productId}")
-    public ResponseEntity<CommonResponse<ProductMyResultResponse>> showMyProduct(
-        @PathVariable Long productId,@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        ProductMyResultResponse showProduct = productService.showMyProduct(userDetails.getUser()
-            .getId(), productId);
-        return ResponseEntity.status(HttpStatus.OK.value())
-            .body(CommonResponse.<ProductMyResultResponse>builder()
-                .msg("get products complete!")
-                .data(showProduct)
-                .build());
-    }
 }
