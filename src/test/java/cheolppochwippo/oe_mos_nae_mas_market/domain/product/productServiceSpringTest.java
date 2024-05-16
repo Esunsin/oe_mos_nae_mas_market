@@ -1,5 +1,6 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductByStoreResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.entity.Product;
@@ -18,11 +19,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.given;
 
 @SpringBootTest
 public class productServiceSpringTest {
@@ -40,11 +45,8 @@ public class productServiceSpringTest {
     private ProductRepository productRepository;
 
     @Test
-    @DisplayName("상품 생성 - 쿼리")
+    @DisplayName("상품 생성 - jpa saveAll")
     void create(){
-        System.out.println("===========================================");
-        System.out.println("===========================================");
-        System.out.println("===========================================");
         UserRequest userReq = new UserRequest("t1", "1234", "00", true);
         User seller = new User(userReq, "1234");
         seller.changeRoleToSeller();
@@ -57,7 +59,7 @@ public class productServiceSpringTest {
         System.out.println("===========================================");
         System.out.println("===========================================");
         System.out.println("===========================================");
-        List<String> urls = List.of("https://www.google.com", "https://www.baidu.com");
+        List<String> urls = List.of("https://www.google.com", "https://www.baidu.com" , "aaa" , "bbb");
         ProductRequest productRequest = new ProductRequest("p", "p", 10000L, 1000L, 50L, urls);
         ProductResponse productResponse = productService.createProduct(productRequest, seller);
         System.out.println("===========================================");
@@ -68,5 +70,67 @@ public class productServiceSpringTest {
         assertEquals(product.getProductName(), productRequest.getProductName());
 
     }
+    @Test
+    @DisplayName("상품 생성 - jdbc bulk")
+    void createbulk(){
+        UserRequest userReq = new UserRequest("t1", "1234", "00", true);
+        User seller = new User(userReq, "1234");
+        seller.changeRoleToSeller();
+        userRepository.save(seller);
 
+        StoreRequest storeRequest = new StoreRequest("store1", "s");
+        Store store = new Store(storeRequest, seller);
+        storeRepository.save(store);
+
+        System.out.println("===========================================");
+        System.out.println("===========================================");
+        System.out.println("===========================================");
+        List<String> urls = List.of("https://www.google.com", "https://www.baidu.com" , "aaa" , "bbb");
+        ProductRequest productRequest = new ProductRequest("p", "p", 10000L, 1000L, 50L, urls);
+        ProductResponse productResponse = productService.createProductBulkImage(productRequest, seller);
+        System.out.println("===========================================");
+        System.out.println("===========================================");
+        System.out.println("===========================================");
+        Product product = productRepository.findById(productResponse.getProductId()).get();
+
+        assertEquals(product.getProductName(), productRequest.getProductName());
+    }
+
+    @Test
+    public void showProductByStore () throws Exception{
+        //give
+        UserRequest userReq = new UserRequest("user1", "1234", "00", true);
+        User seller = new User(userReq, "1234");
+        seller.changeRoleToSeller();
+        userRepository.save(seller);
+
+        StoreRequest storeRequest = new StoreRequest("store1", "s");
+        Store store = new Store(storeRequest, seller);
+        storeRepository.save(store);
+
+        List<String> urls = List.of("https://www.google.com", "https://www.baidu.com");
+        List<ProductRequest> productRequests = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            productRequests.add(new ProductRequest("p", "p", 10000L, 1000L, 50L, urls));
+        }
+
+        List<Product> products = new ArrayList<>();
+        for (ProductRequest productRequest : productRequests) {
+            products.add(new Product(productRequest, store));
+        }
+        productRepository.saveAll(products);
+
+        Pageable pageable = PageRequest.of(0,10);
+
+        //when
+        System.out.println("===========================================");
+        System.out.println("===========================================");
+        System.out.println("===========================================");
+        List<ProductByStoreResponse> productByStoreResponses = productService.showStoreProduct(pageable, seller);
+        System.out.println("===========================================");
+        System.out.println("===========================================");
+        System.out.println("===========================================");
+        //then
+        assertEquals(10,productByStoreResponses.size());
+    }
 }
