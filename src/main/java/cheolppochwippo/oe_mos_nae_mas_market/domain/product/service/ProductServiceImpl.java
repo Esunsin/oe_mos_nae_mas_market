@@ -14,6 +14,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.RoleEnum;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import cheolppochwippo.oe_mos_nae_mas_market.global.exception.customException.NoPermissionException;
 
+import java.sql.SQLException;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,8 +59,7 @@ public class ProductServiceImpl implements ProductService {
         return new ProductResponse(product);
     }
 
-    @Transactional
-    public ProductResponse createProductBulkImage(ProductRequest productRequest, User user) {
+    public ProductResponse createProductBulkImage(ProductRequest productRequest, User user) throws SQLException {
         User seller = validateSeller(user);
 
         Store store = storeRepository.findByUserId(seller.getId())
@@ -131,7 +131,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "products", key = "#pageable")
+    @Cacheable(cacheNames = "products", key = "#pageable")//이미지로 페이징됨
     public ProductShowResponse showAllProduct(Pageable pageable) {
         List<ProductImage> image = productImageRepository.getAllImage(pageable);
         List<ProductResultResponse> productResultResponseList = new ArrayList<>();

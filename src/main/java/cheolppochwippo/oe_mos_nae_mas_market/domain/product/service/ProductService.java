@@ -5,6 +5,7 @@ import cheolppochwippo.oe_mos_nae_mas_market.domain.user.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLException;
 import java.util.List;
 
 
@@ -26,5 +27,5 @@ public interface ProductService {
 
     ProductResponse updateQuantity(QuantityUpdateRequest productRequest, User user);
 
-    ProductResponse createProductBulkImage(ProductRequest productRequest, User user);
+    ProductResponse createProductBulkImage(ProductRequest productRequest, User user) throws SQLException;
 }
