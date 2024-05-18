@@ -1,5 +1,7 @@
 package cheolppochwippo.oe_mos_nae_mas_market.domain.product;
 
+import cheolppochwippo.oe_mos_nae_mas_market.domain.image.entity.ProductImage;
+import cheolppochwippo.oe_mos_nae_mas_market.domain.image.repository.ProductImageRepository;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductByStoreResponse;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductRequest;
 import cheolppochwippo.oe_mos_nae_mas_market.domain.product.dto.ProductResponse;
@@ -22,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -44,8 +47,11 @@ public class productServiceSpringTest {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private ProductImageRepository productImageRepository;
+
     @Test
-    @DisplayName("상품 생성 - jpa saveAll")
+    @DisplayName("상품 생성 - jpa saveAll - 1만건")
     void create(){
         UserRequest userReq = new UserRequest("t1", "1234", "00", true);
         User seller = new User(userReq, "1234");
@@ -59,7 +65,10 @@ public class productServiceSpringTest {
         System.out.println("===========================================");
         System.out.println("===========================================");
         System.out.println("===========================================");
-        List<String> urls = List.of("https://www.google.com", "https://www.baidu.com" , "aaa" , "bbb");
+        List<String> urls = new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            urls.add("aaa");
+        }
         ProductRequest productRequest = new ProductRequest("p", "p", 10000L, 1000L, 50L, urls);
         ProductResponse productResponse = productService.createProduct(productRequest, seller);
         System.out.println("===========================================");
@@ -71,8 +80,8 @@ public class productServiceSpringTest {
 
     }
     @Test
-    @DisplayName("상품 생성 - jdbc bulk")
-    void createbulk(){
+    @DisplayName("상품 생성 - jdbc bulk - 1만건")
+    void createBulk() throws SQLException {
         UserRequest userReq = new UserRequest("t1", "1234", "00", true);
         User seller = new User(userReq, "1234");
         seller.changeRoleToSeller();
@@ -85,15 +94,18 @@ public class productServiceSpringTest {
         System.out.println("===========================================");
         System.out.println("===========================================");
         System.out.println("===========================================");
-        List<String> urls = List.of("https://www.google.com", "https://www.baidu.com" , "aaa" , "bbb");
+        List<String> urls = new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            urls.add("aaa");
+        }
         ProductRequest productRequest = new ProductRequest("p", "p", 10000L, 1000L, 50L, urls);
         ProductResponse productResponse = productService.createProductBulkImage(productRequest, seller);
         System.out.println("===========================================");
         System.out.println("===========================================");
         System.out.println("===========================================");
-        Product product = productRepository.findById(productResponse.getProductId()).get();
+        List<ProductImage> byProductId = productImageRepository.findByProductId(productResponse.getProductId());
 
-        assertEquals(product.getProductName(), productRequest.getProductName());
+        assertEquals(byProductId.size(), 10000);
     }
 
     @Test

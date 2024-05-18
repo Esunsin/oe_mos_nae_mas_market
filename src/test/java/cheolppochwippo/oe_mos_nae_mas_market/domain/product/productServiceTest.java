@@ -27,6 +27,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -82,7 +83,7 @@ public class productServiceTest {
     }
     @Test
     @DisplayName("상품생성 - jdbc bulk insert")
-    void createProductBulkImage(){
+    void createProductBulkImage() throws SQLException {
         //given
         UserRequest userReq = new UserRequest("user1", "1234", "00", true);
         User seller = new User(userReq, "1234");
