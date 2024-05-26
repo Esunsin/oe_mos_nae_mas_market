@@ -22,6 +22,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,26 +135,15 @@ public class ProductServiceImpl implements ProductService {
     @Cacheable(cacheNames = "products", key = "#pageable")//이미지로 페이징됨
     public ProductShowResponse showAllProduct(Pageable pageable) {
         List<ProductImage> image = productImageRepository.getAllImage(pageable);
-        List<ProductResultResponse> productResultResponseList = new ArrayList<>();
-        Map<Product, List<String>> productAndUrlMap = new HashMap<>();
+        return getProductShowResponse(image);
+    }
 
-        for (ProductImage productImage : image) {
-            if(!productAndUrlMap.containsKey(productImage.getProduct())) {
-                productAndUrlMap.put(productImage.getProduct()
-                        , productAndUrlMap.getOrDefault(productImage.getProduct(), new ArrayList<>()));
-            }
-            productAndUrlMap.get(productImage.getProduct()).add(productImage.getUrl());
-        }
 
-        for (Product product : productAndUrlMap.keySet()) {
-            ProductResultResponse productResultResponse = new ProductResultResponse(product);
-            for (String url : productAndUrlMap.get(product)) {
-                productResultResponse.addImageUrl(url);
-            }
-            productResultResponseList.add(productResultResponse);
-        }
-
-        return new ProductShowResponse(productResultResponseList);
+    @Transactional(readOnly = true)
+    public ProductShowResponse showAllProductSlice(Pageable pageable){
+        Slice<ProductImage> allImageSlice = productImageRepository.getAllImageSlice(pageable);
+        List<ProductImage> allImageSliceContent = allImageSlice.getContent();
+        return getProductShowResponse(allImageSliceContent);
     }
 
     @Transactional
@@ -206,6 +196,29 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findById(productId)
             .orElseThrow(() -> new NoSuchElementException(
                 messageSource.getMessage("noEntity.product", null, Locale.KOREA)));
+    }
+
+    private static ProductShowResponse getProductShowResponse(List<ProductImage> image) {
+        List<ProductResultResponse> productResultResponseList = new ArrayList<>();
+        Map<Product, List<String>> productAndUrlMap = new HashMap<>();
+
+        for (ProductImage productImage : image) {
+            if(!productAndUrlMap.containsKey(productImage.getProduct())) {
+                productAndUrlMap.put(productImage.getProduct()
+                        , productAndUrlMap.getOrDefault(productImage.getProduct(), new ArrayList<>()));
+            }
+            productAndUrlMap.get(productImage.getProduct()).add(productImage.getUrl());
+        }
+
+        for (Product product : productAndUrlMap.keySet()) {
+            ProductResultResponse productResultResponse = new ProductResultResponse(product);
+            for (String url : productAndUrlMap.get(product)) {
+                productResultResponse.addImageUrl(url);
+            }
+            productResultResponseList.add(productResultResponse);
+        }
+
+        return new ProductShowResponse(productResultResponseList);
     }
 
     private User validateSeller(User user) {

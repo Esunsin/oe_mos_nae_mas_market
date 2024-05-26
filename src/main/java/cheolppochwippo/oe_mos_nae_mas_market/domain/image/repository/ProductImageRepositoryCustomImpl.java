@@ -10,6 +10,8 @@ import cheolppochwippo.oe_mos_nae_mas_market.global.entity.enums.Deleted;
 import com.querydsl.core.QueryResults;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 import java.util.List;
 
@@ -60,5 +62,27 @@ public class ProductImageRepositoryCustomImpl implements ProductImageRepositoryC
                 .limit(pageable.getPageSize())
                 .fetch();
     }
+
+    public Slice<ProductImage> getAllImageSlice(Pageable pageable) {
+        List<ProductImage> productImages = jpaConfig.jpaQueryFactory()
+                .selectFrom(productImage)
+                .leftJoin(productImage.product, product).fetchJoin()
+                .leftJoin(product.store, store).fetchJoin()
+                .innerJoin(store.user, user).fetchJoin()
+                .where(productImage.product.quantity.gt(1)
+                        .and(productImage.product.deleted.eq(Deleted.UNDELETE)))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
+        boolean hasNext = productImages.size() > pageable.getPageSize();
+
+        if (hasNext) {
+            productImages.remove(productImages.size() - 1);
+        }
+
+        return new SliceImpl<>(productImages, pageable, hasNext);
+    }
+
 
 }

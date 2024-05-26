@@ -28,4 +28,6 @@ public interface ProductService {
     ProductResponse updateQuantity(QuantityUpdateRequest productRequest, User user);
 
     ProductResponse createProductBulkImage(ProductRequest productRequest, User user) throws SQLException;
+
+    ProductShowResponse showAllProductSlice(Pageable pageable);
 }
