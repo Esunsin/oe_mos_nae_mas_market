@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+
+import cheolppochwippo.oe_mos_nae_mas_market.global.redissonLockAoop.RedissonLockAnnotation;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RBucket;
 import org.redisson.api.RLock;
@@ -45,10 +47,10 @@ public class IssuedServiceImpl implements IssuedService {
         }
         Coupon coupon = getCouponById(couponId);
         Issued issuedCoupon = saveIssuedCoupon(coupon, user);
-        decreaseCouponAmount(coupon);
+        Coupon findCoupon = getIssuedCoupon(coupon.getId());
+        decreaseCouponAmount(findCoupon);
         return createIssuedResponse(couponId, coupon, issuedCoupon);
     }
-
 
     public Coupon getCouponById(Long couponId) {
         Coupon coupon = couponRepository.findById(couponId)
@@ -60,45 +62,27 @@ public class IssuedServiceImpl implements IssuedService {
                 messageSource.getMessage("insufficient.quantity.coupon",
                     null, Locale.KOREA));
         }
-
         return coupon;
     }
 
-
-
+    @RedissonLockAnnotation
     public void decreaseCouponAmount(Coupon coupon) {
-        Long couponId = coupon.getId();
-        RLock couponLock = redissonClient.getFairLock("coupon:" + couponId);
-        try {
-            try {
-                boolean isCouponLocked = couponLock.tryLock(10, 60, TimeUnit.SECONDS);
-                if (isCouponLocked) {
-                    decreaseCouponAmountTransaction(coupon.getId());
-                }
-            } finally {
-                couponLock.unlock();
-            }
-        } catch (Exception e) {
-            Thread.currentThread().interrupt();
-            System.out.println(e.getMessage());
-        }
-    }
-
-
-    @Transactional
-    public void decreaseCouponAmountTransaction(Long issuedId) {
-        Issued issuedCoupon = issuedRepository.findById(issuedId)
-            .orElseThrow(() -> new NoEntityException(
-                (messageSource.getMessage("noEntity.coupon", null, Locale.KOREA))));
-        Coupon coupon = issuedCoupon.getCoupon();
         if (coupon.getAmount() > 0) {
             coupon.decreaseAmount();
+            couponRepository.save(coupon);
         } else {
             throw new InsufficientQuantityException(
                 messageSource.getMessage("insufficient.quantity.coupon",
                     null, Locale.KOREA));
         }
-        couponRepository.save(coupon);
+    }
+
+    private Coupon getIssuedCoupon(Long issuedId) {
+        Issued issuedCoupon = issuedRepository.findById(issuedId)
+            .orElseThrow(() -> new NoEntityException(
+                (messageSource.getMessage("noEntity.coupon", null, Locale.KOREA))));
+        Coupon coupon = issuedCoupon.getCoupon();
+        return coupon;
     }
 
 
